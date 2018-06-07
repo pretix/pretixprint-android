@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="settings_values_ticketprinter_drivers">
+        <item>CUPS</item>
+    </string-array>
+</resources>

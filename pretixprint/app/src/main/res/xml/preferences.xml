@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <PreferenceCategory android:title="@string/settings_label_ticketprinter">
+
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/settings_values_ticketprinter_drivers"
+            android:entryValues="@array/settings_values_ticketprinter_drivers"
+            android:key="hardware_ticketprinter_driver"
+            android:title="@string/settings_label_driver" />
+        <EditTextPreference
+            android:defaultValue="127.0.0.1"
+            android:key="hardware_ticketprinter_ip"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/settings_label_ipaddress" />
+        <EditTextPreference
+            android:defaultValue="631"
+            android:key="hardware_ticketprinter_port"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/settings_label_port" />
+        <EditTextPreference
+            android:defaultValue="PATicket"
+            android:key="hardware_ticketprinter_printername"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/settings_label_printername" />
+    </PreferenceCategory>
+</PreferenceScreen>

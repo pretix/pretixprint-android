@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">pretixPRINT</string>
+    <string name="action_label_settings">Settings</string>
+    <string name="settings_label_hardware">Hardware</string>
+    <string name="settings_label_ticketprinter">Ticket printer</string>
+    <string name="settings_label_ipaddress">IP address</string>
+    <string name="settings_label_port">Port</string>
+    <string name="settings_label_printername">Printer name</string>
+    <string name="settings_label_driver">Driver</string>
+</resources>

@@ -1,0 +1,2 @@
+include ':app', ':libpretixprint', ':cups4j'
+project(':libpretixprint').projectDir = new File('libpretixprint-repo/libpretixprint')

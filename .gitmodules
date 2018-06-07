@@ -1,0 +1,3 @@
+[submodule "pretixprint/libpretixprint-repo"]
+	path = pretixprint/libpretixprint-repo
+	url = https://github.com/pretix/libpretixprint-itext
