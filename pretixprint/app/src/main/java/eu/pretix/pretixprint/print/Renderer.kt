@@ -35,13 +35,11 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
 }
 
 
-class Renderer(private val layout: JSONArray, private val order: JSONObject, private val background: InputStream, private val ctx: Context) {
+class Renderer(private val layout: JSONArray, private val order: JSONObject, private val positionIndex: Int, private val background: InputStream?, private val ctx: Context) {
     fun writePDF(outFile: File) {
         val positions = order.getJSONArray("positions")
         val posList = emptyList<ContentProvider>().toMutableList()
-        for (i in 0..(positions.length() - 1)) {
-            posList.add(OrderPositionContentProvider(order, positions.getJSONObject(i)))
-        }
+        posList.add(OrderPositionContentProvider(order, positions.getJSONObject(positionIndex)))
         try {
             val l = Layout(
                     layout,

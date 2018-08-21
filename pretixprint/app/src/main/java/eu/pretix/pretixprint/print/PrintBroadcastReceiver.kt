@@ -11,6 +11,11 @@ import org.jetbrains.anko.doAsync
 import java.net.URL
 import org.json.JSONObject
 import java.io.*
+import com.itextpdf.text.pdf.PdfCopy
+import com.itextpdf.text.Document
+import com.itextpdf.text.pdf.PdfReader
+
+
 
 
 class PrintBroadcastReceiver : BroadcastReceiver() {
@@ -40,14 +45,39 @@ class PrintBroadcastReceiver : BroadcastReceiver() {
 
             if (cp != null && intent != null) {
                 val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
-                val bgInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(1).uri)
-
                 val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
 
-                val tmpfile = File.createTempFile("print", "pdf", ctx.cacheDir)
-                bgInputStream.use {
-                    Renderer(jsonData.getJSONArray("__layout"), jsonData, it, ctx).writePDF(tmpfile)
+                val positions = jsonData.getJSONArray("positions")
+                val pages = emptyList<File>().toMutableList()
+                for (i in 0..(positions.length() - 1)) {
+                    val position = positions.getJSONObject(i)
+                    val layout = position.getJSONArray("__layout");
+
+                    val tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
+                    if (position.has("__file_index")) {
+                        val fileIndex = position.getInt("__file_index");
+
+                        val bgInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
+                        bgInputStream.use {
+                            Renderer(layout, jsonData, i, it, ctx).writePDF(tmpfile)
+                        }
+                    } else {
+                        Renderer(layout, jsonData, i, null, ctx).writePDF(tmpfile)
+                    }
+                    pages.add(tmpfile)
                 }
+
+                val tmpfile = File.createTempFile("print" , "pdf", ctx.cacheDir)
+                val document = Document()
+                val copy = PdfCopy(document, FileOutputStream(tmpfile))
+                document.open()
+                for (page in pages) {
+                    val pagedoc = PdfReader(page.absolutePath)
+                    copy.addDocument(pagedoc)
+                    pagedoc.close()
+                }
+                document.close()
+
                 val pj = PrintJob.Builder(tmpfile.inputStream()).build()
                 cp.print(pj)
             }
