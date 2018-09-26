@@ -1,8 +1,5 @@
 package io.github.benoitduffez.cupsprint.ssl;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -17,6 +14,9 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Allows you to trust certificates from additional KeyStores in addition to

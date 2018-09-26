@@ -20,8 +20,6 @@ package org.cups4j.operations.cups;
  * Jon Freeman - 2013
  */
 
-import android.support.annotation.NonNull;
-
 import org.cups4j.CupsPrinter;
 import org.cups4j.operations.IppOperation;
 
@@ -31,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import ch.ethz.vppserver.ippclient.IppResult;
 import ch.ethz.vppserver.schema.ippclient.Attribute;
 import ch.ethz.vppserver.schema.ippclient.AttributeGroup;

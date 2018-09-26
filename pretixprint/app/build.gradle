@@ -4,13 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         applicationId "eu.pretix.pretixprint"
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion 19
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0.0"
         vectorDrawables.useSupportLibrary = true
@@ -78,17 +78,17 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'org.jetbrains.anko:anko:0.10.5'
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:support-vector-drawable:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'org.jetbrains.anko:anko:0.10.6'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.multidex:multidex:2.0.0'
 
     // libpretixprint
-    compile 'com.itextpdf:itextg:5.5.10'
-    compile 'com.google.zxing:core:3.3.2'
+    implementation 'com.itextpdf:itextg:5.5.10'
+    implementation 'com.google.zxing:core:3.3.3'
 
     implementation 'com.joshdholtz.sentry:sentry-android:1.6.0'
     implementation 'com.facebook.stetho:stetho:1.5.0'

@@ -1,8 +1,6 @@
 package io.github.benoitduffez.cupsprint;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,6 +19,8 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.github.benoitduffez.cupsprint.ssl.AdditionalKeyManager;
 import io.github.benoitduffez.cupsprint.ssl.AdditionalKeyStoresSSLSocketFactory;
 import io.github.benoitduffez.cupsprint.ssl.AndroidCupsHostnameVerifier;

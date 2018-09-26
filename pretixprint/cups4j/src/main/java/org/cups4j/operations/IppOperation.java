@@ -20,8 +20,6 @@ package org.cups4j.operations;
  * Jon Freeman - 2013
  */
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,6 +36,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import ch.ethz.vppserver.ippclient.IppResponse;
 import ch.ethz.vppserver.ippclient.IppResult;
 import ch.ethz.vppserver.ippclient.IppTag;
