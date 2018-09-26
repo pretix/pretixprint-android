@@ -29,12 +29,12 @@
         </activity>
 
 
-        <receiver android:name="eu.pretix.pretixprint.print.PrintBroadcastReceiver"
+        <service android:name="eu.pretix.pretixprint.print.PrintService"
             android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_TICKET"/>
             </intent-filter>
-        </receiver>
+        </service>
     </application>
 
 </manifest>
