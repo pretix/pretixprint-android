@@ -17,4 +17,8 @@
     <string name="err_files_generic">Error while creating the files to print: %s</string>
     <string name="err_job_io">Error while sending the print job: %s</string>
     <string name="err_generic">Unknown error while printing: %s</string>
+    <string name="welcome_headline">Welcome to pretixPRINT!</string>
+    <string name="welcome_tutorial1">pretixPRINT allows other pretix apps, e.g. the ticket selling app pretixPOS, to print tickets, badges, and receipts using suitable printers on your network.</string>
+    <string name="welcome_tutorial2">Currently, pretixPRINT knows how to talk to printers shared with CUPS, i.e. all printers shared by a macOS or Linux computer.</string>
+    <string name="action_configure">Start finding a printer</string>
 </resources>
