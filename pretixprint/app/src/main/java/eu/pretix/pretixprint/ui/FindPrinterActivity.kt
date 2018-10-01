@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.ui
 
 import android.app.ProgressDialog
-import android.app.Service
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
@@ -16,11 +15,18 @@ import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.print.getPrinter
 import kotlinx.android.synthetic.main.activity_find.*
-import org.jetbrains.anko.*
+import org.cups4j.CupsPrinter
+import org.cups4j.PrintJob
+import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.progressDialog
+import org.jetbrains.anko.toast
+import java.io.IOException
 
 
-class ServiceAdapter(val items : List<NsdServiceInfo>, val context: FindPrinterActivity) : RecyclerView.Adapter<ViewHolder>() {
+class ServiceAdapter(val items: List<NsdServiceInfo>, val context: FindPrinterActivity) : RecyclerView.Adapter<ViewHolder>() {
     override fun getItemCount(): Int {
         return items.size
     }
@@ -37,7 +43,7 @@ class ServiceAdapter(val items : List<NsdServiceInfo>, val context: FindPrinterA
     }
 }
 
-class ViewHolder (view: View) : RecyclerView.ViewHolder(view) {
+class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val tvName = view.findViewById<TextView>(R.id.textView)
 }
 
@@ -52,6 +58,7 @@ class FindPrinterActivity : AppCompatActivity() {
     private lateinit var nsdManager: NsdManager
     private var type = "ticket"
     private var pgResolve: ProgressDialog? = null
+    private var pgTest: ProgressDialog? = null
 
     private val resolveListener = object : NsdManager.ResolveListener {
         override fun onResolveFailed(service: NsdServiceInfo?, errorCode: Int) {
@@ -92,15 +99,17 @@ class FindPrinterActivity : AppCompatActivity() {
         override fun onServiceFound(service: NsdServiceInfo) {
             if (service.serviceType == SERVICE_TYPE) {
                 Log.d(TAG, "Service discovery success: $service")
-                var new = true
-                for (serv in services) {
-                    if (serv.serviceName == service.serviceName) {
-                        new = false
-                        break
+                synchronized(services) {
+                    var new = true
+                    for (serv in services) {
+                        if (serv.serviceName == service.serviceName) {
+                            new = false
+                            break
+                        }
                     }
-                }
-                if (new) {
-                    services.add(service)
+                    if (new) {
+                        services.add(service)
+                    }
                 }
             } else {
                 Log.d(TAG, "Unknown service type: ${service.serviceType}")
@@ -114,9 +123,11 @@ class FindPrinterActivity : AppCompatActivity() {
             // When the network service is no longer available.
             // Internal bookkeeping code goes here.
             Log.e(TAG, "Service lost: $service")
-            for (serv in services) {
-                if (serv.serviceName == service.serviceName) {
-                    services.remove(serv)
+            synchronized(services) {
+                for (serv in services) {
+                    if (serv.serviceName == service.serviceName) {
+                        services.remove(serv)
+                    }
                 }
             }
             runOnUiThread {
@@ -158,6 +169,12 @@ class FindPrinterActivity : AppCompatActivity() {
         editText_ip.setText(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))
         editText_port.setText(defaultSharedPreferences.getString("hardware_${type}printer_port", ""))
         editText_printer.setText(defaultSharedPreferences.getString("hardware_${type}printer_printername", ""))
+
+        button2.setOnClickListener {
+            if (validate()) {
+                testPrinter()
+            }
+        }
     }
 
     fun selectService(service: NsdServiceInfo) {
@@ -165,6 +182,7 @@ class FindPrinterActivity : AppCompatActivity() {
             nsdManager.resolveService(service, resolveListener)
             runOnUiThread {
                 pgResolve = progressDialog(R.string.resolving) {
+                    isIndeterminate = true
                     setCancelable(false)
                 }
             }
@@ -189,19 +207,71 @@ class FindPrinterActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    fun testPrinter() {
+        pgTest = progressDialog(R.string.testing) {
+            setCancelable(false)
+            isIndeterminate = true
+        }
+        doAsync {
+            var cp: CupsPrinter? = null
+            try {
+                cp = getPrinter(
+                        editText_ip.text.toString(),
+                        editText_port.text.toString(),
+                        editText_printer.text.toString()
+                )
+            } catch (e: IOException) {
+                e.printStackTrace()
+                runOnUiThread {
+                    pgTest?.dismiss()
+                    toast(getString(R.string.err_cups_io, e.message));
+                }
+                return@doAsync
+            }
+            if (cp == null) {
+                runOnUiThread {
+                    pgTest?.dismiss()
+                    toast(getString(R.string.err_printer_not_found, editText_printer.text.toString()))
+                }
+            } else {
+                try {
+                    val pj = PrintJob.Builder(assets.open("demopage_8in_3.25in.pdf")).build()
+                    cp.print(pj)
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(R.string.test_success)
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(getString(R.string.err_job_io, e.message));
+                    }
+                }
+            }
+        }
+    }
+
+    fun validate(): Boolean {
+        if (TextUtils.isEmpty(editText_ip.text)) {
+            editText_ip.error = getString(R.string.err_field_required)
+            return false
+        }
+        if (TextUtils.isEmpty(editText_port.text)) {
+            editText_port.error = getString(R.string.err_field_required)
+            return false
+        }
+        if (TextUtils.isEmpty(editText_printer.text)) {
+            editText_printer.error = getString(R.string.err_field_required)
+            return false
+        }
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
-                if (TextUtils.isEmpty(editText_ip.text)) {
-                    editText_ip.error = getString(R.string.err_field_required)
-                    return true
-                }
-                if (TextUtils.isEmpty(editText_port.text)) {
-                    editText_port.error = getString(R.string.err_field_required)
-                    return true
-                }
-                if (TextUtils.isEmpty(editText_printer.text)) {
-                    editText_printer.error = getString(R.string.err_field_required)
+                if (!validate()) {
                     return true
                 }
 
@@ -211,6 +281,7 @@ class FindPrinterActivity : AppCompatActivity() {
                         .putString("hardware_${type}printer_printername", editText_printer.text.toString())
                         .apply()
                 finish()
+                return true
             }
             R.id.action_close -> {
                 finish()

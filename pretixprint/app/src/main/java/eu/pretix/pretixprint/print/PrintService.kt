@@ -65,28 +65,14 @@ class PrintService : IntentService("PrintService") {
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
-        var cp: CupsPrinter? = null
+        var cp: CupsPrinter?
 
         try {
-            val cc = CupsClient(
-                    URL(
-                            "http://" +
-                                    prefs.getString("hardware_ticketprinter_ip", "127.0.0.1") +
-                                    ":" +
-                                    prefs.getString("hardware_ticketprinter_port", "631")
-                    )
+            cp = getPrinter(
+                    prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
+                    prefs.getString("hardware_ticketprinter_port", "631"),
+                    prefs.getString("hardware_ticketprinter_printername", "PATicket")
             )
-            for (printer in cc.printers) {
-                if (printer.name == prefs.getString("hardware_ticketprinter_printername", "PATicket")) {
-                    cp = printer
-                }
-            }
-            if (cp == null) {
-                if (prefs.contains("hardware_ticketprinter_printername")) {
-                    throw PrintException(getString(R.string.err_printer_not_found, prefs.getString("hardware_ticketprinter_printername", "PATicket")));
-                }
-                cp = cc.defaultPrinter
-            }
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(getString(R.string.err_cups_io, e.message));
