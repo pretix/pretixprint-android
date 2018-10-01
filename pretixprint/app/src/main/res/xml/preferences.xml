@@ -16,4 +16,11 @@
             android:title="@string/settings_label_find"
             />
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_label_about">
+        <Preference
+            android:key="licenses"
+            android:title="@string/settings_label_licenses"
+            />
+    </PreferenceCategory>
 </PreferenceScreen>
