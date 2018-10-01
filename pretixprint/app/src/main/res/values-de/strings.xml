@@ -1,4 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">pretixPRINT</string>
+    <string name="action_label_settings">Einstellungen</string>
+    <string name="settings_label_hardware">Hardware</string>
+    <string name="settings_label_ticketprinter">Ticketdrucker</string>
+    <string name="settings_label_badgeprinter">Badgedrucker</string>
+    <string name="settings_label_about">Über diese App</string>
+    <string name="settings_label_licenses">Autoren und Lizenzen</string>
+    <string name="settings_label_find">Drucker einrichten</string>
+    <string name="settings_label_ipaddress">IP-Adresse</string>
+    <string name="settings_label_port">Port</string>
+    <string name="settings_label_printername">Druckername</string>
+    <string name="settings_label_driver">Drucker</string>
+    <string name="notification_channel_print">Druckjobs</string>
+    <string name="notification_channel_print_description">Zeigt eine Benachrichtigung, während gedruckt wird.</string>
+    <string name="print_notification">Drucke…</string>
+    <string name="err_printer_not_found">Drucker %s nicht gefunden</string>
+    <string name="err_no_printer_found">Kein Drucker gefunden</string>
+    <string name="err_cups_io">Fehler beim Kontaktieren des Druckerservers: %s</string>
+    <string name="err_files_io">Fehler beim Übertragen der Druckdateien: %s</string>
+    <string name="err_files_generic">Fehler beim Erstellen der Druckdateien: %s</string>
+    <string name="err_job_io">Fehler beim Senden des Druckjobs: %s</string>
+    <string name="err_generic">Fehler beim Drucken: %s</string>
+    <string name="welcome_headline">Willkommen zu pretixPRINT!</string>
+    <string name="welcome_tutorial1">pretixPRINT erlaubt anderen pretix-Apps, z.B. der Kassensoftware pretixPOS, Tickets, Badges oder Bons auf Druckern im Netzwerk zu drucken.</string>
+    <string name="welcome_tutorial2">Aktuell kann pretixPRINT mit Druckern kommunizieren, die IPP oder CUPS unterstützen, d.h. alle Drucker, die von einem Mac- oder Linux-Computer freigegeben wurden sowie die meisten aktuellen Drucker mit eigenem Netzwerkanschluss.</string>
+    <string name="action_configure">Beginne Druckereinrichtung</string>
+    <string name="headline_found_printers">Gefundene Netzwerkdrucker</string>
+    <string name="headline_add_printer">Drucker konfigurieren</string>
+    <string name="field_label_ipaddress">IP-Adresse</string>
+    <string name="field_label_port">Port</string>
+    <string name="field_label_queue">Druckername</string>
+    <string name="resolving">Adresse auflösen…</string>
+    <string name="testing">Testdruck…</string>
+    <string name="test_success">Der Verbindungstest war erfolgreich.</string>
+    <string name="err_resolv_failed">Die Adresse des Druckers konnte nicht aufgelöst werden.</string>
+    <string name="err_field_required">Dieses Feld ist erforderlich.</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_save">Speichern</string>
+    <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s</string>
+    <string name="button_label_test">Testseite drucken</string>
+    <string name="dismiss">Schließen</string>
 </resources>
