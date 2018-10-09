@@ -1,6 +1,7 @@
 package io.github.benoitduffez.cupsprint.ssl;
 
 import android.content.Context;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.security.KeyChain;
 import android.security.KeyChainException;
@@ -61,23 +62,27 @@ public class AdditionalKeyManager implements X509KeyManager {
     }
 
     private static X509Certificate[] getCertificateChain(Context context, final String alias) throws CertificateException {
-        X509Certificate[] certificateChain;
-        try {
-            certificateChain = KeyChain.getCertificateChain(context, alias);
-        } catch (final KeyChainException | InterruptedException e) {
-            logError(alias, "certificate chain", e);
-            throw new CertificateException(e);
+        X509Certificate[] certificateChain = new X509Certificate[0];
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            try {
+                certificateChain = KeyChain.getCertificateChain(context, alias);
+            } catch (final KeyChainException | InterruptedException e) {
+                logError(alias, "certificate chain", e);
+                throw new CertificateException(e);
+            }
         }
         return certificateChain;
     }
 
     private static PrivateKey getPrivateKey(Context context, String alias) throws CertificateException {
-        PrivateKey privateKey;
-        try {
-            privateKey = KeyChain.getPrivateKey(context, alias);
-        } catch (final KeyChainException | InterruptedException e) {
-            logError(alias, "private key", e);
-            throw new CertificateException(e);
+        PrivateKey privateKey = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            try {
+                privateKey = KeyChain.getPrivateKey(context, alias);
+            } catch (final KeyChainException | InterruptedException e) {
+                logError(alias, "private key", e);
+                throw new CertificateException(e);
+            }
         }
 
         return privateKey;
