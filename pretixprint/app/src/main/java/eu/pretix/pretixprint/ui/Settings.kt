@@ -58,7 +58,6 @@ class SettingsFragment : PreferenceFragment() {
         }
     }
 
-
     private fun asset_dialog(@RawRes htmlRes: Int, @StringRes title: Int) {
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_about, null, false)
         val dialog = AlertDialog.Builder(activity)
