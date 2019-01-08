@@ -3,6 +3,8 @@ package eu.pretix.pretixprint
 import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
 import eu.pretix.pretixprint.print.Renderer
+import io.sentry.Sentry
+import io.sentry.android.AndroidSentryClientFactory
 
 class PretixPrint : MultiDexApplication() {
     override fun onCreate() {
@@ -10,6 +12,10 @@ class PretixPrint : MultiDexApplication() {
 
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)
+        }
+        if (BuildConfig.SENTRY_DSN != null) {
+            val sentryDsn = BuildConfig.SENTRY_DSN
+            Sentry.init(sentryDsn, AndroidSentryClientFactory(this))
         }
         Renderer.registerFonts(this)
     }
