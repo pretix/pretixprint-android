@@ -45,6 +45,7 @@ class PrintService : IntentService("PrintService") {
     }
 
     private fun startForegroundNotification() {
+        createNotificationChannel()
         val notificationIntent = Intent(this, SettingsActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
         val notification = if (SDK_INT >= Build.VERSION_CODES.O) {
