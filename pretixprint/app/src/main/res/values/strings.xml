@@ -41,4 +41,8 @@
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s</string>
     <string name="button_label_test">Print test page</string>
+    <string-array name="printer_modes">
+        <item>CUPS/IPP</item>
+        <item>FGL</item>
+    </string-array>
 </resources>

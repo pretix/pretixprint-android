@@ -9,12 +9,14 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
 import kotlinx.android.synthetic.main.activity_find.*
 import org.cups4j.CupsPrinter
@@ -52,6 +54,7 @@ class FindPrinterActivity : AppCompatActivity() {
         val EXTRA_TYPE = "TYPE"
         val TAG = "FindPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
+        val MODES = arrayOf("CUPS/IPP", "FGL")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
@@ -170,6 +173,20 @@ class FindPrinterActivity : AppCompatActivity() {
         editText_port.setText(defaultSharedPreferences.getString("hardware_${type}printer_port", ""))
         editText_printer.setText(defaultSharedPreferences.getString("hardware_${type}printer_printername", ""))
 
+        ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                android.R.id.text1,
+                MODES
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            spinner_mode.adapter = adapter
+            spinner_mode.setSelection(MODES.indexOf(defaultSharedPreferences.getString("hardware_${type}printer_mode", "CUPS/IPP")))
+        }
+
+
         button2.setOnClickListener {
             if (validate()) {
                 testPrinter()
@@ -208,35 +225,18 @@ class FindPrinterActivity : AppCompatActivity() {
     }
 
     fun testPrinter() {
+        val mode = MODES[spinner_mode.selectedItemPosition]
         pgTest = progressDialog(R.string.testing) {
             setCancelable(false)
             isIndeterminate = true
         }
         doAsync {
-            var cp: CupsPrinter? = null
-            try {
-                cp = getPrinter(
-                        editText_ip.text.toString(),
-                        editText_port.text.toString(),
-                        editText_printer.text.toString()
-                )
-            } catch (e: IOException) {
-                e.printStackTrace()
-                runOnUiThread {
-                    pgTest?.dismiss()
-                    toast(getString(R.string.err_cups_io, e.message));
-                }
-                return@doAsync
-            }
-            if (cp == null) {
-                runOnUiThread {
-                    pgTest?.dismiss()
-                    toast(getString(R.string.err_printer_not_found, editText_printer.text.toString()))
-                }
-            } else {
+            if (mode == "FGL") {
                 try {
-                    val pj = PrintJob.Builder(assets.open("demopage_8in_3.25in.pdf")).build()
-                    cp.print(pj)
+                    FGLNetworkPrinter(
+                            editText_ip.text.toString(),
+                            Integer.valueOf(editText_port.text.toString())
+                    ).printPDF(assets.open("demopage_8in_3.25in.pdf"))
                     runOnUiThread {
                         pgTest?.dismiss()
                         toast(R.string.test_success)
@@ -245,7 +245,45 @@ class FindPrinterActivity : AppCompatActivity() {
                     e.printStackTrace()
                     runOnUiThread {
                         pgTest?.dismiss()
-                        toast(getString(R.string.err_job_io, e.message));
+                        toast(getString(R.string.err_cups_io, e.message))
+                    }
+                    return@doAsync
+                }
+            } else if (mode == "CUPS/IPS") {
+                var cp: CupsPrinter? = null
+                try {
+                    cp = getPrinter(
+                            editText_ip.text.toString(),
+                            editText_port.text.toString(),
+                            editText_printer.text.toString()
+                    )
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(getString(R.string.err_cups_io, e.message));
+                    }
+                    return@doAsync
+                }
+                if (cp == null) {
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(getString(R.string.err_printer_not_found, editText_printer.text.toString()))
+                    }
+                } else {
+                    try {
+                        val pj = PrintJob.Builder(assets.open("demopage_8in_3.25in.pdf")).build()
+                        cp.print(pj)
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(R.string.test_success)
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(getString(R.string.err_job_io, e.message));
+                        }
                     }
                 }
             }
@@ -279,6 +317,7 @@ class FindPrinterActivity : AppCompatActivity() {
                         .putString("hardware_${type}printer_ip", editText_ip.text.toString())
                         .putString("hardware_${type}printer_port", editText_port.text.toString())
                         .putString("hardware_${type}printer_printername", editText_printer.text.toString())
+                        .putString("hardware_${type}printer_mode", MODES[spinner_mode.selectedItemPosition])
                         .apply()
                 finish()
                 return true
