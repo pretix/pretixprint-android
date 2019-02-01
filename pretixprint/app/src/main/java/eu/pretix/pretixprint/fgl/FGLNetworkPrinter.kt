@@ -2,11 +2,10 @@ package eu.pretix.pretixprint.fgl
 
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer
+import java.io.BufferedOutputStream
 import java.io.InputStream
 import java.net.InetAddress
 import java.net.Socket
-import java.io.BufferedWriter
-import java.io.OutputStreamWriter
 import kotlin.math.min
 
 
@@ -15,7 +14,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
     fun printPDF(pdfstream: InputStream) {
         val serverAddr = InetAddress.getByName(ip)
         val socket = Socket(serverAddr, port)
-        val ostream = BufferedWriter(OutputStreamWriter(socket.getOutputStream()));
+        val ostream = BufferedOutputStream(socket.getOutputStream())
 
         val doc = PDDocument.load(pdfstream)
         val renderer = PDFRenderer(doc)
@@ -27,7 +26,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
         socket.close()
     }
 
-    private fun printPage(doc: PDFRenderer, page: Int, ostream: BufferedWriter) {
+    private fun printPage(doc: PDFRenderer, page: Int, ostream: BufferedOutputStream) {
         // TODO: configurable dpi
         val img = doc.renderImageWithDPI(page, 200.0F)
         val pixels = IntArray(img.width * img.height)
@@ -35,7 +34,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
 
         for (yoffset in 0..(img.height - 1) step 8) {
             System.out.println("<RC${yoffset},0><G${img.width}>")
-            val row = IntArray(img.width)
+            val row = ByteArray(img.width)
             for (x in 0..(img.width - 1)) {
                 var col = 0
                 for (j in 0..7) {
@@ -49,14 +48,11 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
                         col = col or (1 shl (7 - j))
                     }
                 }
-                row[x] = col
+                row[x] = col.toByte()
             }
-            ostream.write("<RC${yoffset},0><G${img.width}>")
-            for (c in row) {
-                ostream.write(c)
-            }
+            ostream.write("<RC${yoffset},0><G${img.width}>".toByteArray())
+            ostream.write(row)
         }
-        ostream.write("<p>\n")
-        System.out.println("<RC>ALL WRITTEN")
+        ostream.write("<p>\n".toByteArray())
     }
 }

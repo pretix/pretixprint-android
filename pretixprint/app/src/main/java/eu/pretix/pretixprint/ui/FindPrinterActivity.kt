@@ -245,7 +245,7 @@ class FindPrinterActivity : AppCompatActivity() {
                     e.printStackTrace()
                     runOnUiThread {
                         pgTest?.dismiss()
-                        toast(getString(R.string.err_cups_io, e.message))
+                        toast(getString(R.string.err_job_io, e.message))
                     }
                     return@doAsync
                 }

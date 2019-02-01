@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.cups4j.CupsClient
 import org.cups4j.CupsPrinter
@@ -66,21 +67,6 @@ class PrintService : IntentService("PrintService") {
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
-        var cp: CupsPrinter?
-
-        try {
-            cp = getPrinter(
-                    prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
-                    prefs.getString("hardware_ticketprinter_port", "631"),
-                    prefs.getString("hardware_ticketprinter_printername", "PATicket")
-            )
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw PrintException(getString(R.string.err_cups_io, e.message));
-        }
-        if (cp == null) {
-            throw PrintException(getString(R.string.err_no_printer_found))
-        }
 
         val pages = emptyList<File>().toMutableList()
         var tmpfile: File?
@@ -125,12 +111,41 @@ class PrintService : IntentService("PrintService") {
             throw PrintException(getString(R.string.err_files_generic, e.message));
         }
 
-        try {
-            val pj = PrintJob.Builder(tmpfile.inputStream()).build()
-            cp.print(pj)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw PrintException(getString(R.string.err_job_io, e.message));
+
+        val mode = prefs.getString("hardware_ticketprinter_printername", "CUPS/IPP")
+        if (mode == "FGL") {
+            try {
+                FGLNetworkPrinter(
+                        prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
+                        Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100"))
+                ).printPDF(tmpfile.inputStream())
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw PrintException(getString(R.string.err_job_io, e.message));
+            }
+        } else if (mode == "CUPS/IPS") {
+            var cp: CupsPrinter?
+
+            try {
+                cp = getPrinter(
+                        prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
+                        prefs.getString("hardware_ticketprinter_port", "631"),
+                        prefs.getString("hardware_ticketprinter_printername", "PATicket")
+                )
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw PrintException(getString(R.string.err_cups_io, e.message));
+            }
+            if (cp == null) {
+                throw PrintException(getString(R.string.err_no_printer_found))
+            }
+            try {
+                val pj = PrintJob.Builder(tmpfile.inputStream()).build()
+                cp.print(pj)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw PrintException(getString(R.string.err_job_io, e.message));
+            }
         }
     }
 
