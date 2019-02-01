@@ -112,13 +112,13 @@ class PrintService : IntentService("PrintService") {
         }
 
 
-        val mode = prefs.getString("hardware_ticketprinter_printername", "CUPS/IPP")
+        val mode = prefs.getString("hardware_ticketprinter_mode", "CUPS/IPP")
         if (mode == "FGL") {
             try {
                 FGLNetworkPrinter(
                         prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100"))
-                ).printPDF(tmpfile.inputStream())
+                ).printPDF(tmpfile)
             } catch (e: IOException) {
                 e.printStackTrace()
                 throw PrintException(getString(R.string.err_job_io, e.message));

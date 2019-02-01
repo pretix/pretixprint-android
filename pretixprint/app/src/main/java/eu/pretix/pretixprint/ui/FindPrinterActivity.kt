@@ -25,6 +25,8 @@ import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.progressDialog
 import org.jetbrains.anko.toast
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 
@@ -233,10 +235,28 @@ class FindPrinterActivity : AppCompatActivity() {
         doAsync {
             if (mode == "FGL") {
                 try {
+
+                    val file = File(cacheDir, "demopage.pdf")
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                    val asset = assets.open("demopage_8in_3.25in.pdf")
+                    val output = FileOutputStream(file)
+                    val buffer = ByteArray(1024)
+                    var size = asset.read(buffer)
+                    while (size != -1) {
+                        output.write(buffer, 0, size)
+                        size = asset.read(buffer)
+                    }
+                    asset.close()
+                    output.close()
+
                     FGLNetworkPrinter(
                             editText_ip.text.toString(),
                             Integer.valueOf(editText_port.text.toString())
-                    ).printPDF(assets.open("demopage_8in_3.25in.pdf"))
+                    ).printPDF(file)
+                    file.delete()
+
                     runOnUiThread {
                         pgTest?.dismiss()
                         toast(R.string.test_success)
