@@ -17,6 +17,10 @@
             />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/settings_label_receiptprinter">
+        <Preference android:key="hardware_receiptprinter_find" android:title="@string/settings_label_find"/>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_label_about">
         <Preference
             android:key="licenses"

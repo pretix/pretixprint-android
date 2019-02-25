@@ -3,7 +3,7 @@ package eu.pretix.pretixprint
 import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
 import com.tom_roush.pdfbox.util.PDFBoxResourceLoader
-import eu.pretix.pretixprint.print.Renderer
+import eu.pretix.pretixprint.print.WYSIWYGRenderer
 import io.sentry.Sentry
 import io.sentry.android.AndroidSentryClientFactory
 
@@ -18,7 +18,7 @@ class PretixPrint : MultiDexApplication() {
             val sentryDsn = BuildConfig.SENTRY_DSN
             Sentry.init(sentryDsn, AndroidSentryClientFactory(this))
         }
-        Renderer.registerFonts(this)
+        WYSIWYGRenderer.registerFonts(this)
         PDFBoxResourceLoader.init(getApplicationContext());
     }
 }

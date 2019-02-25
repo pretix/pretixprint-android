@@ -11,19 +11,13 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.ui.SettingsActivity
-import org.cups4j.CupsClient
-import org.cups4j.CupsPrinter
-import org.cups4j.PrintJob
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.URL
-
 
 class PrintService : IntentService("PrintService") {
     companion object {
@@ -67,7 +61,12 @@ class PrintService : IntentService("PrintService") {
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
+        val type = getType(intent.action)
+        val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
+        val connection = prefs.getString("hardware_${type}printer_connection", "")
+        val mode = prefs.getString("hardware_${type}printer_mode", "")
 
+        /* ToDo: switch Rendering-Engine depending on renderer (WYSIWYG/ESCPOS) */
         val pages = emptyList<File>().toMutableList()
         var tmpfile: File?
         try {
@@ -83,17 +82,17 @@ class PrintService : IntentService("PrintService") {
                 if (position.has("__file_index")) {
                     val fileIndex = position.getInt("__file_index");
 
-                    val bgInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
+                    val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
                     bgInputStream.use {
-                        Renderer(layout, jsonData, i, it, ctx).writePDF(_tmpfile)
+                        WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
                     }
                 } else {
-                    Renderer(layout, jsonData, i, null, ctx).writePDF(_tmpfile)
+                    WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
                 }
                 pages.add(_tmpfile)
             }
 
-            tmpfile = File.createTempFile("print", "pdf", ctx.cacheDir)
+            tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
             val document = Document()
             val copy = PdfCopy(document, FileOutputStream(tmpfile))
             document.open()
@@ -110,45 +109,36 @@ class PrintService : IntentService("PrintService") {
             e.printStackTrace()
             throw PrintException(getString(R.string.err_files_generic, e.message));
         }
+        /* */
 
+        when (connection) {
+            "network_printer" -> {
+                NetworkPrintService(this, type, mode).print(tmpfile)
+            }
+            "bluetooth_printer" -> {
+                BluetoothPrintService(this, type).print(tmpfile)
+            }
+        }
 
-        val mode = prefs.getString("hardware_ticketprinter_mode", "CUPS/IPP")
-        if (mode == "FGL") {
-            try {
-                FGLNetworkPrinter(
-                        prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
-                        Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100")),
-                        Integer.valueOf(prefs.getString("hardware_ticketprinter_dpi", "200"))
-                ).printPDF(tmpfile)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                throw PrintException(getString(R.string.err_job_io, e.message));
-            }
-        } else if (mode == "CUPS/IPP") {
-            var cp: CupsPrinter?
+    }
 
-            try {
-                cp = getPrinter(
-                        prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
-                        prefs.getString("hardware_ticketprinter_port", "631"),
-                        prefs.getString("hardware_ticketprinter_printername", "PATicket")
-                )
-            } catch (e: IOException) {
-                e.printStackTrace()
-                throw PrintException(getString(R.string.err_cups_io, e.message));
+    private fun getType(intentAction: String): String {
+        return when(intentAction) {
+            "eu.pretix.pretixpos.print.PRINT_TICKET" -> {
+                "ticket"
             }
-            if (cp == null) {
-                throw PrintException(getString(R.string.err_no_printer_found))
+            "eu.pretix.pretixpos.print.PRINT_BADGE" -> {
+                "badge"
             }
-            try {
-                val pj = PrintJob.Builder(tmpfile.inputStream()).build()
-                cp.print(pj)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                throw PrintException(getString(R.string.err_job_io, e.message));
+            "eu.pretix.pretixpos.print.PRINT_RECEIPT" -> {
+                "receipt"
+            }
+            else -> {
+                "ticket"
             }
         }
     }
+
 
     override fun onHandleIntent(intent: Intent) {
         var rr: ResultReceiver? = null

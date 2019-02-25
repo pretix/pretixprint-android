@@ -1,0 +1,42 @@
+package eu.pretix.pretixprint.ui
+
+import android.content.Context
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentPagerAdapter
+import eu.pretix.pretixprint.R
+
+class FindPrinterAdapter(fm: FragmentManager, type: String, context: Context) : FragmentPagerAdapter(fm) {
+    private val type = type
+    private val context = context
+
+    override fun getItem(position: Int): Fragment {
+        return when (getConnectionTechnologies()[position]) {
+            R.string.bluetooth_printer -> { FindBluetoothPrinterFragment(type) }
+            else -> { FindNetworkPrinterFragment(type) }
+        }
+    }
+
+    override fun getCount(): Int {
+        return getConnectionTechnologies().count()
+    }
+
+    override fun getPageTitle(position: Int): CharSequence {
+        return context.getString(getConnectionTechnologies()[position])
+    }
+
+    private fun getConnectionTechnologies() : List<Int> {
+        return when (type) {
+            "receipt" -> {
+                listOf(
+                        R.string.bluetooth_printer
+                )
+            }
+            else -> {
+                listOf(
+                        R.string.network_printer
+                )
+            }
+        }
+    }
+}

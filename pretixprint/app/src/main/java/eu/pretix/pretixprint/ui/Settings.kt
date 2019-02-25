@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.ui
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceFragment
@@ -20,9 +19,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 
-
 class SettingsFragment : PreferenceFragment() {
-    val types = listOf("ticket", "badge")
+    val types = listOf("ticket", "badge", "receipt")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +40,7 @@ class SettingsFragment : PreferenceFragment() {
             asset_dialog(R.raw.about, R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
         }
+
         findPreference("version").summary = BuildConfig.VERSION_NAME
     }
 
@@ -51,8 +50,10 @@ class SettingsFragment : PreferenceFragment() {
             if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
                 val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
                 val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
+                val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "")
+
                 findPreference("hardware_${type}printer_find").summary = getString(
-                        R.string.pref_printer_current, name, ip
+                        R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", activity.packageName))
                 )
             } else {
                 findPreference("hardware_${type}printer_find").summary = ""
@@ -120,4 +121,3 @@ class SettingsActivity : AppCompatPreferenceActivity() {
                 .commit()
     }
 }
-

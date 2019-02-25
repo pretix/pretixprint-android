@@ -5,6 +5,7 @@
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticket printer</string>
     <string name="settings_label_badgeprinter">Badge printer</string>
+    <string name="settings_label_receiptprinter">Receipt printer</string>
     <string name="settings_label_about">About this app</string>
     <string name="settings_label_version">Version</string>
     <string name="settings_label_licenses">Author and licenses</string>
@@ -28,7 +29,8 @@
     <string name="welcome_tutorial1">pretixPRINT allows other pretix apps, e.g. the ticket selling app pretixPOS, to print tickets, badges, and receipts using suitable printers on your network.</string>
     <string name="welcome_tutorial2">Currently, pretixPRINT knows how to talk to printers supporting IPP or shared with CUPS, i.e. all printers shared by a macOS or Linux computer and most modern printers with a network interface.</string>
     <string name="action_configure">Start finding a printer</string>
-    <string name="headline_found_printers">Found network printers</string>
+    <string name="headline_found_network_printers">Found network printers</string>
+    <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
     <string name="field_label_port">Port</string>
@@ -41,8 +43,13 @@
     <string name="err_field_required">This field is required.</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
-    <string name="pref_printer_current">Currently using printer %s @ %s</string>
+    <string name="pref_printer_current">Currently using printer %s @ %s (%s)</string>
     <string name="button_label_test">Print test page</string>
+    <string name="bluetooth_printer">Bluetooth Printer</string>
+    <string name="network_printer">Network Printer</string>
+    <string name="err_bluetooth_not_available">Bluetooth is not available</string>
+    <string name="field_label_macaddress">MAC address</string>
+    <string name="err_not_supported">Not supported</string>
     <string-array name="printer_modes">
         <item>CUPS/IPP</item>
         <item>FGL</item>

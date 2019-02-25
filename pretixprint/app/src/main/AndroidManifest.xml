@@ -2,10 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.pretix.pretixprint">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -38,13 +39,16 @@
             android:label="@string/title_activity_main">
         </activity>
 
-
         <service android:name="eu.pretix.pretixprint.print.PrintService"
             android:enabled="true" android:exported="true">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_TICKET"/>
+                <action android:name="eu.pretix.pretixpos.print.PRINT_BADGE"/>
+                <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT"/>
             </intent-filter>
         </service>
+        <service android:name="eu.pretix.pretixprint.bt.BtService"
+            android:enabled="true" android:exported="false" />
     </application>
 
 </manifest>

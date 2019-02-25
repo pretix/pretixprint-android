@@ -6,6 +6,7 @@
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticketdrucker</string>
     <string name="settings_label_badgeprinter">Badgedrucker</string>
+    <string name="settings_label_receiptprinter">Belegdrucker</string>
     <string name="settings_label_about">Über diese App</string>
     <string name="settings_label_licenses">Autoren und Lizenzen</string>
     <string name="settings_label_find">Drucker einrichten</string>
@@ -27,7 +28,8 @@
     <string name="welcome_tutorial1">pretixPRINT erlaubt anderen pretix-Apps, z.B. der Kassensoftware pretixPOS, Tickets, Badges oder Bons auf Druckern im Netzwerk zu drucken.</string>
     <string name="welcome_tutorial2">Aktuell kann pretixPRINT mit Druckern kommunizieren, die IPP oder CUPS unterstützen, d.h. alle Drucker, die von einem Mac- oder Linux-Computer freigegeben wurden sowie die meisten aktuellen Drucker mit eigenem Netzwerkanschluss.</string>
     <string name="action_configure">Beginne Druckereinrichtung</string>
-    <string name="headline_found_printers">Gefundene Netzwerkdrucker</string>
+    <string name="headline_found_network_printers">Gefundene Netzwerkdrucker</string>
+    <string name="headline_found_bluetooth_printers">Gefundene Bluetoothdrucker</string>
     <string name="headline_add_printer">Drucker konfigurieren</string>
     <string name="field_label_ipaddress">IP-Adresse</string>
     <string name="field_label_port">Port</string>
@@ -39,7 +41,18 @@
     <string name="err_field_required">Dieses Feld ist erforderlich.</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
-    <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s</string>
+    <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s (%s)</string>
     <string name="button_label_test">Testseite drucken</string>
     <string name="dismiss">Schließen</string>
+    <string name="field_label_macaddress">MAC Addresse</string>
+    <string-array name="printer_modes">
+        <item>CUPS/IPP</item>
+        <item>FGL</item>
+    </string-array>
+    <string name="bluetooth_printer">Bluetooth Drucker</string>
+    <string name="err_bluetooth_not_available">Bluetooth ist nicht verfügbar</string>
+    <string name="field_label_dpi">DPI</string>
+    <string name="network_printer">Netzwerkdrucker</string>
+    <string name="settings_label_version">Version</string>
+    <string name="err_not_supported">Nicht unterstüzt</string>
 </resources>

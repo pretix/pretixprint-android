@@ -35,7 +35,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
 }
 
 
-class Renderer(private val layout: JSONArray, private val order: JSONObject, private val positionIndex: Int, private val background: InputStream?, private val ctx: Context) {
+class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObject, private val positionIndex: Int, private val background: InputStream?, private val ctx: Context) {
     fun writePDF(outFile: File) {
         val positions = order.getJSONArray("positions")
         val posList = emptyList<ContentProvider>().toMutableList()
