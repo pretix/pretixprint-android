@@ -51,9 +51,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
                 ostream.write(p)
                 ostream.flush()
             }
-            System.out.println("sendBufferSize: " + socket.sendBufferSize)
             Thread.sleep(2000)
-            System.out.println("sendBufferSize: " + socket.sendBufferSize)
         } finally {
             istream.close()
             ostream.close()
