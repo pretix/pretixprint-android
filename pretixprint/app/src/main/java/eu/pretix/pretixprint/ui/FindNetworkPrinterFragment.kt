@@ -14,7 +14,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
+import eu.pretix.pretixprint.socket.FGLNetworkPrinter
+import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
 import kotlinx.android.synthetic.main.activity_find_network.*
 import org.cups4j.CupsPrinter
@@ -50,7 +51,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
     companion object {
         val TAG = "FindNWPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
-        val MODES = arrayOf("CUPS/IPP", "FGL")
+        val MODES = arrayOf("CUPS/IPP", "FGL", "SLCS")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
@@ -228,7 +229,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
         }
         doAsync {
             when (mode) {
-                "FGL" -> {
+                "FGL", "SLCS" -> {
                     try {
 
                         val file = File(ctx.cacheDir, "demopage.pdf")
@@ -246,11 +247,19 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                         asset.close()
                         output.close()
 
-                        FGLNetworkPrinter(
-                                editText_ip.text.toString(),
-                                Integer.valueOf(editText_port.text.toString()),
-                                Integer.valueOf(editText_dpi.text.toString())
-                        ).printPDF(file)
+                        if (mode == "SLCS") {
+                            SLCSNetworkPrinter(
+                                    editText_ip.text.toString(),
+                                    Integer.valueOf(editText_port.text.toString()),
+                                    Integer.valueOf(editText_dpi.text.toString())
+                            ).printPDF(file)
+                        } else {
+                            FGLNetworkPrinter(
+                                    editText_ip.text.toString(),
+                                    Integer.valueOf(editText_port.text.toString()),
+                                    Integer.valueOf(editText_dpi.text.toString())
+                            ).printPDF(file)
+                        }
                         file.delete()
 
                         runOnUiThread {
