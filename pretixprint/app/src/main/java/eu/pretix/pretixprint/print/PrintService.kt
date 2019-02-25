@@ -124,7 +124,7 @@ class PrintService : IntentService("PrintService") {
                 e.printStackTrace()
                 throw PrintException(getString(R.string.err_job_io, e.message));
             }
-        } else if (mode == "CUPS/IPS") {
+        } else if (mode == "CUPS/IPP") {
             var cp: CupsPrinter?
 
             try {
