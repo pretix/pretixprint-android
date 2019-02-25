@@ -11,9 +11,9 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.socket.FGLNetworkPrinter
-import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
+import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.ui.SettingsActivity
+import org.cups4j.CupsClient
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
 import org.jetbrains.anko.ctx
@@ -22,6 +22,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URL
 
 
 class PrintService : IntentService("PrintService") {
@@ -115,17 +116,6 @@ class PrintService : IntentService("PrintService") {
         if (mode == "FGL") {
             try {
                 FGLNetworkPrinter(
-                        prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
-                        Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100")),
-                        Integer.valueOf(prefs.getString("hardware_ticketprinter_dpi", "200"))
-                ).printPDF(tmpfile)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                throw PrintException(getString(R.string.err_job_io, e.message));
-            }
-        } else if (mode == "SLCS") {
-            try {
-                SLCSNetworkPrinter(
                         prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100")),
                         Integer.valueOf(prefs.getString("hardware_ticketprinter_dpi", "200"))

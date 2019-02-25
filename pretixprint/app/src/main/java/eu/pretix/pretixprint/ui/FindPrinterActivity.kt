@@ -16,9 +16,8 @@ import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.socket.FGLNetworkPrinter
+import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
-import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import kotlinx.android.synthetic.main.activity_find.*
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
@@ -57,7 +56,7 @@ class FindPrinterActivity : AppCompatActivity() {
         val EXTRA_TYPE = "TYPE"
         val TAG = "FindPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
-        val MODES = arrayOf("CUPS/IPP", "FGL", "SLCS")
+        val MODES = arrayOf("CUPS/IPP", "FGL")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
@@ -254,43 +253,6 @@ class FindPrinterActivity : AppCompatActivity() {
                     output.close()
 
                     FGLNetworkPrinter(
-                            editText_ip.text.toString(),
-                            Integer.valueOf(editText_port.text.toString()),
-                            Integer.valueOf(editText_dpi.text.toString())
-                    ).printPDF(file)
-                    file.delete()
-
-                    runOnUiThread {
-                        pgTest?.dismiss()
-                        toast(R.string.test_success)
-                    }
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    runOnUiThread {
-                        pgTest?.dismiss()
-                        toast(getString(R.string.err_job_io, e.message))
-                    }
-                    return@doAsync
-                }
-            } else if (mode == "SLCS") {
-                try {
-
-                    val file = File(cacheDir, "demopage.pdf")
-                    if (file.exists()) {
-                        file.delete()
-                    }
-                    val asset = assets.open("demopage_8in_3.25in.pdf")
-                    val output = FileOutputStream(file)
-                    val buffer = ByteArray(1024)
-                    var size = asset.read(buffer)
-                    while (size != -1) {
-                        output.write(buffer, 0, size)
-                        size = asset.read(buffer)
-                    }
-                    asset.close()
-                    output.close()
-
-                    SLCSNetworkPrinter(
                             editText_ip.text.toString(),
                             Integer.valueOf(editText_port.text.toString()),
                             Integer.valueOf(editText_dpi.text.toString())
