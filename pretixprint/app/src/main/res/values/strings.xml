@@ -46,5 +46,6 @@
     <string-array name="printer_modes">
         <item>CUPS/IPP</item>
         <item>FGL</item>
+        <item>SLCS</item>
     </string-array>
 </resources>
