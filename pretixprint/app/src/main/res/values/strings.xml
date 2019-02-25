@@ -31,6 +31,7 @@
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
     <string name="field_label_port">Port</string>
+    <string name="field_label_dpi">DPI</string>
     <string name="field_label_queue">Printer name</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>
@@ -41,4 +42,8 @@
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s</string>
     <string name="button_label_test">Print test page</string>
+    <string-array name="printer_modes">
+        <item>CUPS/IPP</item>
+        <item>FGL</item>
+    </string-array>
 </resources>

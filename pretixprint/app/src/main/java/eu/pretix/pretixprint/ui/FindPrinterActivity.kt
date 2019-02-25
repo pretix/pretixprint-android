@@ -9,12 +9,14 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
 import kotlinx.android.synthetic.main.activity_find.*
 import org.cups4j.CupsPrinter
@@ -23,6 +25,8 @@ import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.progressDialog
 import org.jetbrains.anko.toast
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 
@@ -52,6 +56,7 @@ class FindPrinterActivity : AppCompatActivity() {
         val EXTRA_TYPE = "TYPE"
         val TAG = "FindPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
+        val MODES = arrayOf("CUPS/IPP", "FGL")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
@@ -168,7 +173,22 @@ class FindPrinterActivity : AppCompatActivity() {
         type = intent.extras.getString(EXTRA_TYPE, "ticket")
         editText_ip.setText(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))
         editText_port.setText(defaultSharedPreferences.getString("hardware_${type}printer_port", ""))
+        editText_dpi.setText(defaultSharedPreferences.getString("hardware_${type}printer_dpi", ""))
         editText_printer.setText(defaultSharedPreferences.getString("hardware_${type}printer_printername", ""))
+
+        ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                android.R.id.text1,
+                MODES
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            spinner_mode.adapter = adapter
+            spinner_mode.setSelection(MODES.indexOf(defaultSharedPreferences.getString("hardware_${type}printer_mode", "CUPS/IPP")))
+        }
+
 
         button2.setOnClickListener {
             if (validate()) {
@@ -208,35 +228,37 @@ class FindPrinterActivity : AppCompatActivity() {
     }
 
     fun testPrinter() {
+        val mode = MODES[spinner_mode.selectedItemPosition]
         pgTest = progressDialog(R.string.testing) {
             setCancelable(false)
             isIndeterminate = true
         }
         doAsync {
-            var cp: CupsPrinter? = null
-            try {
-                cp = getPrinter(
-                        editText_ip.text.toString(),
-                        editText_port.text.toString(),
-                        editText_printer.text.toString()
-                )
-            } catch (e: IOException) {
-                e.printStackTrace()
-                runOnUiThread {
-                    pgTest?.dismiss()
-                    toast(getString(R.string.err_cups_io, e.message));
-                }
-                return@doAsync
-            }
-            if (cp == null) {
-                runOnUiThread {
-                    pgTest?.dismiss()
-                    toast(getString(R.string.err_printer_not_found, editText_printer.text.toString()))
-                }
-            } else {
+            if (mode == "FGL") {
                 try {
-                    val pj = PrintJob.Builder(assets.open("demopage_8in_3.25in.pdf")).build()
-                    cp.print(pj)
+
+                    val file = File(cacheDir, "demopage.pdf")
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                    val asset = assets.open("demopage_8in_3.25in.pdf")
+                    val output = FileOutputStream(file)
+                    val buffer = ByteArray(1024)
+                    var size = asset.read(buffer)
+                    while (size != -1) {
+                        output.write(buffer, 0, size)
+                        size = asset.read(buffer)
+                    }
+                    asset.close()
+                    output.close()
+
+                    FGLNetworkPrinter(
+                            editText_ip.text.toString(),
+                            Integer.valueOf(editText_port.text.toString()),
+                            Integer.valueOf(editText_dpi.text.toString())
+                    ).printPDF(file)
+                    file.delete()
+
                     runOnUiThread {
                         pgTest?.dismiss()
                         toast(R.string.test_success)
@@ -245,7 +267,45 @@ class FindPrinterActivity : AppCompatActivity() {
                     e.printStackTrace()
                     runOnUiThread {
                         pgTest?.dismiss()
-                        toast(getString(R.string.err_job_io, e.message));
+                        toast(getString(R.string.err_job_io, e.message))
+                    }
+                    return@doAsync
+                }
+            } else if (mode == "CUPS/IPS") {
+                var cp: CupsPrinter? = null
+                try {
+                    cp = getPrinter(
+                            editText_ip.text.toString(),
+                            editText_port.text.toString(),
+                            editText_printer.text.toString()
+                    )
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(getString(R.string.err_cups_io, e.message));
+                    }
+                    return@doAsync
+                }
+                if (cp == null) {
+                    runOnUiThread {
+                        pgTest?.dismiss()
+                        toast(getString(R.string.err_printer_not_found, editText_printer.text.toString()))
+                    }
+                } else {
+                    try {
+                        val pj = PrintJob.Builder(assets.open("demopage_8in_3.25in.pdf")).build()
+                        cp.print(pj)
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(R.string.test_success)
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(getString(R.string.err_job_io, e.message));
+                        }
                     }
                 }
             }
@@ -265,6 +325,13 @@ class FindPrinterActivity : AppCompatActivity() {
             editText_printer.error = getString(R.string.err_field_required)
             return false
         }
+        val mode = MODES[spinner_mode.selectedItemPosition]
+        if (mode == "FQL") {
+            if (TextUtils.isEmpty(editText_dpi.text)) {
+                editText_dpi.error = getString(R.string.err_field_required)
+                return false
+            }
+        }
         return true
     }
 
@@ -278,7 +345,9 @@ class FindPrinterActivity : AppCompatActivity() {
                 defaultSharedPreferences.edit()
                         .putString("hardware_${type}printer_ip", editText_ip.text.toString())
                         .putString("hardware_${type}printer_port", editText_port.text.toString())
+                        .putString("hardware_${type}printer_dpi", if (editText_dpi.text.toString().isNotEmpty()) editText_dpi.text.toString() else "0")
                         .putString("hardware_${type}printer_printername", editText_printer.text.toString())
+                        .putString("hardware_${type}printer_mode", MODES[spinner_mode.selectedItemPosition])
                         .apply()
                 finish()
                 return true
