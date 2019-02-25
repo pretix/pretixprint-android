@@ -6,6 +6,7 @@
     <string name="settings_label_ticketprinter">Ticket printer</string>
     <string name="settings_label_badgeprinter">Badge printer</string>
     <string name="settings_label_about">About this app</string>
+    <string name="settings_label_version">Version</string>
     <string name="settings_label_licenses">Author and licenses</string>
     <string name="settings_label_find">Find a printer</string>
     <string name="settings_label_ipaddress">IP address</string>

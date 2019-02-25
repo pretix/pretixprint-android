@@ -22,5 +22,10 @@
             android:key="licenses"
             android:title="@string/settings_label_licenses"
             />
+        <Preference
+            android:key="version"
+            android:title="@string/settings_label_version"
+            android:summary="loading…"
+            />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.BufferedReader
@@ -41,6 +42,7 @@ class SettingsFragment : PreferenceFragment() {
             asset_dialog(R.raw.about, R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
         }
+        findPreference("version").summary = BuildConfig.VERSION_NAME
     }
 
     override fun onResume() {
