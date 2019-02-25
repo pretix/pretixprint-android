@@ -2,16 +2,14 @@ package eu.pretix.pretixprint.ui
 
 import androidx.fragment.app.Fragment
 
-abstract class PrinterFragment(type: String, connection: String) : Fragment() {
-    private val type = type
-    private val connection = connection
+abstract class PrinterFragment : Fragment() {
 
     fun getType() : String {
-        return type
+        return arguments!!.getString("type")
     }
 
     fun getConnection() : String {
-        return connection
+        return arguments!!.getString("connection")
     }
 
     abstract fun validate() : Boolean

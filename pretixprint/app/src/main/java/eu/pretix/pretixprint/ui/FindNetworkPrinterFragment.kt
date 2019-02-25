@@ -46,7 +46,7 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val tvName = view.findViewById<TextView>(R.id.textView)
 }
 
-class FindNetworkPrinterFragment(type: String) : PrinterFragment(type, "network_printer") {
+class FindNetworkPrinterFragment : PrinterFragment() {
     companion object {
         val TAG = "FindNWPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
@@ -156,6 +156,7 @@ class FindNetworkPrinterFragment(type: String) : PrinterFragment(type, "network_
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        arguments!!.putString("connection", "network_printer")
         nsdManager = activity!!.getSystemService(Context.NSD_SERVICE) as NsdManager
     }
 

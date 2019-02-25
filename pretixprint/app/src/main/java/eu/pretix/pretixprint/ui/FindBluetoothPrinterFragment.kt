@@ -41,7 +41,7 @@ class BluetoothServiceAdapter(val items: Array<BluetoothDevice>, val fragment: F
     }
 }
 
-class FindBluetoothPrinterFragment(type: String) : PrinterFragment(type, "bluetooth_printer") {
+class FindBluetoothPrinterFragment : PrinterFragment() {
     var lastEvent: BtEvent? = null
     var currentState: State = State.Initial
         private set
@@ -62,6 +62,11 @@ class FindBluetoothPrinterFragment(type: String) : PrinterFragment(type, "blueto
             return false
         }
         return true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments!!.putString("connection", "bluetooth_printer")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
