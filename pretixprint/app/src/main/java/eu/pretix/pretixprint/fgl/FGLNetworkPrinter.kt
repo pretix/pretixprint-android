@@ -16,11 +16,14 @@ import java.io.OutputStream
 import java.nio.ByteBuffer
 
 
-class FGLNetworkPrinter(var ip: String, var port: Int) {
+class FGLNetworkPrinter(var ip: String, var port: Int, var dpi: Int) {
 
     fun printPDF(file: File) {
         val serverAddr = InetAddress.getByName(ip)
-        val dpi = 200.0F  // TODO: configurable
+        var d = dpi.toFloat()
+        if (d < 1) {
+            d = 200f  // Set default
+        }
         val pages = mutableListOf<ByteArray>()
         if (Build.VERSION.SDK_INT >= 21) {
             val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -28,7 +31,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
             val pageCount = renderer.pageCount
             for (i in 0 until pageCount) {
                 val page = renderer.openPage(i)
-                val img = Bitmap.createBitmap((page.width / 72 * dpi).toInt(), (page.height / 72 * dpi).toInt(), Bitmap.Config.ARGB_8888)
+                val img = Bitmap.createBitmap((page.width / 72 * d).toInt(), (page.height / 72 * d).toInt(), Bitmap.Config.ARGB_8888)
                 page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
                 page.close()
                 pages.add(convertPageToFGL(img))
@@ -39,7 +42,7 @@ class FGLNetworkPrinter(var ip: String, var port: Int) {
             val doc = PDDocument.load(file.inputStream())
             val renderer = PDFBoxRenderer(doc)
             for (page in 0..(doc.pages.count - 1)) {
-                val img = renderer.renderImageWithDPI(page, dpi)
+                val img = renderer.renderImageWithDPI(page, d)
                 pages.add(convertPageToFGL(img))
             }
         }

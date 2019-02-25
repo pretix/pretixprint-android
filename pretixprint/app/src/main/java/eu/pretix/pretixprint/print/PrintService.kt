@@ -117,7 +117,8 @@ class PrintService : IntentService("PrintService") {
             try {
                 FGLNetworkPrinter(
                         prefs.getString("hardware_ticketprinter_ip", "127.0.0.1"),
-                        Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100"))
+                        Integer.valueOf(prefs.getString("hardware_ticketprinter_port", "9100")),
+                        Integer.valueOf(prefs.getString("hardware_ticketprinter_dpi", "200"))
                 ).printPDF(tmpfile)
             } catch (e: IOException) {
                 e.printStackTrace()

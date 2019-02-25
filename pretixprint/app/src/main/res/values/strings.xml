@@ -31,6 +31,7 @@
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
     <string name="field_label_port">Port</string>
+    <string name="field_label_dpi">DPI</string>
     <string name="field_label_queue">Printer name</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>

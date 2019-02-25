@@ -173,6 +173,7 @@ class FindPrinterActivity : AppCompatActivity() {
         type = intent.extras.getString(EXTRA_TYPE, "ticket")
         editText_ip.setText(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))
         editText_port.setText(defaultSharedPreferences.getString("hardware_${type}printer_port", ""))
+        editText_dpi.setText(defaultSharedPreferences.getString("hardware_${type}printer_dpi", ""))
         editText_printer.setText(defaultSharedPreferences.getString("hardware_${type}printer_printername", ""))
 
         ArrayAdapter(
@@ -253,7 +254,8 @@ class FindPrinterActivity : AppCompatActivity() {
 
                     FGLNetworkPrinter(
                             editText_ip.text.toString(),
-                            Integer.valueOf(editText_port.text.toString())
+                            Integer.valueOf(editText_port.text.toString()),
+                            Integer.valueOf(editText_dpi.text.toString())
                     ).printPDF(file)
                     file.delete()
 
@@ -323,6 +325,13 @@ class FindPrinterActivity : AppCompatActivity() {
             editText_printer.error = getString(R.string.err_field_required)
             return false
         }
+        val mode = MODES[spinner_mode.selectedItemPosition]
+        if (mode == "FQL") {
+            if (TextUtils.isEmpty(editText_dpi.text)) {
+                editText_dpi.error = getString(R.string.err_field_required)
+                return false
+            }
+        }
         return true
     }
 
@@ -336,6 +345,7 @@ class FindPrinterActivity : AppCompatActivity() {
                 defaultSharedPreferences.edit()
                         .putString("hardware_${type}printer_ip", editText_ip.text.toString())
                         .putString("hardware_${type}printer_port", editText_port.text.toString())
+                        .putString("hardware_${type}printer_dpi", if (editText_dpi.text.toString().isNotEmpty()) editText_dpi.text.toString() else "0")
                         .putString("hardware_${type}printer_printername", editText_printer.text.toString())
                         .putString("hardware_${type}printer_mode", MODES[spinner_mode.selectedItemPosition])
                         .apply()
