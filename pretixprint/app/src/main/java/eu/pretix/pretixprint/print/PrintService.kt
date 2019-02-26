@@ -63,7 +63,7 @@ class PrintService : IntentService("PrintService") {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action)
         val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
-        val connection = prefs.getString("hardware_${type}printer_connection", "")
+        val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
         /* ToDo: switch Rendering-Engine depending on renderer (WYSIWYG/ESCPOS) */

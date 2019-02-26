@@ -50,7 +50,7 @@ class SettingsFragment : PreferenceFragment() {
             if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
                 val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
                 val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
-                val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "")
+                val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
 
                 findPreference("hardware_${type}printer_find").summary = getString(
                         R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", activity.packageName))
