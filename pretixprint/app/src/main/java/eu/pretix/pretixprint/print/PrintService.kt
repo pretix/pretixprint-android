@@ -19,6 +19,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
+
 class PrintService : IntentService("PrintService") {
     companion object {
         val CHANNEL_ID = "pretixprint_print_channel"

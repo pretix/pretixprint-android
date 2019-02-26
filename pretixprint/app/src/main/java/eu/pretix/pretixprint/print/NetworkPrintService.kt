@@ -3,7 +3,8 @@ package eu.pretix.pretixprint.print
 import android.content.Context
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.fgl.FGLNetworkPrinter
+import eu.pretix.pretixprint.socket.FGLNetworkPrinter
+import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
 import org.jetbrains.anko.defaultSharedPreferences
@@ -19,6 +20,17 @@ class NetworkPrintService(context: Context, type: String = "ticket", mode: Strin
         if (mode == "FGL") {
             try {
                 FGLNetworkPrinter(
+                        prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),
+                        Integer.valueOf(prefs.getString("hardware_${type}printer_port", "9100")),
+                        Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200"))
+                ).printPDF(tmpfile)
+            } catch (e: IOException) {
+                e.printStackTrace()
+                throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message));
+            }
+        } else if (mode == "SLCS") {
+            try {
+                SLCSNetworkPrinter(
                         prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_port", "9100")),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200"))
