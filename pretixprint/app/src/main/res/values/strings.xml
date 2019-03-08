@@ -54,5 +54,6 @@
         <item>CUPS/IPP</item>
         <item>FGL</item>
         <item>SLCS</item>
+        <item>RAW</item>
     </string-array>
 </resources>

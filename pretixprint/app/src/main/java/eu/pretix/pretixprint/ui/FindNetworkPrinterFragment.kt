@@ -51,7 +51,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
     companion object {
         val TAG = "FindNWPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
-        val MODES = arrayOf("CUPS/IPP", "FGL", "SLCS")
+        val MODES = arrayOf("CUPS/IPP", "FGL", "SLCS", "RAW")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
