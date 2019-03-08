@@ -25,8 +25,8 @@ class BtService : Service() {
             caller.startService<BtService>(EXTRA_DEVICE_ADDRESS to deviceAddress)
         }
 
-        fun send(caller: Context, command: List<Byte>) {
-            caller.startService<BtService>(EXTRA_COMMAND to command.toByteArray())
+        fun send(caller: Context, command: ByteArray) {
+            caller.startService<BtService>(EXTRA_COMMAND to command)
         }
     }
 

@@ -1,37 +1,232 @@
 package eu.pretix.pretixprint.print
 
 import android.content.Context
-import android.util.Log
-import org.json.JSONArray
+import org.json.JSONObject
+import java.text.DecimalFormat
 
-class ESCPOSRenderer(private val layout: JSONArray, private val order: JSONArray, private val ctx: Context) {
+class ESCPOSRenderer(private val order: JSONObject, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
+    var taxrates = mutableListOf<String>()
+    var taxvalues = mutableListOf<Double>()
     companion object {
         const val ESC : Byte = 0x1B
+        const val GS : Byte = 0x1D
         const val FONTA : String = "a"
         const val FONTB : String = "b"
         const val LEFT : String = "left"
         const val CENTER : String = "center"
         const val RIGHT : String = "right"
+        const val charsPerLine : Int = 32 // 60mm: 32cpl, 80mm: 48cpl
+        enum class CharacterCodeTable(val codeTable: Int) {
+            PC437(0),
+            Katakana(1),
+            PC850(2),
+            Multilingual(2),
+            PC860(3),
+            Portuguese(3),
+            PC863(4),
+            CanadianFrench(4),
+            PC865(5),
+            Nordic(5),
+            WPC1252(16),
+            PC866(17),
+            Cyrillic2(17),
+            PC852(18),
+            Latin2(18),
+            PC858(19),
+            Euro(19),
+            Thai42(20),
+            Thai11(21),
+            Thai13(22),
+            Thai14(23),
+            Thai16(24),
+            Thai17(25),
+            Thai18(26),
+            UserDefined1(254),
+            UserDefined2(255)
+        }
+        enum class InternationalCharacterSet(val country: Int) {
+            USA(0),
+            France(1),
+            Germany(2),
+            UK(3),
+            Denmark1(4),
+            Sweden(5),
+            Italy(6),
+            Spain1(7),
+            Japan(8),
+            Norway(9),
+            Denmark2(10),
+            Spain2(11),
+            LatinAmerica(12),
+            Korea(13),
+            Slovenia(14),
+            Croatia(14),
+            China(15),
+            Vietnam(16),
+            Arabia(17),
+            IndiaDevanagari(66),
+            IndiaBengali (67),
+            IndiaTamil(68),
+            IndiaTelugu(69),
+            IndiaAssamese(70),
+            IndiaOriya(71),
+            IndiaKannada(72),
+            IndiaMalayalam(73),
+            IndiaGujarati(74),
+            IndiaPunjabi(75),
+            IndiaMarathi(82)
+        }
     }
 
-    fun render() : List<Byte> {
+
+    fun render() : ByteArray {
+        out.clear()
         init()
+        characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
+        internationalCharacterSet(InternationalCharacterSet.Germany.country)
+
+        val layout = order.getJSONArray("__layout")
 
         for (i in 0..(layout.length() - 1)) {
             val layoutLine = layout.getJSONObject(i)
+            renderline(layoutLine)
+        }
 
-            if (layoutLine.getString("type") == "textarea") {
+        //newline(3)
+        newline(2)
+        cut()
+        return out.toByteArray()
+    }
+
+    private fun renderline(layoutLine: JSONObject) {
+        when (layoutLine.getString("type")) {
+            "textarea" -> {
                 text(
-                        layoutLine.getString("value"),
+                        getText(layoutLine),
                         if (layoutLine.has("align")) layoutLine.getString("align") else LEFT
                 )
-                newline()
+            }
+            "newline" -> {
+                if (layoutLine.has("count")) {
+                    newline(layoutLine.getInt("count"))
+                } else {
+                    newline()
+                }
+            }
+            "orderlines" -> {
+                val positions = order.getJSONArray("positions")
+
+                for (i in 0..(positions.length() - 1)) {
+                    val position = positions.getJSONObject(i)
+                    val json = position.getJSONObject("pdf_data")
+
+                    processTaxes()
+
+                    val taxindex = taxrates.indexOf(position.getString("tax_rate"))
+
+                    splitline(
+                            json.getString("itemvar"),
+                            position.getString("price") + " " + (taxindex + 65).toChar()
+                    )
+                }
+            }
+            "taxlines" -> {
+                processTaxes()
+
+                for (i in 0..(taxrates.count() -1)) {
+                    splitline(
+                            (i + 65).toChar() + " " + taxrates[i] + "%:",
+                            DecimalFormat("0.00").format(taxvalues[i])
+                    )
+                }
+            }
+            "splitline" -> {
+                val splitLines = layoutLine.getJSONArray("content")
+
+                splitline(
+                        getText(splitLines.getJSONObject(0)),
+                        getText(splitLines.getJSONObject(1))
+                )
+            }
+            "testmode" -> {
+                if (order.getBoolean("testmode")) {
+                    mode(doubleheight = true, doublewidth = true, underline = true, emph = true)
+                    text("TESTMODE", CENTER)
+                    newline(2)
+                    mode()
+                }
+            }
+        }
+    }
+
+    private fun processTaxes() {
+        if (taxrates.isEmpty()) {
+            val positions = order.getJSONArray("positions")
+            for (i in 0..(positions.length() - 1)) {
+                val position = positions.getJSONObject(i)
+
+                if (position.getString("tax_rate") !in taxrates) {
+                    taxrates.add(position.getString("tax_rate"))
+                    taxvalues.add(position.getDouble("tax_value"))
+                } else {
+                    val taxindex = taxrates.indexOf(position.getString("tax_rate"))
+                    taxvalues[taxindex].plus(position.getDouble("tax_value"))
+                }
+            }
+        }
+    }
+
+    private fun getText(layoutLine : JSONObject): String {
+        if (layoutLine.has("content")) {
+            var text : String
+            val content = layoutLine.getString("content").split("_")
+            if (content[0] == "invoice") {
+                text = order.getJSONObject("__invoicesettings").getString(layoutLine.getString("content"))
+            } else {
+                text = order.getString(layoutLine.getString("content"))
+            }
+
+            if (layoutLine.has("padding")) {
+                text += " ".repeat(layoutLine.getInt("padding"))
+            }
+
+            if (text.isNotBlank()) {
+                return text
             }
         }
 
-        newline(3)
-        return out
+        return layoutLine.getString("text")
+    }
+
+    private fun splitline(leftText : String, rightText: String, padding: Int = 2) {
+        val limit = charsPerLine - rightText.length - padding
+        val leftSplit = leftText.split(" ")
+        var leftTextList = mutableListOf<String>()
+
+        leftTextList.add("")
+
+        for (i in 0..(leftSplit.count() - 1)) {
+            if ((leftTextList.last().length + leftSplit[i].length + 1) <= limit) {
+                if (leftTextList.last().isEmpty()) {
+                    leftTextList[leftTextList.lastIndex] += leftSplit[i]
+                } else {
+                    leftTextList[leftTextList.lastIndex] += " " + leftSplit[i]
+                }
+            } else if (leftSplit[i].length <= limit) {
+                leftTextList.add(leftSplit[i])
+            } else {
+                leftTextList.addAll(leftSplit[i].chunked(limit))
+            }
+        }
+
+        for (i in 0..(leftTextList.count() - 2)) {
+            text(leftTextList[i], LEFT)
+            newline()
+        }
+
+        text(leftTextList.last() + " ".repeat(charsPerLine - leftTextList.last().length - rightText.length) + rightText, LEFT)
+        newline()
     }
 
     private fun init() {
@@ -91,6 +286,29 @@ class ESCPOSRenderer(private val layout: JSONArray, private val order: JSONArray
 
         for (char in text) {
             out.add(char.toByte())
+        }
+    }
+
+    private fun characterCodeTable(table : Int = 0) {
+        out.add(ESC)
+        out.add('t'.toByte())
+        out.add(table.toByte())
+    }
+
+    private fun internationalCharacterSet(country : Int = 0) {
+        out.add(ESC)
+        out.add('R'.toByte())
+        out.add(country.toByte())
+    }
+
+    private fun cut(partial : Boolean = false) {
+        out.add(GS)
+        out.add('V'.toByte())
+
+        if (partial) {
+            out.add(1)
+        } else {
+            out.add(0)
         }
     }
 }

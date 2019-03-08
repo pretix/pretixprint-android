@@ -67,50 +67,59 @@ class PrintService : IntentService("PrintService") {
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
-        /* ToDo: switch Rendering-Engine depending on renderer (WYSIWYG/ESCPOS) */
         val pages = emptyList<File>().toMutableList()
         var tmpfile: File?
-        try {
-            val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
-            val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
 
-            val positions = jsonData.getJSONArray("positions")
-            for (i in 0..(positions.length() - 1)) {
-                val position = positions.getJSONObject(i)
-                val layout = position.getJSONArray("__layout");
+        val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
+        val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
+        val positions = jsonData.getJSONArray("positions")
 
-                val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
-                if (position.has("__file_index")) {
-                    val fileIndex = position.getInt("__file_index");
+        when (renderer) {
+            "ESCPOS" -> {
 
-                    val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
-                    bgInputStream.use {
-                        WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
+                tmpfile = File.createTempFile("print_" + jsonData.getString("code"), "escpos", this.cacheDir)
+
+                tmpfile.writeBytes(ESCPOSRenderer(jsonData, this).render())
+            }
+            else -> {
+                try {
+                    for (i in 0..(positions.length() - 1)) {
+                        val position = positions.getJSONObject(i)
+                        val layout = position.getJSONArray("__layout");
+
+                        val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
+                        if (position.has("__file_index")) {
+                            val fileIndex = position.getInt("__file_index")
+
+                            val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
+                            bgInputStream.use {
+                                WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
+                            }
+                        } else {
+                            WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
+                        }
+                        pages.add(_tmpfile)
                     }
-                } else {
-                    WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
-                }
-                pages.add(_tmpfile)
-            }
 
-            tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
-            val document = Document()
-            val copy = PdfCopy(document, FileOutputStream(tmpfile))
-            document.open()
-            for (page in pages) {
-                val pagedoc = PdfReader(page.absolutePath)
-                copy.addDocument(pagedoc)
-                pagedoc.close()
+                    tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
+                    val document = Document()
+                    val copy = PdfCopy(document, FileOutputStream(tmpfile))
+                    document.open()
+                    for (page in pages) {
+                        val pagedoc = PdfReader(page.absolutePath)
+                        copy.addDocument(pagedoc)
+                        pagedoc.close()
+                    }
+                    document.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    throw PrintException(getString(R.string.err_files_io, e.message))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw PrintException(getString(R.string.err_files_generic, e.message))
+                }
             }
-            document.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            throw PrintException(getString(R.string.err_files_io, e.message));
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw PrintException(getString(R.string.err_files_generic, e.message));
         }
-        /* */
 
         when (connection) {
             "network_printer" -> {

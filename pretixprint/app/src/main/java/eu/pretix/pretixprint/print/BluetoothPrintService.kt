@@ -1,18 +1,11 @@
 package eu.pretix.pretixprint.print
 
-import android.app.*
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import android.content.Intent
-import android.os.Build.VERSION.SDK_INT
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.ui.SettingsActivity
-import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
-import org.json.JSONObject
 import java.io.IOException
-import android.os.*
 import android.util.Log
 import eu.pretix.pretixprint.bt.BtEvent
 import eu.pretix.pretixprint.bt.BtService
@@ -26,28 +19,19 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
     var lastEvent : BtEvent? = null
     var currentState : State = State.Initial
         private set
-    lateinit var escpos : List<Byte>
+    lateinit var escpos : ByteArray
 
     override fun print(tmpfile: File) {
         val prefs = context.defaultSharedPreferences
 
-        throw PrintException(context.applicationContext.getString(R.string.err_cups_io, "Test"))
-        /*
         try {
-            val dataInputStream = context.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
-            val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
-
-            val layout = jsonData.getJSONArray("__layout")
-            val positions = jsonData.getJSONArray("positions")
-
-            escpos = ESCPOSRenderer(layout, positions, ctx).render()
-
-            val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(prefs.getString("hardware_receiptprinter_ip", null))
+            val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(prefs.getString("hardware_${type}printer_ip", null))
+            escpos = tmpfile.readBytes()
 
             EventBus.getDefault().register(this)
             goToState(State.Idle)
 
-            BtService.connect(this.baseContext, device.address)
+            BtService.connect(context, device.address)
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_files_io, e.message));
@@ -55,7 +39,6 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_files_generic, e.message));
         }
-        */
     }
 
     private fun goToState(state: State) {
@@ -73,7 +56,10 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
             }
             State.Paired -> {
                 Log.d("ESCPOSPRINT", "Paired")
-                //BtService.send(this.baseContext, escpos)
+                if (escpos.isNotEmpty()) {
+                    BtService.send(context, escpos)
+                    escpos = ByteArray(0)
+                }
             }
             State.Setup -> {
                 Log.d("ESCPOSPRINT", "Setup")
