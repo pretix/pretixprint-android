@@ -63,7 +63,8 @@ class PrintService : IntentService("PrintService") {
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action)
-        val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
+        //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
+        val renderer = if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"}
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 

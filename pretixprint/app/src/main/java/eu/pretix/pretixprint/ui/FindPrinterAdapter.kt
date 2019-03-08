@@ -41,7 +41,8 @@ class FindPrinterAdapter(fm: FragmentManager, type: String, context: Context) : 
         return when (type) {
             "receipt" -> {
                 listOf(
-                        R.string.bluetooth_printer
+                        R.string.bluetooth_printer,
+                        R.string.network_printer
                 )
             }
             else -> {
