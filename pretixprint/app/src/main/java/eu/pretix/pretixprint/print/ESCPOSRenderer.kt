@@ -156,6 +156,9 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
                     mode()
                 }
             }
+            "emphasize" -> {
+                emphasize(layoutLine.getBoolean("on"))
+            }
         }
     }
 
@@ -305,6 +308,17 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
         out.add('V'.toByte())
 
         if (partial) {
+            out.add(1)
+        } else {
+            out.add(0)
+        }
+    }
+
+    private fun emphasize(on : Boolean) {
+        out.add(ESC)
+        out.add('E'.toByte())
+
+        if (on) {
             out.add(1)
         } else {
             out.add(0)
