@@ -9,7 +9,7 @@
     <string name="settings_label_about">About this app</string>
     <string name="settings_label_version">Version</string>
     <string name="settings_label_licenses">Author and licenses</string>
-    <string name="settings_label_find">Find a printer</string>
+    <string name="settings_label_find">Configure printer</string>
     <string name="settings_label_ipaddress">IP address</string>
     <string name="settings_label_port">Port</string>
     <string name="settings_label_printername">Printer name</string>
@@ -50,6 +50,7 @@
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
     <string name="field_label_macaddress">MAC address</string>
     <string name="err_not_supported">Not supported</string>
+    <string name="btn_auto">Auto-detected</string>
     <string-array name="printer_modes">
         <item>CUPS/IPP</item>
         <item>FGL</item>

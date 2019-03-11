@@ -12,10 +12,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.bt.*
+import eu.pretix.pretixprint.bt.BtEvent
+import eu.pretix.pretixprint.bt.BtService
+import eu.pretix.pretixprint.bt.State
 import kotlinx.android.synthetic.main.activity_find_bluetooth.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -23,28 +23,13 @@ import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.progressDialog
-
-class BluetoothServiceAdapter(val items: Array<BluetoothDevice>, val fragment: FindBluetoothPrinterFragment) : RecyclerView.Adapter<ViewHolder>() {
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(fragment.context).inflate(R.layout.item_networkservice, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvName.text = "%s (%s)".format(items[position].name, items[position].address)
-        holder.itemView.setOnClickListener {
-            fragment.onDevicePicked(items[position])
-        }
-    }
-}
+import org.jetbrains.anko.support.v4.selector
 
 class FindBluetoothPrinterFragment : PrinterFragment() {
     var lastEvent: BtEvent? = null
     var currentState: State = State.Initial
         private set
+    var devices: Array<BluetoothDevice> = emptyArray()
 
     companion object {
         private const val REQUEST_CODE_ENABLE_BLUETOOTH = 101
@@ -85,13 +70,22 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
             }
         }
 
-        when(currentState) {
+        when (currentState) {
             State.Paired -> activity!!.applicationContext.stopService(Intent(activity!!.applicationContext, BtService::class.java))
             else -> queuePairedDevices()
         }
 
         EventBus.getDefault().register(this)
         goToState(State.Idle)
+
+        btnAuto.setOnClickListener {
+            val devices = this.devices
+            selector(getString(R.string.headline_found_bluetooth_printers), devices.map {
+                "%s (%s)".format(it.name, it.address)
+            }) { dialogInterface, i ->
+                onDevicePicked(devices[i])
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -127,7 +121,7 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
 
     private fun applyState(state: State) {
         @Suppress("NON_EXHAUSTIVE_WHEN")
-        when(state) {
+        when (state) {
             State.Idle -> {
                 Log.d("ESCPOSPRINT", "Idle")
             }
@@ -140,7 +134,7 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
         }
     }
 
-    fun ensureBluetoothEnabled() : Boolean {
+    fun ensureBluetoothEnabled(): Boolean {
         if (!(BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false)) {
             val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(intent, REQUEST_CODE_ENABLE_BLUETOOTH);
@@ -151,9 +145,7 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
 
     fun queuePairedDevices() {
         if (ensureBluetoothEnabled()) {
-            val devices = BluetoothAdapter.getDefaultAdapter().bondedDevices.toTypedArray()
-            recyclerView.layoutManager = LinearLayoutManager(this.context)
-            recyclerView.adapter = BluetoothServiceAdapter(devices, this)
+            devices = BluetoothAdapter.getDefaultAdapter().bondedDevices.toTypedArray()
         }
     }
 
@@ -167,7 +159,7 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onBtEvent(event: BtEvent) {
-        if (currentState == State.Paired){
+        if (currentState == State.Paired) {
 
         }
     }

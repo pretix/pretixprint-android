@@ -8,16 +8,16 @@ import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.socket.FGLNetworkPrinter
-import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
+import eu.pretix.pretixprint.socket.FGLNetworkPrinter
 import eu.pretix.pretixprint.socket.PlaintextNetworkPrinter
+import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import kotlinx.android.synthetic.main.activity_find_network.*
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
@@ -27,26 +27,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-class NetworkServiceAdapter(val items: List<NsdServiceInfo>, val fragment: FindNetworkPrinterFragment) : RecyclerView.Adapter<ViewHolder>() {
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(fragment.context).inflate(R.layout.item_networkservice, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.tvName.text = items.get(position).serviceName
-        holder.itemView.setOnClickListener {
-            fragment.selectService(items.get(position))
-        }
-    }
-}
-
-class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val tvName = view.findViewById<TextView>(R.id.textView)
-}
 
 class FindNetworkPrinterFragment : PrinterFragment() {
     companion object {
@@ -92,9 +72,6 @@ class FindNetworkPrinterFragment : PrinterFragment() {
     private val discoveryListener = object : NsdManager.DiscoveryListener {
         override fun onDiscoveryStarted(regType: String) {
             Log.d(TAG, "Service discovery started")
-            runOnUiThread {
-                progressBar.visibility = View.VISIBLE
-            }
         }
 
         override fun onServiceFound(service: NsdServiceInfo) {
@@ -116,7 +93,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                 Log.d(TAG, "Unknown service type: ${service.serviceType}")
             }
             runOnUiThread {
-                recyclerView.adapter?.notifyDataSetChanged()
+                btnAuto.isEnabled = services.isNotEmpty()
             }
         }
 
@@ -132,14 +109,14 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                 }
             }
             runOnUiThread {
-                recyclerView.adapter?.notifyDataSetChanged()
+                btnAuto.isEnabled = services.isNotEmpty()
             }
         }
 
         override fun onDiscoveryStopped(serviceType: String) {
             Log.i(TAG, "Discovery stopped: $serviceType")
             runOnUiThread {
-                progressBar.visibility = View.INVISIBLE
+                btnAuto.isEnabled = services.isNotEmpty()
             }
         }
 
@@ -169,9 +146,6 @@ class FindNetworkPrinterFragment : PrinterFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        recyclerView.layoutManager = LinearLayoutManager(this.context)
-        recyclerView.adapter = NetworkServiceAdapter(services, this)
-
         editText_ip.setText(defaultSharedPreferences.getString("hardware_${getType()}printer_ip", ""))
         editText_port.setText(defaultSharedPreferences.getString("hardware_${getType()}printer_port", ""))
         editText_dpi.setText(defaultSharedPreferences.getString("hardware_${getType()}printer_dpi", ""))
@@ -194,6 +168,13 @@ class FindNetworkPrinterFragment : PrinterFragment() {
         button2.setOnClickListener {
             if (validate()) {
                 testPrinter()
+            }
+        }
+
+        btnAuto.setOnClickListener {
+            val services = ArrayList(this.services)
+            selector(getString(R.string.headline_found_network_printers), services.map { it.serviceName }) { dialogInterface, i ->
+                selectService(services[i])
             }
         }
     }
