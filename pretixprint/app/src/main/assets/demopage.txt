@@ -1,0 +1,2 @@
+This is a pretixPRINT demo printing.
+If you can read this, printing works!

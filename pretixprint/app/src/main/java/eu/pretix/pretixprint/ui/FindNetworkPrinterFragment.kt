@@ -17,6 +17,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.socket.FGLNetworkPrinter
 import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import eu.pretix.pretixprint.print.getPrinter
+import eu.pretix.pretixprint.socket.PlaintextNetworkPrinter
 import kotlinx.android.synthetic.main.activity_find_network.*
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
@@ -275,7 +276,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                         return@doAsync
                     }
                 }
-                else -> {
+                "CUPS/IPP" -> {
                     var cp: CupsPrinter? = null
                     try {
                         cp = getPrinter(
@@ -312,6 +313,46 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                             }
                         }
                     }
+                }
+                "RAW" -> {
+                    try {
+                        val file = File(ctx.cacheDir, "demopage.txt")
+                        if (file.exists()) {
+                            file.delete()
+                        }
+                        val asset = ctx.assets.open("demopage.txt")
+                        val output = FileOutputStream(file)
+                        val buffer = ByteArray(1024)
+                        var size = asset.read(buffer)
+                        while (size != -1) {
+                            output.write(buffer, 0, size)
+                            size = asset.read(buffer)
+                        }
+                        asset.close()
+                        output.close()
+
+                        PlaintextNetworkPrinter(
+                                editText_ip.text.toString(),
+                                Integer.valueOf(editText_port.text.toString()),
+                                Integer.valueOf(editText_dpi.text.toString())
+                        ).send(file)
+                        file.delete()
+
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(R.string.test_success)
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        runOnUiThread {
+                            pgTest?.dismiss()
+                            toast(getString(R.string.err_job_io, e.message))
+                        }
+                        return@doAsync
+                    }
+                }
+                else -> {
+                    toast("Connection test unsupported")
                 }
             }
         }
