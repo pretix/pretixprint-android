@@ -63,7 +63,7 @@ class NetworkPrintService(context: Context, type: String = "ticket", mode: Strin
                 e.printStackTrace()
                 throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message));
             }
-        } else if (mode == "RAW") {
+        } else if (mode == "ESC/POS") {
             try {
                 PlaintextNetworkPrinter(
                         prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),

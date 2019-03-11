@@ -46,10 +46,6 @@
     <string name="dismiss">Schließen</string>
     <string name="field_label_macaddress">MAC Addresse</string>
     <string-array name="printer_modes">
-        <item>CUPS/IPP</item>
-        <item>FGL</item>
-        <item>SLCS</item>
-        <item>RAW</item>
     </string-array>
     <string name="bluetooth_printer">Bluetooth Drucker</string>
     <string name="err_bluetooth_not_available">Bluetooth ist nicht verfügbar</string>

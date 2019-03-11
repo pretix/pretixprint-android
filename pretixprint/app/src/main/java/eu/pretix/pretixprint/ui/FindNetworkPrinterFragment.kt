@@ -147,7 +147,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
         super.onActivityCreated(savedInstanceState)
 
         if (getType() == "receipt") {
-            MODES = arrayOf("RAW")
+            MODES = arrayOf("ESC/POS")
         } else {
             MODES = arrayOf("CUPS/IPP", "FGL", "SLCS")
         }
@@ -301,7 +301,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                         }
                     }
                 }
-                "RAW" -> {
+                "ESC/POS" -> {
                     try {
                         val file = File(ctx.cacheDir, "demopage.txt")
                         if (file.exists()) {

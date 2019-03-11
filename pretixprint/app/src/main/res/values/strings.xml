@@ -52,9 +52,5 @@
     <string name="err_not_supported">Not supported</string>
     <string name="btn_auto">Auto-detected</string>
     <string-array name="printer_modes">
-        <item>CUPS/IPP</item>
-        <item>FGL</item>
-        <item>SLCS</item>
-        <item>RAW</item>
     </string-array>
 </resources>
