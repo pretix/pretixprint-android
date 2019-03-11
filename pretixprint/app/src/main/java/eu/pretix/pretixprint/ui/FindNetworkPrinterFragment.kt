@@ -32,11 +32,11 @@ class FindNetworkPrinterFragment : PrinterFragment() {
     companion object {
         val TAG = "FindNWPrinterActivity"
         val SERVICE_TYPE = "_ipp._tcp."
-        val MODES = arrayOf("CUPS/IPP", "FGL", "SLCS", "RAW")
     }
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
     private lateinit var nsdManager: NsdManager
+    private lateinit var MODES: Array<String>
     private var pgResolve: ProgressDialog? = null
     private var pgTest: ProgressDialog? = null
 
@@ -145,6 +145,12 @@ class FindNetworkPrinterFragment : PrinterFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        if (getType() == "receipt") {
+            MODES = arrayOf("RAW")
+        } else {
+            MODES = arrayOf("CUPS/IPP", "FGL", "SLCS")
+        }
 
         editText_ip.setText(defaultSharedPreferences.getString("hardware_${getType()}printer_ip", ""))
         editText_port.setText(defaultSharedPreferences.getString("hardware_${getType()}printer_port", ""))
