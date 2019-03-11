@@ -193,6 +193,10 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
                 text += " ".repeat(layoutLine.getInt("padding"))
             }
 
+            if (layoutLine.has("uppercase")) {
+                text = text.toUpperCase()
+            }
+
             if (text.isNotBlank()) {
                 return text
             }
