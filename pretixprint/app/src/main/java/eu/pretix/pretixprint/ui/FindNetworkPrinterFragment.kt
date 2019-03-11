@@ -353,7 +353,7 @@ class FindNetworkPrinterFragment : PrinterFragment() {
             return false
         }
         val mode = MODES[spinner_mode.selectedItemPosition]
-        if (mode == "FQL") {
+        if (mode == "FGL" || mode == "SLCS") {
             if (TextUtils.isEmpty(editText_dpi.text)) {
                 editText_dpi.error = getString(R.string.err_field_required)
                 return false
