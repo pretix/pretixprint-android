@@ -126,7 +126,7 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
 
                     splitline(
                             json.getString("itemvar"),
-                            position.getString("price") + " " + (taxindex + 65).toChar()
+                            DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
                     )
                 }
             }
