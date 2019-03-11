@@ -19,6 +19,12 @@
 
     <PreferenceCategory android:title="@string/settings_label_receiptprinter">
         <Preference android:key="hardware_receiptprinter_find" android:title="@string/settings_label_find"/>
+        <ListPreference
+            android:key="hardware_receiptprinter_cpl"
+            android:title="@string/settings_label_receiptwidth"
+            android:entries="@array/receipt_width"
+            android:entryValues="@array/receipt_cpl"
+            />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_about">

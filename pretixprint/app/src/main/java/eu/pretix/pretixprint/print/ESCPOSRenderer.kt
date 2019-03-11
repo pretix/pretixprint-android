@@ -4,7 +4,7 @@ import android.content.Context
 import org.json.JSONObject
 import java.text.DecimalFormat
 
-class ESCPOSRenderer(private val order: JSONObject, private val ctx: Context) {
+class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
     var taxrates = mutableListOf<String>()
     var taxvalues = mutableListOf<Double>()
@@ -16,7 +16,6 @@ class ESCPOSRenderer(private val order: JSONObject, private val ctx: Context) {
         const val LEFT : String = "left"
         const val CENTER : String = "center"
         const val RIGHT : String = "right"
-        const val charsPerLine : Int = 32 // 60mm: 32cpl, 80mm: 48cpl
         enum class CharacterCodeTable(val codeTable: Int) {
             PC437(0),
             Katakana(1),

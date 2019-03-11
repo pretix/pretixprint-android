@@ -2,6 +2,7 @@ package eu.pretix.pretixprint.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.preference.ListPreference
 import android.preference.PreferenceFragment
 import android.text.Html
 import android.text.TextUtils
@@ -36,6 +37,13 @@ class SettingsFragment : PreferenceFragment() {
                 return@setOnPreferenceClickListener true
             }
         }
+
+        findPreference("hardware_receiptprinter_cpl").setOnPreferenceChangeListener { preference, newValue ->
+            val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
+            findPreference("hardware_receiptprinter_cpl").summary = cpl.entries[cpl.entryValues.indexOf(newValue)]
+            return@setOnPreferenceChangeListener true
+        }
+
         findPreference("licenses").setOnPreferenceClickListener {
             asset_dialog(R.raw.about, R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
@@ -59,6 +67,9 @@ class SettingsFragment : PreferenceFragment() {
                 findPreference("hardware_${type}printer_find").summary = ""
             }
         }
+
+        val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
+        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) { cpl.entries[0] } else { cpl.entry }
     }
 
     private fun asset_dialog(@RawRes htmlRes: Int, @StringRes title: Int) {

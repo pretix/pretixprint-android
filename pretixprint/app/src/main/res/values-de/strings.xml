@@ -53,4 +53,5 @@
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
     <string name="err_not_supported">Nicht unterstüzt</string>
+    <string name="settings_label_receiptwidth">Breite des Belegpapiers</string>
 </resources>
