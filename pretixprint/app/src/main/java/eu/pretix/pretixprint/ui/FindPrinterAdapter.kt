@@ -37,6 +37,17 @@ class FindPrinterAdapter(fm: FragmentManager, type: String, context: Context) : 
         return context.getString(getConnectionTechnologies()[position])
     }
 
+    fun getPositionOf(technology: Int): Int {
+        var i = 0
+        for (tech in getConnectionTechnologies()) {
+            if (tech == technology) {
+                return i
+            }
+            i++
+        }
+        return -1
+    }
+
     private fun getConnectionTechnologies() : List<Int> {
         return when (type) {
             "receipt" -> {

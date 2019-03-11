@@ -8,6 +8,7 @@ import androidx.core.app.NavUtils
 import androidx.viewpager.widget.ViewPager
 import eu.pretix.pretixprint.R
 import kotlinx.android.synthetic.main.activity_find.*
+import org.jetbrains.anko.defaultSharedPreferences
 
 class FindPrinterActivity : AppCompatActivity() {
     companion object {
@@ -30,6 +31,12 @@ class FindPrinterActivity : AppCompatActivity() {
         viewPager = pager
 
         tabs.setupWithViewPager(pager)
+
+        val current_conn = defaultSharedPreferences.getString("hardware_${type}printer_connection", null)
+        if (current_conn != null) {
+            val res = resources.getIdentifier(current_conn, "string", packageName)
+            viewPager.currentItem = fragmentAdapter.getPositionOf(res)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
