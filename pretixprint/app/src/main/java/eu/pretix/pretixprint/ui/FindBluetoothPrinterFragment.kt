@@ -147,6 +147,7 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
         if (ensureBluetoothEnabled()) {
             devices = BluetoothAdapter.getDefaultAdapter().bondedDevices.toTypedArray()
         }
+        btnAuto.isEnabled = devices.isNotEmpty()
     }
 
     fun onDevicePicked(device: BluetoothDevice) {
