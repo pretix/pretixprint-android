@@ -16,14 +16,16 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.bt.BtEvent
 import eu.pretix.pretixprint.bt.BtService
 import eu.pretix.pretixprint.bt.State
+import eu.pretix.pretixprint.print.BluetoothPrintService
 import kotlinx.android.synthetic.main.activity_find_bluetooth.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.progressDialog
-import org.jetbrains.anko.support.v4.selector
+import org.jetbrains.anko.support.v4.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class FindBluetoothPrinterFragment : PrinterFragment() {
     var lastEvent: BtEvent? = null
@@ -178,6 +180,38 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
             isIndeterminate = true
         }
         doAsync {
+            try {
+                val file = File(ctx.cacheDir, "demopage.txt")
+                if (file.exists()) {
+                    file.delete()
+                }
+                val asset = ctx.assets.open("demopage.txt")
+                val output = FileOutputStream(file)
+                val buffer = ByteArray(1024)
+                var size = asset.read(buffer)
+                while (size != -1) {
+                    output.write(buffer, 0, size)
+                    size = asset.read(buffer)
+                }
+                asset.close()
+                output.close()
+
+                BluetoothPrintService(ctx, getType()).testPrinter(file, editText_mac.text.toString())
+
+                file.delete()
+
+                runOnUiThread {
+                    pgTest?.dismiss()
+                    toast(R.string.test_success)
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                runOnUiThread {
+                    pgTest?.dismiss()
+                    toast(getString(R.string.err_job_io, e.message))
+                }
+                return@doAsync
+            }
         }
     }
 

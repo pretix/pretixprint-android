@@ -41,6 +41,20 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
         }
     }
 
+    fun testPrinter(tmpfile: File, printerMAC: String) {
+        val prefs = context.defaultSharedPreferences
+        val editor = prefs.edit()
+        val oldMAC = prefs.getString("hardware_${type}printer_ip", null)
+
+        editor.putString("hardware_${type}printer_ip", printerMAC)
+        editor.apply()
+
+        print(tmpfile)
+
+        editor.putString("hardware_${type}printer_ip", oldMAC)
+        editor.apply()
+    }
+
     private fun goToState(state: State) {
         if (currentState != state) {
             currentState = state
