@@ -1,10 +1,11 @@
 package eu.pretix.pretixprint.print
 
 import android.content.Context
+import org.json.JSONException
 import org.json.JSONObject
 import java.text.DecimalFormat
 
-class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
+class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
     var taxrates = mutableListOf<String>()
     var taxvalues = mutableListOf<Double>()
@@ -85,14 +86,13 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
         characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
         internationalCharacterSet(InternationalCharacterSet.Germany.country)
 
-        val layout = order.getJSONArray("__layout")
+        val layout = receipt.getJSONArray("__layout")
 
         for (i in 0..(layout.length() - 1)) {
             val layoutLine = layout.getJSONObject(i)
             renderline(layoutLine)
         }
 
-        //newline(3)
         newline(2)
         cut()
         return out.toByteArray()
@@ -114,18 +114,17 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
                 }
             }
             "orderlines" -> {
-                val positions = order.getJSONArray("positions")
+                val positions = receipt.getJSONArray("positions")
 
                 for (i in 0..(positions.length() - 1)) {
                     val position = positions.getJSONObject(i)
-                    val json = position.getJSONObject("pdf_data")
 
                     processTaxes()
 
                     val taxindex = taxrates.indexOf(position.getString("tax_rate"))
 
                     splitline(
-                            json.getString("itemvar"),
+                            position.getString("sale_text"),
                             DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
                     )
                 }
@@ -135,7 +134,7 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
 
                 for (i in 0..(taxrates.count() -1)) {
                     splitline(
-                            (i + 65).toChar() + " " + taxrates[i] + "%:",
+                            (i + 65).toChar() + " " + DecimalFormat("0.00").format(taxrates[i].toDouble()) + "%:",
                             DecimalFormat("0.00").format(taxvalues[i])
                     )
                 }
@@ -149,7 +148,7 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
                 )
             }
             "testmode" -> {
-                if (order.getBoolean("testmode")) {
+                if (receipt.getBoolean("testmode")) {
                     mode(doubleheight = true, doublewidth = true, underline = true, emph = true)
                     text("TESTMODE", CENTER)
                     newline(2)
@@ -164,7 +163,7 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
 
     private fun processTaxes() {
         if (taxrates.isEmpty()) {
-            val positions = order.getJSONArray("positions")
+            val positions = receipt.getJSONArray("positions")
             for (i in 0..(positions.length() - 1)) {
                 val position = positions.getJSONObject(i)
 
@@ -181,12 +180,39 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
 
     private fun getText(layoutLine : JSONObject): String {
         if (layoutLine.has("content")) {
-            var text : String
+            var text: String
             val content = layoutLine.getString("content").split("_")
-            if (content[0] == "invoice") {
-                text = order.getJSONObject("__invoicesettings").getString(layoutLine.getString("content"))
-            } else {
-                text = order.getString(layoutLine.getString("content"))
+
+            text = when (content[0]) {
+                "invoice" -> {
+                   receipt.getJSONObject("__invoicesettings").getString(layoutLine.getString("content"))
+                }
+                "calc" -> {
+                    when (layoutLine.getString("content")) {
+                        "calc_total" -> {
+                            val positions = receipt.getJSONArray("positions")
+                            var total = 0.00
+
+                            for (i in 0..(positions.length() - 1)) {
+                                val position = positions.getJSONObject(i)
+
+                                total = total.plus(position.getDouble("price"))
+                            }
+
+                            DecimalFormat("0.00").format(total)
+                        }
+                        else -> {
+                            receipt.getString(layoutLine.getString("content"))
+                        }
+                    }
+                }
+                else -> {
+                    try {
+                        receipt.getString(layoutLine.getString("content"))
+                    } catch (ex: JSONException) {
+                        receipt.getString(layoutLine.getString("text"))
+                    }
+                }
             }
 
             if (layoutLine.has("padding")) {
@@ -290,7 +316,9 @@ class ESCPOSRenderer(private val order: JSONObject, private val charsPerLine : I
             out.add(0)
         }
 
-        for (char in text) {
+        var printText = text.replace("–", "-")
+
+        for (char in printText) {
             out.add(char.toByte())
         }
     }

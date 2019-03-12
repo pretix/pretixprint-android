@@ -77,7 +77,7 @@ class PrintService : IntentService("PrintService") {
 
         when (renderer) {
             "ESCPOS" -> {
-                tmpfile = File.createTempFile("print_" + jsonData.getString("code"), "escpos", this.cacheDir)
+                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id"), "escpos", this.cacheDir)
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
