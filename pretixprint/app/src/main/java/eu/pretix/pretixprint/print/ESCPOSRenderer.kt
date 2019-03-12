@@ -3,7 +3,10 @@ package eu.pretix.pretixprint.print
 import android.content.Context
 import org.json.JSONException
 import org.json.JSONObject
+import java.text.DateFormat
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
@@ -207,10 +210,19 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                     }
                 }
                 else -> {
-                    try {
-                        receipt.getString(layoutLine.getString("content"))
-                    } catch (ex: JSONException) {
-                        receipt.getString(layoutLine.getString("text"))
+                    if (layoutLine.getString("content").startsWith("datetime")) {
+                        DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
+                                .format(
+                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").parse(
+                                                receipt.getString(layoutLine.getString("content"))
+                                        )
+                                )
+                    } else {
+                        try {
+                            receipt.getString(layoutLine.getString("content"))
+                        } catch (ex: JSONException) {
+                            receipt.getString(layoutLine.getString("text"))
+                        }
                     }
                 }
             }
