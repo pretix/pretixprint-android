@@ -196,7 +196,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         newline(2)
                         text("-".repeat(charsPerLine), CENTER); newline()
                     }
-                    else -> {
+                    "cash" -> {
                         text(ctx.getString(R.string.receiptline_paidcash))
                         newline()
                     }
