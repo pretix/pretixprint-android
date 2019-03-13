@@ -142,6 +142,51 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                     )
                 }
             }
+            "paymentlines" -> {
+                when (receipt.getString("payment_type")) {
+                    "sumup", "card" -> {
+                        val payment_data = receipt.getJSONObject("payment_data")
+                        text("-".repeat(charsPerLine), CENTER)
+                        newline(2)
+                        emphasize(true)
+                        text("K-U-N-D-E-N-B-E-L-E-G", CENTER);
+                        newline(2)
+                        emphasize(false)
+                        splitline("Händler-ID:", payment_data.getString("merchant_code"))
+                        splitline("Transaktion-ID:", payment_data.getString("tx_code"))
+                        //splitline("Terminal-ID:", payment_data.getString(""))
+                        //splitline("Beleg-Nr:", payment_data.getString(""))
+                        newline()
+                        text(payment_data.getString("card_type")); newline()
+                        text("**** **** **** " + payment_data.getString("last4")); newline()
+                        //text("Max Mustermann"); newline()
+                        text(payment_data.getString("entry_mode"))
+                        newline(2)
+                        mode(doubleheight = true, doublewidth = true)
+                        text("Zahlungsbeleg", CENTER); newline()
+                        mode()
+                        text(getDate(receipt.getString("datetime_closed")), CENTER)
+                        newline(2)
+                        emphasize(true)
+                        splitline("Betrag", receipt.getString("currency") + " " + DecimalFormat("0.00").format(calcTotal()))
+                        newline(2)
+                        emphasize(false)
+                        text("ICH BESTÄTIGE DEN OBEN GENANNTEN GESAMTBETRAG ENTSPRECHEND DER VEREINBARUNG DES KARTENHERAUSGEBERS ZU ZAHLEN.", CENTER)
+                        newline(2)
+                        mode(doubleheight = true, doublewidth = true)
+                        text(payment_data.getString("status"), CENTER)
+                        newline(2)
+                        mode()
+                        text("BITTE BEWAHREN SIE DIESEN BELEG AUF.", CENTER)
+                        newline(2)
+                        text("-".repeat(charsPerLine), CENTER); newline()
+                    }
+                    else -> {
+                        text("Betrag BAR erhalten.")
+                        newline()
+                    }
+                }
+            }
             "splitline" -> {
                 val splitLines = layoutLine.getJSONArray("content")
 
@@ -193,16 +238,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                 "calc" -> {
                     when (layoutLine.getString("content")) {
                         "calc_total" -> {
-                            val positions = receipt.getJSONArray("positions")
-                            var total = 0.00
-
-                            for (i in 0..(positions.length() - 1)) {
-                                val position = positions.getJSONObject(i)
-
-                                total = total.plus(position.getDouble("price"))
-                            }
-
-                            DecimalFormat("0.00").format(total)
+                            DecimalFormat("0.00").format(calcTotal())
                         }
                         else -> {
                             receipt.getString(layoutLine.getString("content"))
@@ -211,12 +247,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                 }
                 else -> {
                     if (layoutLine.getString("content").startsWith("datetime")) {
-                        DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
-                                .format(
-                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").parse(
-                                                receipt.getString(layoutLine.getString("content"))
-                                        )
-                                )
+                        getDate(receipt.getString(layoutLine.getString("content")))
                     } else {
                         try {
                             receipt.getString(layoutLine.getString("content"))
@@ -241,6 +272,28 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         }
 
         return layoutLine.getString("text")
+    }
+
+    private fun getDate(date: String) : String {
+        return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
+            .format(
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").parse(
+                            date
+                    )
+            )
+    }
+
+    private fun calcTotal() : Double {
+        val positions = receipt.getJSONArray("positions")
+        var total = 0.00
+
+        for (i in 0..(positions.length() - 1)) {
+            val position = positions.getJSONObject(i)
+
+            total = total.plus(position.getDouble("price"))
+        }
+
+        return total
     }
 
     private fun splitline(leftText : String, rightText: String, padding: Int = 2) {
