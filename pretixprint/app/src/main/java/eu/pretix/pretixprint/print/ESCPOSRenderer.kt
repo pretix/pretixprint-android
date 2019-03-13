@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.print
 
 import android.content.Context
+import eu.pretix.pretixprint.R
 import org.json.JSONException
 import org.json.JSONObject
 import java.text.DateFormat
@@ -130,6 +131,19 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                             position.getString("sale_text"),
                             DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
                     )
+                    newline()
+
+                    if (position.getBoolean("canceled")) {
+                        emphasize(true)
+                        text(ctx.getString(R.string.receiptline_cancellation)); newline()
+                        emphasize(false)
+
+                        splitline(
+                                position.getString("sale_text"),
+                                "- " + DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
+                        )
+                        newline()
+                    }
                 }
             }
             "taxlines" -> {
@@ -140,6 +154,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                             (i + 65).toChar() + " " + DecimalFormat("0.00").format(taxrates[i].toDouble()) + "%:",
                             DecimalFormat("0.00").format(taxvalues[i])
                     )
+                    newline()
                 }
             }
             "paymentlines" -> {
@@ -149,13 +164,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         text("-".repeat(charsPerLine), CENTER)
                         newline(2)
                         emphasize(true)
-                        text("K-U-N-D-E-N-B-E-L-E-G", CENTER);
+                        text(ctx.getString(R.string.receiptline_customerreceipt), CENTER);
                         newline(2)
                         emphasize(false)
-                        splitline("Händler-ID:", payment_data.getString("merchant_code"))
-                        splitline("Transaktion-ID:", payment_data.getString("tx_code"))
-                        //splitline("Terminal-ID:", payment_data.getString(""))
-                        //splitline("Beleg-Nr:", payment_data.getString(""))
+                        splitline(ctx.getString(R.string.receiptline_merchantid), payment_data.getString("merchant_code")); newline()
+                        splitline(ctx.getString(R.string.receiptline_transactionid), payment_data.getString("tx_code")); newline()
+                        //splitline(ctx.getString(R.string.receiptline_terminalid), payment_data.getString("")); newline()
+                        //splitline(ctx.getString(R.string.receiptline_receiptnumber), payment_data.getString("")); newline()
                         newline()
                         text(payment_data.getString("card_type")); newline()
                         text("**** **** **** " + payment_data.getString("last4")); newline()
@@ -163,26 +178,26 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         text(payment_data.getString("entry_mode"))
                         newline(2)
                         mode(doubleheight = true, doublewidth = true)
-                        text("Zahlungsbeleg", CENTER); newline()
+                        text(ctx.getString(R.string.receiptline_paymentreceipt), CENTER); newline()
                         mode()
                         text(getDate(receipt.getString("datetime_closed")), CENTER)
                         newline(2)
                         emphasize(true)
-                        splitline("Betrag", receipt.getString("currency") + " " + DecimalFormat("0.00").format(calcTotal()))
+                        splitline(ctx.getString(R.string.receiptline_amount), receipt.getString("currency") + " " + DecimalFormat("0.00").format(calcTotal())); newline()
                         newline(2)
                         emphasize(false)
-                        text("ICH BESTÄTIGE DEN OBEN GENANNTEN GESAMTBETRAG ENTSPRECHEND DER VEREINBARUNG DES KARTENHERAUSGEBERS ZU ZAHLEN.", CENTER)
+                        text(ctx.getString(R.string.receiptline_cardissuerpaymenttext), CENTER)
                         newline(2)
                         mode(doubleheight = true, doublewidth = true)
                         text(payment_data.getString("status"), CENTER)
                         newline(2)
                         mode()
-                        text("BITTE BEWAHREN SIE DIESEN BELEG AUF.", CENTER)
+                        text(ctx.getString(R.string.receiptline_keepreceipt), CENTER)
                         newline(2)
                         text("-".repeat(charsPerLine), CENTER); newline()
                     }
                     else -> {
-                        text("Betrag BAR erhalten.")
+                        text(ctx.getString(R.string.receiptline_paidcash))
                         newline()
                     }
                 }
@@ -217,10 +232,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
 
                 if (position.getString("tax_rate") !in taxrates) {
                     taxrates.add(position.getString("tax_rate"))
-                    taxvalues.add(position.getDouble("tax_value"))
-                } else {
-                    val taxindex = taxrates.indexOf(position.getString("tax_rate"))
-                    taxvalues[taxindex].plus(position.getDouble("tax_value"))
+                    taxvalues.add(0.00)
+                }
+
+                val taxindex = taxrates.indexOf(position.getString("tax_rate"))
+
+                if (!(position.getBoolean("canceled"))) {
+                    taxvalues[taxindex] = taxvalues[taxindex].plus(position.getDouble("tax_value"))
                 }
             }
         }
@@ -290,7 +308,9 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         for (i in 0..(positions.length() - 1)) {
             val position = positions.getJSONObject(i)
 
-            total = total.plus(position.getDouble("price"))
+            if (!(position.getBoolean("canceled"))) {
+                total = total.plus(position.getDouble("price"))
+            }
         }
 
         return total
@@ -323,7 +343,6 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         }
 
         text(leftTextList.last() + " ".repeat(charsPerLine - leftTextList.last().length - rightText.length) + rightText, LEFT)
-        newline()
     }
 
     private fun init() {
