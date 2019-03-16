@@ -41,7 +41,7 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
                 }
             }
         }
-        ostream.write("<p>\n".toByteArray())
+        ostream.write("<q>\n".toByteArray())
         return ostream.toByteArray()
     }
 }
