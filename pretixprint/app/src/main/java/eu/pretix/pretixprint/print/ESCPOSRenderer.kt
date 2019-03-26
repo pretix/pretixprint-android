@@ -127,6 +127,11 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
 
                     val taxindex = taxrates.indexOf(position.getString("tax_rate"))
 
+                    if (position.optString("type", "") == "PRODUCT_RETURN") {
+                        emphasize(true)
+                        text(ctx.getString(R.string.receiptline_return)); newline()
+                        emphasize(false)
+                    }
                     splitline(
                             position.getString("sale_text"),
                             DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
@@ -196,6 +201,10 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         newline(2)
                         text("-".repeat(charsPerLine), CENTER); newline()
                     }
+                    "external" -> {
+                        text(ctx.getString(R.string.receiptline_paidcard))
+                        newline()
+                    }
                     "cash" -> {
                         text(ctx.getString(R.string.receiptline_paidcash))
                         newline()
@@ -210,10 +219,10 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         getText(splitLines.getJSONObject(1))
                 )
             }
-            "testmode" -> {
-                if (receipt.getBoolean("testmode")) {
+            "headline" -> {
+                if (receipt.getBoolean("printed")) {
                     mode(doubleheight = true, doublewidth = true, underline = true, emph = true)
-                    text("TESTMODE", CENTER)
+                    text(ctx.getString(R.string.receiptline_copy), CENTER)
                     newline(2)
                     mode()
                 }
@@ -247,30 +256,40 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     private fun getText(layoutLine : JSONObject): String {
         if (layoutLine.has("content")) {
             var text: String
+            val fullContent = layoutLine.getString("content")
             val content = layoutLine.getString("content").split("_")
 
             text = when (content[0]) {
                 "invoice" -> {
-                   receipt.getJSONObject("__invoicesettings").getString(layoutLine.getString("content"))
+                    val invoiceSettings = receipt.getJSONObject("__invoicesettings")
+                    if (invoiceSettings.isNull(fullContent)) {
+                        ""
+                    } else {
+                        invoiceSettings.optString(fullContent, "")
+                    }
                 }
                 "calc" -> {
-                    when (layoutLine.getString("content")) {
+                    when (fullContent) {
                         "calc_total" -> {
                             DecimalFormat("0.00").format(calcTotal())
                         }
                         else -> {
-                            receipt.getString(layoutLine.getString("content"))
+                            receipt.optString(fullContent, "")
                         }
                     }
                 }
                 else -> {
-                    if (layoutLine.getString("content").startsWith("datetime")) {
-                        getDate(receipt.getString(layoutLine.getString("content")))
+                    if (fullContent.startsWith("datetime")) {
+                        getDate(receipt.getString(fullContent))
                     } else {
-                        try {
-                            receipt.getString(layoutLine.getString("content"))
-                        } catch (ex: JSONException) {
-                            receipt.getString(layoutLine.getString("text"))
+                        if (receipt.isNull(fullContent)) {
+                            ""
+                        } else {
+                            try {
+                                receipt.optString(fullContent, "")
+                            } catch (ex: JSONException) {
+                                receipt.optString(layoutLine.getString("text"), "")
+                            }
                         }
                     }
                 }
@@ -284,9 +303,11 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                 text = text.toUpperCase()
             }
 
-            if (text.isNotBlank()) {
-                return text
+            if (layoutLine.has("prefix") && !text.isEmpty()) {
+                text = layoutLine.getString("prefix") + text
             }
+
+            return text
         }
 
         return layoutLine.getString("text")

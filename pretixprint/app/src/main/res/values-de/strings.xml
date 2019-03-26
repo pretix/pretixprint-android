@@ -55,6 +55,7 @@
     <string name="err_not_supported">Nicht unterstüzt</string>
     <string name="settings_label_receiptwidth">Breite des Belegpapiers</string>
     <string name="receiptline_cancellation">*** STORNO ***</string>
+    <string name="receiptline_return">*** RETOURE ***</string>
     <string name="receiptline_customerreceipt">K-U-N-D-E-N-B-E-L-E-G</string>
     <string name="receiptline_merchantid">Händler-ID:</string>
     <string name="receiptline_transactionid">Transaktion-ID:</string>
@@ -65,4 +66,6 @@
     <string name="receiptline_cardissuerpaymenttext">ICH BESTÄTIGE DEN OBEN GENANNTEN GESAMTBETRAG ENTSPRECHEND DER VEREINBARUNG DES KARTENHERAUSGEBERS ZU ZAHLEN.</string>
     <string name="receiptline_keepreceipt">BITTE BEWAHREN SIE DIESEN BELEG AUF.</string>
     <string name="receiptline_paidcash">Betrag BAR erhalten.</string>
+    <string name="receiptline_paidcard">Betrag UNBAR erhalten.</string>
+    <string name="receiptline_copy">BONKOPIE</string>
 </resources>

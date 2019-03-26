@@ -54,7 +54,8 @@
     <string-array name="printer_modes">
     </string-array>
     <string name="settings_label_receiptwidth">Width of receipt paper</string>
-    <string name="receiptline_cancellation">*** CANCELLATION***</string>
+    <string name="receiptline_cancellation">*** CANCELLATION ***</string>
+    <string name="receiptline_return">*** REVERSED SALE ***</string>
     <string name="receiptline_customerreceipt">C-U-S-T-O-M-E-R---C-O-P-Y</string>
     <string name="receiptline_merchantid">Merchant-ID:</string>
     <string name="receiptline_transactionid">Transaction-ID:</string>
@@ -65,4 +66,6 @@
     <string name="receiptline_cardissuerpaymenttext">I HEREBY AGREE TO PAY THE ABOVE MENTIONED TOTAL ACCORDING TO THE CARD ISSUER TERMS AND CONDITIONS.</string>
     <string name="receiptline_keepreceipt">PLEASE KEEP THIS RECEIPT.</string>
     <string name="receiptline_paidcash">Paid in CASH.</string>
+    <string name="receiptline_paidcard">Paid with CARD.</string>
+    <string name="receiptline_copy">RECEIPT COPY</string>
 </resources>
