@@ -7,7 +7,7 @@ import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 
 
 class SLCSNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(ip, port, dpi) {
-    override fun convertPageToBytes(img: Bitmap): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean): ByteArray {
         val ostream = ByteArrayOutputStream()
         val pixels = IntArray(img.width * img.height)
         img.getPixels(pixels, 0, img.width, 0, 0, img.width, img.height)

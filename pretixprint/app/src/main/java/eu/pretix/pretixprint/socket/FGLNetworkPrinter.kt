@@ -8,7 +8,7 @@ import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 
 class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(ip, port, dpi) {
 
-    override fun convertPageToBytes(img: Bitmap): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean): ByteArray {
         val ostream = ByteArrayOutputStream()
         val w = img.width
         val h = img.height
@@ -41,7 +41,11 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
                 }
             }
         }
-        ostream.write("<q>\n".toByteArray())
+        if (isLastPage) {
+            ostream.write("<p>\n".toByteArray())
+        } else {
+            ostream.write("<q>\n".toByteArray())
+        }
         return ostream.toByteArray()
     }
 }
