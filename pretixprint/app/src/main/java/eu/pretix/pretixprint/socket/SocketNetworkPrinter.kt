@@ -6,6 +6,7 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import java.io.File
 import java.net.InetAddress
 import java.net.Socket
@@ -53,6 +54,11 @@ abstract class SocketNetworkPrinter(var ip: String, var port: Int, var dpi: Int)
             for (p in pages) {
                 ostream.write(p)
                 ostream.flush()
+                while (istream.read() != 6) {
+                    Log.d("Foobar", "Sleeping")
+                    Thread.sleep(100)
+                }
+                Log.d("Foobar", "Out")
             }
             Thread.sleep(getCooldown())
         } finally {
