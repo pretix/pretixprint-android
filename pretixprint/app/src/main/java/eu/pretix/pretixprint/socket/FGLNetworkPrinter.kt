@@ -66,10 +66,11 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
             for (p in pages) {
                 ostream.write(p)
                 ostream.flush()
+                val loopStarted = System.currentTimeMillis()
                 wait@ while (true) {
                     val r = istream.read()
                     when (r) {
-                        0 -> continue@wait
+                        0 -> Thread.sleep(100)
                         1 -> break@wait  // reject bin warning
                         2 -> throw FGLPrintError("Reject bin error")
                         3 -> throw FGLPrintError("Paper jam (path 1)")
@@ -88,7 +89,7 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
                         16 -> throw FGLPrintError("Out of paper")
                         17 -> break@wait // x-on
                         18 -> break@wait // power on
-                        19 -> continue@wait // x-off = busy
+                        19 -> Thread.sleep(100) // x-off = busy
                         20 -> throw FGLPrintError("Bad flash memory")
                         21 -> throw FGLPrintError("Illegal print command")
                         22 -> break@wait // ribbon low
@@ -100,9 +101,11 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
                         29 -> throw FGLPrintError("Cutter jam")
                         30 -> throw FGLPrintError("Stuck ticket")
                         31 -> throw FGLPrintError("Cutter jam (path 2)")
-                        else -> throw FGLPrintError("Invalid status response: " + r)
+                        else -> throw FGLPrintError("Invalid status response: $r")
                     }
-                    Thread.sleep(100)
+                    if (System.currentTimeMillis() - loopStarted > 15000) {
+                        throw FGLPrintError("Response timeout")
+                    }
                 }
             }
             Thread.sleep(getCooldown())
