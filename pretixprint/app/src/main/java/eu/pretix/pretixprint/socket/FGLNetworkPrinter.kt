@@ -65,8 +65,8 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
         val ostream = socket.getOutputStream()
         val istream = socket.getInputStream()
         try {
-            for (p in pages) {
-                ostream.write(p)
+            for (f in pages) {
+                ostream.write(f.get())
                 ostream.flush()
                 val loopStarted = System.currentTimeMillis()
                 wait@ while (true) {
