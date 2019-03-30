@@ -18,9 +18,13 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java8.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 
 class PrintService : IntentService("PrintService") {
+    protected var threadPool = Executors.newCachedThreadPool()
+
     companion object {
         val CHANNEL_ID = "pretixprint_print_channel"
         val ONGOING_NOTIFICATION_ID = 42
@@ -68,7 +72,7 @@ class PrintService : IntentService("PrintService") {
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
-        val pages = emptyList<File>().toMutableList()
+        val pages = emptyList<CompletableFuture<File>>().toMutableList()
         var tmpfile: File?
 
         val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
@@ -86,21 +90,25 @@ class PrintService : IntentService("PrintService") {
             else -> {
                 try {
                     for (i in 0..(positions.length() - 1)) {
-                        val position = positions.getJSONObject(i)
-                        val layout = position.getJSONArray("__layout");
+                        val future = CompletableFuture<File>()
+                        threadPool.submit {
+                            val position = positions.getJSONObject(i)
+                            val layout = position.getJSONArray("__layout");
 
-                        val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
-                        if (position.has("__file_index")) {
-                            val fileIndex = position.getInt("__file_index")
+                            val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
+                            if (position.has("__file_index")) {
+                                val fileIndex = position.getInt("__file_index")
 
-                            val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
-                            bgInputStream.use {
-                                WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
+                                val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
+                                bgInputStream.use {
+                                    WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
+                                }
+                            } else {
+                                WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
                             }
-                        } else {
-                            WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
+                            future.complete(_tmpfile)
                         }
-                        pages.add(_tmpfile)
+                        pages.add(future)
                     }
 
                     tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
@@ -108,7 +116,7 @@ class PrintService : IntentService("PrintService") {
                     val copy = PdfCopy(document, FileOutputStream(tmpfile))
                     document.open()
                     for (page in pages) {
-                        val pagedoc = PdfReader(page.absolutePath)
+                        val pagedoc = PdfReader(page.get().absolutePath)
                         copy.addDocument(pagedoc)
                         pagedoc.close()
                     }
