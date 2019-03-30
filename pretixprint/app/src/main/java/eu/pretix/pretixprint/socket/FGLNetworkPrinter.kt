@@ -2,6 +2,9 @@ package eu.pretix.pretixprint.socket
 
 import android.graphics.Bitmap
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.net.InetAddress
+import java.net.Socket
 import kotlin.math.min
 import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 
@@ -47,5 +50,31 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(
             ostream.write("<q>\n".toByteArray())
         }
         return ostream.toByteArray()
+    }
+
+    override fun printPDF(file: File) {
+        val serverAddr = InetAddress.getByName(ip)
+        var d = dpi.toFloat()
+        if (d < 1) {
+            d = 200f  // Set default
+        }
+        val pages = renderPages(file, d)
+        val socket = Socket(serverAddr, port)
+        val ostream = socket.getOutputStream()
+        val istream = socket.getInputStream()
+        try {
+            for (p in pages) {
+                ostream.write(p)
+                ostream.flush()
+                while (istream.read() != 6) {
+                    Thread.sleep(100)
+                }
+            }
+            Thread.sleep(getCooldown())
+        } finally {
+            istream.close()
+            ostream.close()
+            socket.close()
+        }
     }
 }

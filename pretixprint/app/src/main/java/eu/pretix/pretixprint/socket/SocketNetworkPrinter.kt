@@ -20,12 +20,7 @@ abstract class SocketNetworkPrinter(var ip: String, var port: Int, var dpi: Int)
         return 2000;
     }
 
-    fun printPDF(file: File) {
-        val serverAddr = InetAddress.getByName(ip)
-        var d = dpi.toFloat()
-        if (d < 1) {
-            d = 200f  // Set default
-        }
+    fun renderPages(file: File, d: Float): List<ByteArray> {
         val pages = mutableListOf<ByteArray>()
         if (Build.VERSION.SDK_INT >= 21) {
             val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -48,6 +43,16 @@ abstract class SocketNetworkPrinter(var ip: String, var port: Int, var dpi: Int)
                 pages.add(convertPageToBytes(img, page == doc.pages.count - 1))
             }
         }
+        return pages
+    }
+
+    open fun printPDF(file: File) {
+        val serverAddr = InetAddress.getByName(ip)
+        var d = dpi.toFloat()
+        if (d < 1) {
+            d = 200f  // Set default
+        }
+        val pages = renderPages(file, d)
         val socket = Socket(serverAddr, port)
         val ostream = socket.getOutputStream()
         val istream = socket.getInputStream()
@@ -55,11 +60,6 @@ abstract class SocketNetworkPrinter(var ip: String, var port: Int, var dpi: Int)
             for (p in pages) {
                 ostream.write(p)
                 ostream.flush()
-                while (istream.read() != 6) {
-                    Log.d("Foobar", "Sleeping")
-                    Thread.sleep(100)
-                }
-                Log.d("Foobar", "Out")
             }
             Thread.sleep(getCooldown())
         } finally {
