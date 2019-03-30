@@ -3,11 +3,13 @@ package eu.pretix.pretixprint.socket
 import android.graphics.Bitmap
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.net.InetAddress
 import java.net.Socket
 import kotlin.math.min
 import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 
+class FGLPrintError(message: String) : IOException(message);
 
 class FGLNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(ip, port, dpi) {
 
