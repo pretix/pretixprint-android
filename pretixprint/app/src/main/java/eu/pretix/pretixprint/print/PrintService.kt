@@ -125,10 +125,10 @@ class PrintService : IntentService("PrintService") {
 
         when (connection) {
             "network_printer" -> {
-                NetworkPrintService(this, type, mode).print(tmpfile)
+                NetworkPrintService(this, type, mode).print(tmpfile, pages.size)
             }
             "bluetooth_printer" -> {
-                BluetoothPrintService(this, type).print(tmpfile)
+                BluetoothPrintService(this, type).print(tmpfile, pages.size)
             }
         }
 

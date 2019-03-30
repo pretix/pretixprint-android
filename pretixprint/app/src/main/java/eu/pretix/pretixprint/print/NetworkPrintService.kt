@@ -15,7 +15,7 @@ import java.io.IOException
 class NetworkPrintService(context: Context, type: String = "ticket", mode: String = "CUPS/IPP") : PrintServiceTransport(context, type) {
     val mode = mode
 
-    override fun print(tmpfile: File) {
+    override fun print(tmpfile: File, numPages: Int) {
         val prefs = context.defaultSharedPreferences
 
         if (mode == "FGL") {
@@ -24,7 +24,7 @@ class NetworkPrintService(context: Context, type: String = "ticket", mode: Strin
                         prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_port", "9100")),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200"))
-                ).printPDF(tmpfile)
+                ).printPDF(tmpfile, numPages)
             } catch (e: IOException) {
                 e.printStackTrace()
                 throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message));
@@ -35,7 +35,7 @@ class NetworkPrintService(context: Context, type: String = "ticket", mode: Strin
                         prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_port", "9100")),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200"))
-                ).printPDF(tmpfile)
+                ).printPDF(tmpfile, numPages)
             } catch (e: IOException) {
                 e.printStackTrace()
                 throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message));

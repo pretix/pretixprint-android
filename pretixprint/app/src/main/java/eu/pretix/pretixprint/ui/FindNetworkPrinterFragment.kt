@@ -240,13 +240,13 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                                     editText_ip.text.toString(),
                                     Integer.valueOf(editText_port.text.toString()),
                                     Integer.valueOf(editText_dpi.text.toString())
-                            ).printPDF(file)
+                            ).printPDF(file, 1)
                         } else {
                             FGLNetworkPrinter(
                                     editText_ip.text.toString(),
                                     Integer.valueOf(editText_port.text.toString()),
                                     Integer.valueOf(editText_dpi.text.toString())
-                            ).printPDF(file)
+                            ).printPDF(file, 1)
                         }
                         file.delete()
 

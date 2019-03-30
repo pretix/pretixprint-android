@@ -7,5 +7,5 @@ abstract class PrintServiceTransport(context: Context, type: String) {
     val type = type
     val context = context
 
-    abstract fun print(tmpfile: File)
+    abstract fun print(tmpfile: File, numPages: Int)
 }

@@ -21,7 +21,7 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
         private set
     lateinit var escpos : ByteArray
 
-    override fun print(tmpfile: File) {
+    override fun print(tmpfile: File, numPages: Int) {
         val prefs = context.defaultSharedPreferences
 
         try {

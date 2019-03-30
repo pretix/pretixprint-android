@@ -6,7 +6,7 @@ import java.net.InetAddress
 import java.net.Socket
 
 class PlaintextNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(ip, port, dpi) {
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
