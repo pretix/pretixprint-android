@@ -72,54 +72,49 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int, val diffRendering: Bool
         val socket = Socket(serverAddr, port)
         val ostream = socket.getOutputStream()
         val istream = socket.getInputStream()
-        val bufferedBytes = mutableListOf<Int>()
         try {
             for (f in pages) {
-                val p = f.get()
-                bufferedBytes.add(p.size)
-                ostream.write(p)
+                ostream.write(f.get())
                 ostream.flush()
-                if (bufferedBytes.sum() > 64000) {
-                    val loopStarted = System.currentTimeMillis()
-                    wait@ while (true) {
-                        val r = istream.read()
-                        when (r) {
-                            0 -> Thread.sleep(10)
-                            1 -> break@wait  // reject bin warning
-                            2 -> throw FGLPrintError("Reject bin error")
-                            3 -> throw FGLPrintError("Paper jam (path 1)")
-                            4 -> throw FGLPrintError("Paper jam (path 2)")
-                            5 -> break@wait // test button ticket ack
-                            6 -> { bufferedBytes.removeAt(0); break@wait } // ticket ack
-                            7 -> throw FGLPrintError("Wrong file identifier during update")
-                            8 -> throw FGLPrintError("Invalid checksum")
-                            9 -> break@wait // valid checksum
-                            10 -> throw FGLPrintError("Out of paper (path 1)")
-                            11 -> throw FGLPrintError("Out of paper (path 2)")
-                            12 -> break@wait // paper loaded path 1
-                            13 -> break@wait // paper loaded path 2
-                            14 -> throw FGLPrintError("Escrow jam")
-                            15 -> break@wait // low paper
-                            16 -> throw FGLPrintError("Out of paper")
-                            17 -> Thread.sleep(10) // x-on
-                            18 -> break@wait // power on
-                            19 -> Thread.sleep(10) // x-off = busy
-                            20 -> throw FGLPrintError("Bad flash memory")
-                            21 -> throw FGLPrintError("Illegal print command")
-                            22 -> break@wait // ribbon low
-                            23 -> throw FGLPrintError("Ribbon out")
-                            24 -> throw FGLPrintError("Paper jam")
-                            25 -> throw FGLPrintError("Illegal data")
-                            26 -> throw FGLPrintError("Powerup problem")
-                            28 -> throw FGLPrintError("Downloading error")
-                            29 -> throw FGLPrintError("Cutter jam")
-                            30 -> throw FGLPrintError("Stuck ticket")
-                            31 -> throw FGLPrintError("Cutter jam (path 2)")
-                            else -> throw FGLPrintError("Invalid status response: $r")
-                        }
-                        if (System.currentTimeMillis() - loopStarted > 15000) {
-                            throw FGLPrintError("Response timeout")
-                        }
+                val loopStarted = System.currentTimeMillis()
+                wait@ while (true) {
+                    val r = istream.read()
+                    when (r) {
+                        0 -> Thread.sleep(10)
+                        1 -> break@wait  // reject bin warning
+                        2 -> throw FGLPrintError("Reject bin error")
+                        3 -> throw FGLPrintError("Paper jam (path 1)")
+                        4 -> throw FGLPrintError("Paper jam (path 2)")
+                        5 -> break@wait // test button ticket ack
+                        6 -> break@wait // ticket ack
+                        7 -> throw FGLPrintError("Wrong file identifier during update")
+                        8 -> throw FGLPrintError("Invalid checksum")
+                        9 -> break@wait // valid checksum
+                        10 -> throw FGLPrintError("Out of paper (path 1)")
+                        11 -> throw FGLPrintError("Out of paper (path 2)")
+                        12 -> break@wait // paper loaded path 1
+                        13 -> break@wait // paper loaded path 2
+                        14 -> throw FGLPrintError("Escrow jam")
+                        15 -> break@wait // low paper
+                        16 -> throw FGLPrintError("Out of paper")
+                        17 -> Thread.sleep(10) // x-on
+                        18 -> break@wait // power on
+                        19 -> Thread.sleep(10) // x-off = busy
+                        20 -> throw FGLPrintError("Bad flash memory")
+                        21 -> throw FGLPrintError("Illegal print command")
+                        22 -> break@wait // ribbon low
+                        23 -> throw FGLPrintError("Ribbon out")
+                        24 -> throw FGLPrintError("Paper jam")
+                        25 -> throw FGLPrintError("Illegal data")
+                        26 -> throw FGLPrintError("Powerup problem")
+                        28 -> throw FGLPrintError("Downloading error")
+                        29 -> throw FGLPrintError("Cutter jam")
+                        30 -> throw FGLPrintError("Stuck ticket")
+                        31 -> throw FGLPrintError("Cutter jam (path 2)")
+                        else -> throw FGLPrintError("Invalid status response: $r")
+                    }
+                    if (System.currentTimeMillis() - loopStarted > 15000) {
+                        throw FGLPrintError("Response timeout")
                     }
                 }
             }
