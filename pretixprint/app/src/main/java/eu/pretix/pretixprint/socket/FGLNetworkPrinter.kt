@@ -84,7 +84,7 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int, val diffRendering: Bool
                     wait@ while (true) {
                         val r = istream.read()
                         when (r) {
-                            0 -> Thread.sleep(20)
+                            0 -> Thread.sleep(10)
                             1 -> break@wait  // reject bin warning
                             2 -> throw FGLPrintError("Reject bin error")
                             3 -> throw FGLPrintError("Paper jam (path 1)")
@@ -101,9 +101,9 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int, val diffRendering: Bool
                             14 -> throw FGLPrintError("Escrow jam")
                             15 -> break@wait // low paper
                             16 -> throw FGLPrintError("Out of paper")
-                            17 -> break@wait // x-on
+                            17 -> Thread.sleep(10) // x-on
                             18 -> break@wait // power on
-                            19 -> Thread.sleep(20) // x-off = busy
+                            19 -> Thread.sleep(10) // x-off = busy
                             20 -> throw FGLPrintError("Bad flash memory")
                             21 -> throw FGLPrintError("Illegal print command")
                             22 -> break@wait // ribbon low
