@@ -55,9 +55,11 @@ class FGLNetworkPrinter(ip: String, port: Int, dpi: Int, val diffRendering: Bool
             }
         }
         if (isLastPage) {
-            ostream.write("<p>\n".toByteArray())
-        } else {
+            ostream.write("<z>\n".toByteArray())
+        } else if (diffRendering) {
             ostream.write("<r>\n".toByteArray())
+        } else {
+            ostream.write("<q>\n".toByteArray())
         }
         return ostream.toByteArray()
     }
