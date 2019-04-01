@@ -23,7 +23,8 @@ class NetworkPrintService(context: Context, type: String = "ticket", mode: Strin
                 FGLNetworkPrinter(
                         prefs.getString("hardware_${type}printer_ip", "127.0.0.1"),
                         Integer.valueOf(prefs.getString("hardware_${type}printer_port", "9100")),
-                        Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200"))
+                        Integer.valueOf(prefs.getString("hardware_${type}printer_dpi", "200")),
+                        diffRendering = false  // Stimare can't do it
                 ).printPDF(tmpfile, numPages)
             } catch (e: IOException) {
                 e.printStackTrace()

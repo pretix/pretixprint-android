@@ -245,7 +245,8 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                             FGLNetworkPrinter(
                                     editText_ip.text.toString(),
                                     Integer.valueOf(editText_port.text.toString()),
-                                    Integer.valueOf(editText_dpi.text.toString())
+                                    Integer.valueOf(editText_dpi.text.toString()),
+                                    diffRendering = false  // Stimare can't do it…
                             ).printPDF(file, 1)
                         }
                         file.delete()
