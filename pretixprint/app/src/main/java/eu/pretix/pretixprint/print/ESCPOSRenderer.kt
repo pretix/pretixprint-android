@@ -13,6 +13,8 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     private val out = mutableListOf<Byte>()
     var taxrates = mutableListOf<String>()
     var taxvalues = mutableListOf<Double>()
+    var reverseSale: Boolean = false
+
     companion object {
         const val ESC : Byte = 0x1B
         const val GS : Byte = 0x1D
@@ -128,6 +130,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                     val taxindex = taxrates.indexOf(position.getString("tax_rate"))
 
                     if (position.optString("type", "") == "PRODUCT_RETURN") {
+                        reverseSale = true
                         emphasize(true)
                         text(ctx.getString(R.string.receiptline_return)); newline()
                         emphasize(false)
@@ -225,6 +228,17 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                     text(ctx.getString(R.string.receiptline_copy), CENTER)
                     newline(2)
                     mode()
+                }
+            }
+            "footlines" -> {
+                if (reverseSale) {
+                    text(ctx.getString(R.string.receiptline_customerinformation))
+                    newline(10)
+                    mode(underline = true)
+                    text("X")
+                    text(" ".repeat(charsPerLine - 1))
+                    newline()
+                    mode(underline = false)
                 }
             }
             "emphasize" -> {

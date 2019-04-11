@@ -68,4 +68,5 @@
     <string name="receiptline_paidcash">Betrag BAR erhalten.</string>
     <string name="receiptline_paidcard">Betrag UNBAR erhalten.</string>
     <string name="receiptline_copy">BONKOPIE</string>
+    <string name="receiptline_customerinformation">Kundendaten:</string>
 </resources>
