@@ -99,7 +99,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             renderline(layoutLine)
         }
 
-        newline(2)
+        newline(4)
         cut()
         return out.toByteArray()
     }
