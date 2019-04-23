@@ -12,9 +12,12 @@ class SLCSNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter
         val pixels = IntArray(img.width * img.height)
         img.getPixels(pixels, 0, img.width, 0, 0, img.width, img.height)
 
-        ostream.write("CB\n".toByteArray())
-        ostream.write("SM0,0\n".toByteArray())
-        ostream.write("LD".toByteArray())
+        // http://www.bixolon.com/upload/download/manual_slp-d42xx_slcs_english_rev_1_03.pdf
+
+        ostream.write("CB\n".toByteArray())  // clear buffer
+        ostream.write("SW${img.width}\n".toByteArray())  // set label width to input width
+        ostream.write("SM0,0\n".toByteArray())  // clear margins
+        ostream.write("LD".toByteArray())  // send iamge
         ostream.write(byteArrayOf(0, 0, 0, 0))  // x and y offset
         val bytewidth = img.width / 8
         ostream.write(byteArrayOf((bytewidth and 0xFF).toByte(), ((bytewidth shr 8) and 0xFF).toByte()))
