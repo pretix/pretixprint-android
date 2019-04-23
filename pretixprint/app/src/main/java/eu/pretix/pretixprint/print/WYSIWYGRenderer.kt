@@ -61,6 +61,10 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Fira Sans", "fonts/firasans-%s-webfont.ttf")
             registerFontFamily(ctx, "Lato", "fonts/Lato-%s.ttf")
             registerFontFamily(ctx, "Vollkorn", "fonts/Vollkorn-%s.ttf")
+            registerFontFamily(ctx, "Montserrat", "fonts/montserrat-%s-webfont.ttf")
+            registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
+            registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
+            registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
         }
 
         fun storeFont(ctx: Context, path: String): String {
