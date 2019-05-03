@@ -328,12 +328,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     }
 
     private fun getDate(date: String) : String {
-        return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
-            .format(
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'").parse(
-                            date
-                    )
+        val dfOut = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
+        dfOut.timeZone = TimeZone.getDefault()
+        return dfOut.format(
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mmX").parse(
+                    date.replace("Z", "+00:00")
             )
+        )
     }
 
     private fun calcTotal() : Double {
