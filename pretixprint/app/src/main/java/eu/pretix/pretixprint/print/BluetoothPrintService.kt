@@ -49,7 +49,7 @@ class BluetoothPrintService(context: Context, type: String = "receipt") : PrintS
         editor.putString("hardware_${type}printer_ip", printerMAC)
         editor.apply()
 
-        print(tmpfile)
+        this.print(tmpfile, 0)
 
         editor.putString("hardware_${type}printer_ip", oldMAC)
         editor.apply()
