@@ -69,4 +69,5 @@
     <string name="receiptline_paidcard">Paid with CARD.</string>
     <string name="receiptline_copy">RECEIPT COPY</string>
     <string name="receiptline_customerinformation">Customer Information:</string>
+    <string name="pref_printer_cpl">%s characters</string>
 </resources>

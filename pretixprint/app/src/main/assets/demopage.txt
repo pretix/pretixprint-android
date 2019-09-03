@@ -1,2 +1,10 @@
 This is a pretixPRINT demo printing.
 If you can read this, printing works!
+
+Please use the following line of characters to determine the proper paper width.
+
+Select the last character of the first printed line as the "Width of receipt paper" in your pretixPRINT settings.
+
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz
+
+

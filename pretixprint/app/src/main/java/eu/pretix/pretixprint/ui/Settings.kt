@@ -40,7 +40,7 @@ class SettingsFragment : PreferenceFragment() {
 
         findPreference("hardware_receiptprinter_cpl").setOnPreferenceChangeListener { preference, newValue ->
             val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
-            findPreference("hardware_receiptprinter_cpl").summary = cpl.entries[cpl.entryValues.indexOf(newValue)]
+            findPreference("hardware_receiptprinter_cpl").summary = getString(R.string.pref_printer_cpl, newValue)
             return@setOnPreferenceChangeListener true
         }
 
@@ -69,7 +69,7 @@ class SettingsFragment : PreferenceFragment() {
         }
 
         val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
-        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) { cpl.entries[0] } else { cpl.entry }
+        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) { getString(R.string.pref_printer_cpl, cpl.entries[31]) } else { getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString()) }
     }
 
     private fun asset_dialog(@RawRes htmlRes: Int, @StringRes title: Int) {
