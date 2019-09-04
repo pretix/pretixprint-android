@@ -15,7 +15,7 @@ before_install:
 script:
     - git submodule update --init
     - cd pretixprint
-    - TERM=dumb ./gradlew checkDebug lintDebug assembleDebug
+    - TERM=dumb ./gradlew lintDebug assembleDebug
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
