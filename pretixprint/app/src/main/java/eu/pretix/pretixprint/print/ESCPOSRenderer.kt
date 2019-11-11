@@ -107,10 +107,19 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     private fun renderline(layoutLine: JSONObject) {
         when (layoutLine.getString("type")) {
             "textarea" -> {
-                text(
-                        getText(layoutLine),
-                        if (layoutLine.has("align")) layoutLine.getString("align") else LEFT
-                )
+                val t = getText(layoutLine)
+                if (!t.isNullOrBlank()) {
+                    text(
+                            t,
+                            if (layoutLine.has("align")) layoutLine.getString("align") else LEFT
+                    )
+                }
+            }
+            "qr" -> {
+                val t = getText(layoutLine)
+                if (!t.isNullOrBlank()) {
+                    qr(t, layoutLine.optInt("blocksize", 6))
+                }
             }
             "newline" -> {
                 if (layoutLine.has("count")) {
@@ -218,8 +227,8 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                 val splitLines = layoutLine.getJSONArray("content")
 
                 splitline(
-                        getText(splitLines.getJSONObject(0)),
-                        getText(splitLines.getJSONObject(1))
+                        getText(splitLines.getJSONObject(0))!!,
+                        getText(splitLines.getJSONObject(1))!!
                 )
             }
             "headline" -> {
@@ -267,7 +276,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         }
     }
 
-    private fun getText(layoutLine : JSONObject): String {
+    private fun getText(layoutLine: JSONObject): String? {
         if (layoutLine.has("content")) {
             var text: String
             val fullContent = layoutLine.getString("content")
@@ -424,7 +433,39 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         out.add(lines.toByte())
     }
 
-    private fun text(text : String, align : String = LEFT) {
+    private fun qr(text: String, blockSize: Int) {
+        val data = text.toByteArray()
+        val payloadLen = data.size + 3
+        val payloadPL = (payloadLen % 256)
+        val paloadPH = (payloadLen / 256)
+
+        // QR Code: Select the model
+        //              Hex     1D      28      6B      04      00      31      41      n1(x32)     n2(x00) - size of model
+        // set n1 [49 x31, model 1] [50 x32, model 2] [51 x33, micro qr code]
+        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=140
+        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00).map { it.toByte() })
+        // QR Code: Set the size of module
+        // Hex      1D      28      6B      03      00      31      43      n
+        // n depends on the printer
+        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=141
+        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, blockSize).map { it.toByte() })
+        //          Hex     1D      28      6B      03      00      31      45      n
+        // Set n for error correction [48 x30 -> 7%] [49 x31-> 15%] [50 x32 -> 25%] [51 x33 -> 30%]
+        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=142
+        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x31).map { it.toByte() })
+        // QR Code: Store the data in the symbol storage area
+        // Hex      1D      28      6B      pL      pH      31      50      30      d1...dk
+        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=143
+        //                        1D          28          6B         pL          pH  cn(49->x31) fn(80->x50) m(48->x30) d1…dk
+        out.addAll(listOf(0x1d, 0x28, 0x6b, payloadPL, paloadPH, 0x31, 0x50, 0x30).map { it.toByte() })
+        out.addAll(data.toList())
+        // QR Code: Print the symbol data in the symbol storage area
+        // Hex      1D      28      6B      03      00      31      51      m
+        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=144
+        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30).map { it.toByte() })
+    }
+
+    private fun text(text: String, align: String = LEFT) {
         out.add(ESC)
         out.add('a'.toByte())
 
