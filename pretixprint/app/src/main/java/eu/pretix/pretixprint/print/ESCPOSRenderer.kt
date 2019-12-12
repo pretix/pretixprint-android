@@ -105,14 +105,23 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     }
 
     private fun renderline(layoutLine: JSONObject) {
+        if (layoutLine.has("font")) {
+
+        }
         when (layoutLine.getString("type")) {
             "textarea" -> {
                 val t = getText(layoutLine)
                 if (!t.isNullOrBlank()) {
+                    if (layoutLine.has("font")) {
+                        mode(layoutLine.getString("font"))
+                    }
                     text(
                             t,
                             if (layoutLine.has("align")) layoutLine.getString("align") else LEFT
                     )
+                    if (layoutLine.has("font")) {
+                        mode()
+                    }
                 }
             }
             "qr" -> {

@@ -70,4 +70,5 @@
     <string name="receiptline_copy">BONKOPIE</string>
     <string name="receiptline_customerinformation">Kundendaten:</string>
     <string name="pref_printer_cpl">%s Zeichen</string>
+    <string name="btn_auto">Auto-detected</string>
 </resources>
