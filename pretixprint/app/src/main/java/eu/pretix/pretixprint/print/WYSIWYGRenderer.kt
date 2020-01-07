@@ -65,6 +65,7 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
             registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
             registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
+            registerFontFamily(ctx, "DejaVu Sans", "fonts/DejaVuSans-%s-webfont.ttf")
         }
 
         fun storeFont(ctx: Context, path: String): String {
