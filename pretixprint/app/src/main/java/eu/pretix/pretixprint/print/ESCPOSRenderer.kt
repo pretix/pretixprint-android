@@ -185,6 +185,18 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             }
             "paymentlines" -> {
                 when (receipt.getString("payment_type")) {
+                    "stripe_terminal" -> {
+                        emphasize(true)
+                        text(ctx.getString(R.string.receiptline_paidcard))
+                        newline()
+                        emphasize(false)
+                        val payment_data = receipt.getJSONObject("payment_data")
+                        splitline("Application", payment_data.getString("application_preferred_name"))
+                        splitline("AID", payment_data.getString("dedicated_file_name"))
+                        splitline("TVR", payment_data.getString("terminal_verification_results"))
+                        splitline("ARC / TSI", payment_data.getString("authorization_response_code") + " / " + payment_data.getString("transaction_status_information"))
+                        newline()
+                    }
                     "sumup", "card" -> {
                         val payment_data = receipt.getJSONObject("payment_data")
                         text("-".repeat(charsPerLine), CENTER)
