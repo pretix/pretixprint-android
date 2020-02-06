@@ -7,6 +7,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.byteprotocols.FGL
 import eu.pretix.pretixprint.byteprotocols.SLCS
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import org.jetbrains.anko.defaultSharedPreferences
@@ -41,6 +42,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragment = when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
             NetworkConnection().identifier -> NetworkSettingsFragment()
+            BluetoothConnection().identifier -> BluetoothSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }
         fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
