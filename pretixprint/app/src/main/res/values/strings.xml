@@ -51,8 +51,7 @@
     <string name="field_label_macaddress">MAC address</string>
     <string name="err_not_supported">Not supported</string>
     <string name="btn_auto">Auto-detected</string>
-    <string-array name="printer_modes">
-    </string-array>
+    <string-array name="printer_modes"></string-array>
     <string name="settings_label_receiptwidth">Width of receipt paper</string>
     <string name="receiptline_cancellation">*** CANCELLATION ***</string>
     <string name="receiptline_return">*** REVERSED SALE ***</string>
@@ -70,4 +69,11 @@
     <string name="receiptline_copy">RECEIPT COPY</string>
     <string name="receiptline_customerinformation">Customer Information:</string>
     <string name="pref_printer_cpl">%s characters</string>
+    <string name="setup_connection_type_headline">How is your printer connected?</string>
+    <string name="connection_type_network">Network (LAN/WLAN)</string>
+    <string name="connection_type_bluetooth">Bluetooth</string>
+    <string name="connection_type_usb">USB</string>
+    <string name="connection_type_cups">CUPS (Linux server)</string>
+    <string name="error_no_choice">Please choose an option</string>
+    <string name="btn_next">NEXT</string>
 </resources>

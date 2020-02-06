@@ -36,19 +36,19 @@ android {
     }
 
     buildTypes {
-		def sentry_dsn = "";
-		try {
-			Properties properties = new Properties()
-			properties.load(project.rootProject.file('local.properties').newDataInputStream())
-			sentry_dsn = properties.getProperty('sentry.dsn')
-			if (sentry_dsn == null) {
-				sentry_dsn = "null"
-			} else {
-				sentry_dsn = "\"" + sentry_dsn + "\""
-			}
-		} catch (all) {
-			sentry_dsn = "null"
-		}
+        def sentry_dsn = "";
+        try {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+            sentry_dsn = properties.getProperty('sentry.dsn')
+            if (sentry_dsn == null) {
+                sentry_dsn = "null"
+            } else {
+                sentry_dsn = "\"" + sentry_dsn + "\""
+            }
+        } catch (all) {
+            sentry_dsn = "null"
+        }
 
         release {
             minifyEnabled false
@@ -79,13 +79,14 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'org.jetbrains.anko:anko:0.10.6'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.tom_roush:pdfbox-android:1.8.10.0'
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
 
     // libpretixprint
     implementation 'com.itextpdf:itextg:5.5.10'
@@ -93,10 +94,10 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.10.5'
     implementation 'com.joshdholtz.sentry:sentry-android:1.6.0'
-    implementation 'io.sentry:sentry-android:1.7.16'
-    implementation 'org.slf4j:slf4j-nop:1.7.25'
+    implementation 'io.sentry:sentry-android:1.7.29'
+    implementation 'org.slf4j:slf4j-nop:1.7.30'
 
-    implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation(project(':cups4j')) {
         transitive = false
     }
@@ -105,9 +106,9 @@ dependencies {
     }
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.9"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1"
 
-    implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.0'
+    implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.1'
 }
 repositories {
     mavenCentral()

@@ -31,7 +31,7 @@ class SettingsFragment : PreferenceFragment() {
 
         for (type in types) {
             findPreference("hardware_${type}printer_find").setOnPreferenceClickListener {
-                val intent = Intent(activity, FindPrinterActivity::class.java)
+                val intent = Intent(activity, PrinterSetupActivity::class.java)
                 intent.putExtra(FindPrinterActivity.EXTRA_TYPE, type)
                 activity.startActivity(intent)
                 return@setOnPreferenceClickListener true
