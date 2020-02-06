@@ -41,6 +41,7 @@
     <string name="test_success">The connection test was successful.</string>
     <string name="err_resolv_failed">Resolving the network printer failed.</string>
     <string name="err_field_required">This field is required.</string>
+    <string name="err_field_invalid">This field is invalid.</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s (%s)</string>
@@ -76,4 +77,13 @@
     <string name="connection_type_cups">CUPS (Linux server)</string>
     <string name="error_no_choice">Please choose an option</string>
     <string name="btn_next">NEXT</string>
+    <string name="setup_network_settings">Where is your printer on the network?</string>
+    <string name="btn_prev">PREVIOUS</string>
+    <string name="protocol_fgl">FGL (Boca, Practical Automation)</string>
+    <string name="protocol_slcs">SLCS (BIXOLON, Metapace)</string>
+    <string name="protocol_escpos">ESC/POS (Epson and other receipt printers)</string>
+    <string name="setup_protocol">What protocol does your printer support?</string>
+    <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
+    <string name="setup_done">Okay, we\'ve got everything!</string>
+    <string name="btn_save">Save settings</string>
 </resources>

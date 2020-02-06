@@ -10,36 +10,36 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.connections.ConnectionType
-import eu.pretix.pretixprint.connections.connectionTypes
-import eu.pretix.pretixprint.databinding.ItemConnectionTypeBinding
+import eu.pretix.pretixprint.byteprotocols.ByteProtocol
+import eu.pretix.pretixprint.byteprotocols.protocols
+import eu.pretix.pretixprint.databinding.ItemByteProtocolBinding
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.toast
 
 
-class ConnectionTypeDiffCallback : DiffUtil.ItemCallback<ConnectionType>() {
-    override fun areItemsTheSame(oldItem: ConnectionType, newItem: ConnectionType): Boolean {
+class ByteProtocolDiffCallback : DiffUtil.ItemCallback<ByteProtocol>() {
+    override fun areItemsTheSame(oldItem: ByteProtocol, newItem: ByteProtocol): Boolean {
         return oldItem.identifier == newItem.identifier
     }
 
-    override fun areContentsTheSame(oldItem: ConnectionType, newItem: ConnectionType): Boolean {
+    override fun areContentsTheSame(oldItem: ByteProtocol, newItem: ByteProtocol): Boolean {
         return oldItem.identifier == newItem.identifier
     }
 }
 
-internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
-        ListAdapter<ConnectionType, BindingHolder<ItemConnectionTypeBinding>>(ConnectionTypeDiffCallback()),
+internal class ByteProtocolAdapter(var selectedValue: ByteProtocol?) :
+        ListAdapter<ByteProtocol, BindingHolder<ItemByteProtocolBinding>>(ByteProtocolDiffCallback()),
         View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-    var list: List<ConnectionType>? = null
+    var list: List<ByteProtocol>? = null
     private val CHECKED_CHANGE = 1
 
-    override fun onBindViewHolder(holder: BindingHolder<ItemConnectionTypeBinding>, position: Int) {
+    override fun onBindViewHolder(holder: BindingHolder<ItemByteProtocolBinding>, position: Int) {
         val sp = getItem(position)
         holder.binding.ct = sp
         holder.binding.radioButton.isChecked = sp == selectedValue
     }
 
-    override fun onBindViewHolder(holder: BindingHolder<ItemConnectionTypeBinding>, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: BindingHolder<ItemByteProtocolBinding>, position: Int, payloads: MutableList<Any>) {
         if (payloads.size > 0 && payloads.all { it == CHECKED_CHANGE }) {
             val value = getItem(position)
             holder.binding.radioButton.setOnCheckedChangeListener(null)
@@ -50,16 +50,16 @@ internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingHolder<ItemConnectionTypeBinding> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BindingHolder<ItemByteProtocolBinding> {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemConnectionTypeBinding.inflate(inflater, parent, false)
+        val binding = ItemByteProtocolBinding.inflate(inflater, parent, false)
         binding.root.tag = binding
         binding.root.setOnClickListener(this)
         return BindingHolder(binding)
     }
 
     override fun onClick(v: View) {
-        val binding = v.tag as ItemConnectionTypeBinding
+        val binding = v.tag as ItemByteProtocolBinding
         val previous = selectedValue
         selectedValue = binding.ct
 
@@ -77,42 +77,44 @@ internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
         onClick(v?.parent as View)
     }
 
-    override fun submitList(list: List<ConnectionType>?) {
+    override fun submitList(list: List<ByteProtocol>?) {
         this.list = list
         super.submitList(list)
     }
 }
 
-class ChooseConnectionTypeFragment : SetupFragment() {
-
+class ChooseByteProtocolFragment : SetupFragment() {
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_choose_connection_type, container, false)
+        val view = inflater.inflate(R.layout.fragment_choose_byte_protocol, container, false)
 
         val current = (activity as PrinterSetupActivity).settingsStagingArea.get(
-                "hardware_${useCase}printer_connection"
-        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_connection", "")
+                "hardware_${useCase}printer_mode"
+        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_mode", "")
 
-        val adapter = ConnectionTypeAdapter(connectionTypes.firstOrNull {
+        val adapter = ByteProtocolAdapter(protocols.firstOrNull {
             it.identifier == current
         })
         val layoutManager = androidx.recyclerview.widget.LinearLayoutManager(activity)
 
-        adapter.submitList(connectionTypes.filter {
+        adapter.submitList(protocols.filter {
             it.allowedForUsecase(useCase)
         })
         view.findViewById<RecyclerView>(R.id.list).adapter = adapter
         view.findViewById<RecyclerView>(R.id.list).layoutManager = layoutManager
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             if (adapter.selectedValue != null) {
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_connection", adapter.selectedValue!!.identifier)
-                (activity as PrinterSetupActivity).startConnectionSettings()
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_mode", adapter.selectedValue!!.identifier)
+                (activity as PrinterSetupActivity).startProtocolSettings()
             } else {
                 toast(R.string.error_no_choice).show()
             }
+        }
+        view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
+            (activity as PrinterSetupActivity).startConnectionSettings()
         }
 
         return view
