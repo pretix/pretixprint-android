@@ -16,7 +16,6 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.bt.BtEvent
 import eu.pretix.pretixprint.bt.BtService
 import eu.pretix.pretixprint.bt.State
-import eu.pretix.pretixprint.print.BluetoothPrintService
 import kotlinx.android.synthetic.main.activity_find_bluetooth.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -195,8 +194,6 @@ class FindBluetoothPrinterFragment : PrinterFragment() {
                 }
                 asset.close()
                 output.close()
-
-                BluetoothPrintService(ctx, getType()).testPrinter(file, editText_mac.text.toString())
 
                 file.delete()
 

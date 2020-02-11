@@ -16,7 +16,9 @@
         android:logo="@drawable/ic_logo"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.PrinterSetupActivity"></activity>
+        <activity
+            android:name=".ui.PrinterSetupActivity"
+            android:parentActivityName=".ui.SettingsActivity"></activity>
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_activity_main">
@@ -29,10 +31,6 @@
         <activity
             android:name=".ui.WelcomeActivity"
             android:label="@string/title_activity_main"></activity>
-        <activity
-            android:name=".ui.FindPrinterActivity"
-            android:label="@string/title_activity_main"
-            android:parentActivityName=".ui.SettingsActivity"></activity>
 
         <service
             android:name=".print.PrintService"

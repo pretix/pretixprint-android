@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.jetbrains.anko.ctx
@@ -141,7 +142,7 @@ class PrintService : IntentService("PrintService") {
                 NetworkConnection().print(tmpfile, pages.size, this, type, null)
             }
             "bluetooth_printer" -> {
-                BluetoothPrintService(this, type).print(tmpfile, pages.size)
+                BluetoothConnection().print(tmpfile, pages.size, this, type, null)
             }
         }
 
