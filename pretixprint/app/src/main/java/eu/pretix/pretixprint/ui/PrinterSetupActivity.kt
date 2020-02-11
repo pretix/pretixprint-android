@@ -23,6 +23,10 @@ class PrinterSetupActivity : AppCompatActivity() {
     lateinit var fragment: SetupFragment
     lateinit var useCase: String
 
+    fun mode(): String {
+        return settingsStagingArea.get("hardware_${useCase}printer_connection") ?: ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)

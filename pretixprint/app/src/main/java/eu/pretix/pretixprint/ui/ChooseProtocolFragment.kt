@@ -17,20 +17,20 @@ import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.toast
 
 
-class ByteProtocolDiffCallback : DiffUtil.ItemCallback<ByteProtocol>() {
-    override fun areItemsTheSame(oldItem: ByteProtocol, newItem: ByteProtocol): Boolean {
+class ByteProtocolDiffCallback : DiffUtil.ItemCallback<ByteProtocol<*>>() {
+    override fun areItemsTheSame(oldItem: ByteProtocol<*>, newItem: ByteProtocol<*>): Boolean {
         return oldItem.identifier == newItem.identifier
     }
 
-    override fun areContentsTheSame(oldItem: ByteProtocol, newItem: ByteProtocol): Boolean {
+    override fun areContentsTheSame(oldItem: ByteProtocol<*>, newItem: ByteProtocol<*>): Boolean {
         return oldItem.identifier == newItem.identifier
     }
 }
 
-internal class ByteProtocolAdapter(var selectedValue: ByteProtocol?) :
-        ListAdapter<ByteProtocol, BindingHolder<ItemByteProtocolBinding>>(ByteProtocolDiffCallback()),
+internal class ByteProtocolAdapter(var selectedValue: ByteProtocol<*>?) :
+        ListAdapter<ByteProtocol<*>, BindingHolder<ItemByteProtocolBinding>>(ByteProtocolDiffCallback()),
         View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-    var list: List<ByteProtocol>? = null
+    var list: List<ByteProtocol<*>>? = null
     private val CHECKED_CHANGE = 1
 
     override fun onBindViewHolder(holder: BindingHolder<ItemByteProtocolBinding>, position: Int) {
@@ -77,7 +77,7 @@ internal class ByteProtocolAdapter(var selectedValue: ByteProtocol?) :
         onClick(v?.parent as View)
     }
 
-    override fun submitList(list: List<ByteProtocol>?) {
+    override fun submitList(list: List<ByteProtocol<*>>?) {
         this.list = list
         super.submitList(list)
     }

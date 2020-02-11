@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
@@ -68,7 +69,11 @@ class PrintService : IntentService("PrintService") {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action)
         //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
-        val renderer = if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"}
+        val renderer = if (type == "receipt") {
+            "ESCPOS"
+        } else {
+            "WYSIWYG"
+        }
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
@@ -133,7 +138,7 @@ class PrintService : IntentService("PrintService") {
 
         when (connection) {
             "network_printer" -> {
-                NetworkPrintService(this, type, mode).print(tmpfile, pages.size)
+                NetworkConnection().print(tmpfile, pages.size, this, type, null)
             }
             "bluetooth_printer" -> {
                 BluetoothPrintService(this, type).print(tmpfile, pages.size)
@@ -143,7 +148,7 @@ class PrintService : IntentService("PrintService") {
     }
 
     private fun getType(intentAction: String): String {
-        return when(intentAction) {
+        return when (intentAction) {
             "eu.pretix.pretixpos.print.PRINT_TICKET" -> {
                 "ticket"
             }

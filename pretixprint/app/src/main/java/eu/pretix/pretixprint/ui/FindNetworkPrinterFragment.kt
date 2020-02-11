@@ -15,9 +15,6 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.print.getPrinter
-import eu.pretix.pretixprint.socket.FGLNetworkPrinter
-import eu.pretix.pretixprint.socket.PlaintextNetworkPrinter
-import eu.pretix.pretixprint.socket.SLCSNetworkPrinter
 import kotlinx.android.synthetic.main.activity_find_network.*
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
@@ -234,21 +231,6 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                         }
                         asset.close()
                         output.close()
-
-                        if (mode == "SLCS") {
-                            SLCSNetworkPrinter(
-                                    editText_ip.text.toString(),
-                                    Integer.valueOf(editText_port.text.toString()),
-                                    Integer.valueOf(editText_dpi.text.toString())
-                            ).printPDF(file, 1)
-                        } else {
-                            FGLNetworkPrinter(
-                                    editText_ip.text.toString(),
-                                    Integer.valueOf(editText_port.text.toString()),
-                                    Integer.valueOf(editText_dpi.text.toString()),
-                                    diffRendering = false  // Stimare can't do it…
-                            ).printPDF(file, 1)
-                        }
                         file.delete()
 
                         runOnUiThread {
@@ -319,11 +301,6 @@ class FindNetworkPrinterFragment : PrinterFragment() {
                         asset.close()
                         output.close()
 
-                        PlaintextNetworkPrinter(
-                                editText_ip.text.toString(),
-                                Integer.valueOf(editText_port.text.toString()),
-                                Integer.valueOf(editText_dpi.text.toString())
-                        ).send(file)
                         file.delete()
 
                         runOnUiThread {
