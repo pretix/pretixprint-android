@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.connections
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -11,7 +12,6 @@ import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class BluetoothConnection : ConnectionType {
     override val identifier = "bluetooth_printer"
@@ -33,10 +33,22 @@ class BluetoothConnection : ConnectionType {
         }
         val mode = getSetting("hardware_${type}printer_mode", "FGL")
         val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(getSetting("hardware_${type}printer_ip", ""))
-        val socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
-        socket.connect()
-        val ostream = socket.outputStream
-        val istream = socket.inputStream
+
+        // Yes, unfortunately this is necessary when using Services/IntentServices to connect to BT devices.
+        val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+        val clazz = socket.remoteDevice.javaClass
+        val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
+        val m = clazz.getMethod("createRfcommSocket", *paramTypes)
+        val fallbackSocket = m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
+        try {
+            fallbackSocket.connect()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw PrintException(context.applicationContext.getString(R.string.err_files_generic, e.message));
+        }
+
+        val ostream = fallbackSocket.outputStream
+        val istream = fallbackSocket.inputStream
         try {
             escpos = tmpfile.readBytes()
 
