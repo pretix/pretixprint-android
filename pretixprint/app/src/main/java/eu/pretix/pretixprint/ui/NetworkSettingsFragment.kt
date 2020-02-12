@@ -26,7 +26,7 @@ class NetworkSettingsFragment : SetupFragment() {
 
         val currentPort = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_port"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_port", "910")
+        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_port", "9100")
         view.findViewById<TextInputEditText>(R.id.tePort).setText(currentPort)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
