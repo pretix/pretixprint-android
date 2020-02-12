@@ -142,7 +142,8 @@ class PrintService : IntentService("PrintService") {
                 NetworkConnection().print(tmpfile, pages.size, this, type, null)
             }
             "bluetooth_printer" -> {
-                BluetoothConnection().print(tmpfile, pages.size, this, type, null)
+                //BluetoothConnection().print(tmpfile, pages.size, this, type, null)
+                BluetoothConnection().print(tmpfile, 1, this, type, null)
             }
         }
 
