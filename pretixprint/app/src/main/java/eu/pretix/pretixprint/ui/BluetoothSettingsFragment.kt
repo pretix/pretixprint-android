@@ -43,11 +43,6 @@ class BluetoothSettingsFragment : SetupFragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_bluetooth_settings, container, false)
 
-        when (currentState) {
-            State.Paired -> activity!!.applicationContext.stopService(Intent(activity!!.applicationContext, BtService::class.java))
-            else -> queuePairedDevices()
-        }
-
         EventBus.getDefault().register(this)
         goToState(State.Idle)
 
@@ -81,6 +76,15 @@ class BluetoothSettingsFragment : SetupFragment() {
         }
 
         return view
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        when (currentState) {
+            State.Paired -> activity!!.applicationContext.stopService(Intent(activity!!.applicationContext, BtService::class.java))
+            else -> queuePairedDevices()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
