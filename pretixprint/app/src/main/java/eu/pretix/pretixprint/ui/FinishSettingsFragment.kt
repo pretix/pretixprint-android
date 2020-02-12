@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.act
@@ -37,6 +38,24 @@ class FinishSettingsFragment : SetupFragment() {
         return file
     }
 
+    fun writeDemoTxt(): File {
+        val file = File(ctx.cacheDir, "demopage.txt")
+        if (file.exists()) {
+            file.delete()
+        }
+        val asset = ctx.assets.open("demopage.txt")
+        val output = FileOutputStream(file)
+        val buffer = ByteArray(1024)
+        var size = asset.read(buffer)
+        while (size != -1) {
+            output.write(buffer, 0, size)
+            size = asset.read(buffer)
+        }
+        asset.close()
+        output.close()
+        return file
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -46,11 +65,20 @@ class FinishSettingsFragment : SetupFragment() {
         val activity = activity as PrinterSetupActivity
 
         view.findViewById<Button>(R.id.btnTestPage).setOnClickListener {
-            if (activity.mode() == NetworkConnection().identifier) {
-                doAsync {
-                    NetworkConnection().print(writeDemoPdf(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+            when (activity.mode()) {
+                NetworkConnection().identifier -> {
+                    doAsync {
+                        NetworkConnection().print(writeDemoPdf(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                    }
+                }
+                BluetoothConnection().identifier -> {
+                    doAsync {
+                        BluetoothConnection().print(writeDemoTxt(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                    }
                 }
             }
+
+            // TODO: Better decision, what kind of demopage we're sending
             // TODO: progress bar
             // TODO: other connections
         }
