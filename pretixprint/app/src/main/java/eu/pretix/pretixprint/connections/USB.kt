@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.*
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -17,6 +18,7 @@ import eu.pretix.pretixprint.byteprotocols.SLCS
 import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.*
+import java.nio.charset.Charset
 import kotlin.experimental.and
 
 
@@ -135,6 +137,7 @@ class USBConnection : ConnectionType {
                     System.arraycopy(buffer, offset, sndPkt!!, 0, length)
                     val snd = mUsbConnection.bulkTransfer(mUsbEndpoint, sndPkt, length, mTimeout)
                     if (snd < 0) throw IOException("bulkTransfer() failed")
+                    Log.i("SNDUSB", "package $offset ($length): ${sndPkt!!.toString(Charset.defaultCharset())}|")
                     count -= snd
                     offset += snd
                 }
@@ -167,66 +170,72 @@ class USBConnection : ConnectionType {
         if (devices.size != 1) {
             throw PrintException(context.getString(R.string.err_printer_not_found, serial))
         }
+        var done = false
+        val start = System.currentTimeMillis()
 
         val recv = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                context.unregisterReceiver(this)
-                if (ACTION_USB_PERMISSION == intent.action) {
-                    synchronized(this) {
-                        val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            val intf = device!!.getInterface(0)  // TODO: does this work for all supported devices?
-                            var endpoint_out: UsbEndpoint? = null
-                            var endpoint_in: UsbEndpoint? = null
-                            for (epid in 0 until intf.endpointCount) {
-                                val endpoint = intf.getEndpoint(epid)
-                                if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_OUT) {
-                                    endpoint_out = endpoint
+                try {
+                    context.unregisterReceiver(this)
+                    if (ACTION_USB_PERMISSION == intent.action) {
+                        synchronized(this) {
+                            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                                val intf = device!!.getInterface(0)  // TODO: does this work for all supported devices?
+                                var endpoint_out: UsbEndpoint? = null
+                                var endpoint_in: UsbEndpoint? = null
+                                for (epid in 0 until intf.endpointCount) {
+                                    val endpoint = intf.getEndpoint(epid)
+                                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_OUT) {
+                                        endpoint_out = endpoint
+                                    }
+                                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_IN) {
+                                        endpoint_in = endpoint
+                                    }
                                 }
-                                if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_IN) {
-                                    endpoint_in = endpoint
+                                val conn = manager.openDevice(device)
+                                        ?: throw PrintException(context.getString(R.string.err_usb_connection))
+                                conn.claimInterface(intf, true)
+                                if (endpoint_in == null || endpoint_out == null) {
+                                    throw PrintException(context.getString(R.string.err_usb_connection))
                                 }
-                            }
-                            val conn = manager.openDevice(device)
-                                    ?: throw PrintException(context.getString(R.string.err_usb_connection))
-                            conn.claimInterface(intf, true)
-                            if (endpoint_in == null || endpoint_out == null) {
-                                throw PrintException(context.getString(R.string.err_usb_connection))
-                            }
 
-                            val istream = UsbSerialInputStream(conn, endpoint_in)
-                            val ostream = UsbSerialOutputStream(conn, endpoint_out)
-                            try {
-                                if (mode == "FGL") {
-                                    val proto = FGL()
-                                    val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                    proto.send(futures, istream, ostream)
-                                } else if (mode == "SLCS") {
-                                    val proto = SLCS()
-                                    val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                    proto.send(futures, istream, ostream)
-                                } else if (mode == "ESC/POS") {
-                                    val proto = ESCPOS()
-                                    val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                    proto.send(futures, istream, ostream)
+                                val istream = UsbSerialInputStream(conn, endpoint_in)
+                                val ostream = UsbSerialOutputStream(conn, endpoint_out)
+                                try {
+                                    if (mode == "FGL") {
+                                        val proto = FGL()
+                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
+                                        proto.send(futures, istream, ostream)
+                                    } else if (mode == "SLCS") {
+                                        val proto = SLCS()
+                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
+                                        proto.send(futures, istream, ostream)
+                                    } else if (mode == "ESC/POS") {
+                                        val proto = ESCPOS()
+                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
+                                        proto.send(futures, istream, ostream)
+                                    }
+                                } catch (e: PrintError) {
+                                    e.printStackTrace()
+                                    throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                } catch (e: IOException) {
+                                    e.printStackTrace()
+                                    throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                } finally {
+                                    istream.close()
+                                    ostream.close()
+                                    conn.releaseInterface(intf)
+                                    conn.close()
                                 }
-                            } catch (e: PrintError) {
-                                e.printStackTrace()
-                                throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                            } catch (e: IOException) {
-                                e.printStackTrace()
-                                throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                            } finally {
-                                istream.close()
-                                ostream.close()
-                                conn.releaseInterface(intf)
-                                conn.close()
-                            }
 
-                        } else {
-                            throw PrintException(context.getString(R.string.err_usb_permission_denied))
+                            } else {
+                                throw PrintException(context.getString(R.string.err_usb_permission_denied))
+                            }
                         }
                     }
+                } finally {
+                    done = true
                 }
             }
         }
@@ -235,6 +244,11 @@ class USBConnection : ConnectionType {
         context.registerReceiver(recv, filter)
         val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), 0)
         manager.requestPermission(devices.values.first(), permissionIntent)
-
+        while (!done && System.currentTimeMillis() - start < 30000) {
+            // Wait for callback to be called
+            Thread.sleep(50)
+        }
+        Thread.sleep(1000)
+        Log.i("SNDUSB", "END OF MAIN THREAD")
     }
 }
