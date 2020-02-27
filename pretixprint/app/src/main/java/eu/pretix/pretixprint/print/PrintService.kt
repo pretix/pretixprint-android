@@ -12,6 +12,7 @@ import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
+import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.jetbrains.anko.ctx
@@ -139,7 +140,14 @@ class PrintService : IntentService("PrintService") {
 
         when (connection) {
             "network_printer" -> {
+                if (mode == "CUPS/IPP") {
+                    // Backwards compatibility
+                    CUPSConnection().print(tmpfile, pages.size, this, type, null)
+                }
                 NetworkConnection().print(tmpfile, pages.size, this, type, null)
+            }
+            "cups" -> {
+                CUPSConnection().print(tmpfile, pages.size, this, type, null)
             }
             "bluetooth_printer" -> {
                 //BluetoothConnection().print(tmpfile, pages.size, this, type, null)

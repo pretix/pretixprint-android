@@ -10,6 +10,7 @@ import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
+import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.act
@@ -74,6 +75,11 @@ class FinishSettingsFragment : SetupFragment() {
                 BluetoothConnection().identifier -> {
                     doAsync {
                         BluetoothConnection().print(writeDemoTxt(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                    }
+                }
+                CUPSConnection().identifier -> {
+                    doAsync {
+                        CUPSConnection().print(writeDemoPdf(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
                     }
                 }
             }

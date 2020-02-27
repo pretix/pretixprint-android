@@ -48,6 +48,8 @@
     <string name="button_label_test">Print test page</string>
     <string name="bluetooth_printer">Bluetooth Printer</string>
     <string name="network_printer">Network Printer</string>
+    <string name="cups">CUPS/IPP</string>
+    <string name="usb">USB</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
     <string name="field_label_macaddress">MAC address</string>
     <string name="err_not_supported">Not supported</string>

@@ -47,6 +47,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragment = when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
+            CUPSConnection().identifier -> CUPSSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }
         fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
