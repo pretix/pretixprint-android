@@ -1,21 +1,16 @@
 package eu.pretix.pretixprint.ui
 
-import android.content.Context
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.support.v4.act
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import java.io.File
 import java.io.FileOutputStream
 
