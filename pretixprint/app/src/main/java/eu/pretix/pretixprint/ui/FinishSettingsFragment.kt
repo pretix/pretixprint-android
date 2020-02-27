@@ -1,14 +1,17 @@
 package eu.pretix.pretixprint.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.ctx
 import java.io.File
@@ -61,20 +64,33 @@ class FinishSettingsFragment : SetupFragment() {
         val activity = activity as PrinterSetupActivity
 
         view.findViewById<Button>(R.id.btnTestPage).setOnClickListener {
+            val file = when (activity.useCase) {
+                "receipt" -> writeDemoTxt()
+                else -> writeDemoPdf()
+            }
             when (activity.mode()) {
                 NetworkConnection().identifier -> {
                     doAsync {
-                        NetworkConnection().print(writeDemoPdf(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                        NetworkConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
                     }
                 }
                 BluetoothConnection().identifier -> {
                     doAsync {
-                        BluetoothConnection().print(writeDemoTxt(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                        BluetoothConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
                     }
                 }
                 CUPSConnection().identifier -> {
                     doAsync {
-                        CUPSConnection().print(writeDemoPdf(), 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                        CUPSConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                    }
+                }
+                USBConnection().identifier -> {
+                    doAsync {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            USBConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                        } else {
+                            throw Exception("USB not supported on this Android version.")
+                        }
                     }
                 }
             }

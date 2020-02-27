@@ -29,7 +29,7 @@
         android:text="@string/btn_next"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tilMAC"
+        app:layout_constraintTop_toBottomOf="@+id/tilSerial"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
@@ -43,11 +43,11 @@
         app:layout_constraintEnd_toStartOf="@+id/btnNext"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tilMAC"
+        app:layout_constraintTop_toBottomOf="@+id/tilSerial"
         app:layout_constraintVertical_bias="1.0" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilMAC"
+        android:id="@+id/tilSerial"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -58,10 +58,10 @@
         app:layout_constraintTop_toBottomOf="@+id/btnAuto">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/teMAC"
+            android:id="@+id/teSerial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/field_label_macaddress"
+            android:hint="@string/field_label_serial"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 

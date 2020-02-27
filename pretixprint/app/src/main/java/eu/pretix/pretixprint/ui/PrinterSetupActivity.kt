@@ -10,6 +10,7 @@ import eu.pretix.pretixprint.byteprotocols.SLCS
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import org.jetbrains.anko.defaultSharedPreferences
 import java.lang.RuntimeException
 
@@ -47,6 +48,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragment = when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
+            USBConnection().identifier -> USBSettingsFragment()
             CUPSConnection().identifier -> CUPSSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }

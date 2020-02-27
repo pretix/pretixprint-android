@@ -30,6 +30,7 @@
     <string name="welcome_tutorial2">Currently, pretixPRINT knows how to talk to printers supporting IPP or shared with CUPS, i.e. all printers shared by a macOS or Linux computer and most modern printers with a network interface.</string>
     <string name="action_configure">Start finding a printer</string>
     <string name="headline_found_network_printers">Found network printers</string>
+    <string name="headline_found_usb_devices">Found USB devices</string>
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
@@ -51,7 +52,10 @@
     <string name="cups">CUPS/IPP</string>
     <string name="usb">USB</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
+    <string name="err_usb_permission_denied">USB permission has been denied</string>
+    <string name="err_usb_connection">USB connection failed</string>
     <string name="field_label_macaddress">MAC address</string>
+    <string name="field_label_serial">Serial number</string>
     <string name="err_not_supported">Not supported</string>
     <string name="btn_auto">Auto-detected</string>
     <string-array name="printer_modes"></string-array>

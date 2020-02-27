@@ -14,6 +14,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
@@ -150,8 +151,14 @@ class PrintService : IntentService("PrintService") {
                 CUPSConnection().print(tmpfile, pages.size, this, type, null)
             }
             "bluetooth_printer" -> {
-                //BluetoothConnection().print(tmpfile, pages.size, this, type, null)
                 BluetoothConnection().print(tmpfile, 1, this, type, null)
+            }
+            "usb" -> {
+                if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    USBConnection().print(tmpfile, 1, this, type, null)
+                } else {
+                    throw PrintException("USB not supported on this Android version.")
+                }
             }
         }
 
