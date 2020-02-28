@@ -58,10 +58,14 @@ class CUPSSettingsFragment : SetupFragment() {
 
     private val discoveryListener = object : NsdManager.DiscoveryListener {
         override fun onDiscoveryStarted(regType: String) {
+            if (activity == null)
+                return
             Log.d(TAG, "Service discovery started")
         }
 
         override fun onServiceFound(service: NsdServiceInfo) {
+            if (activity == null)
+                return
             if (service.serviceType == SERVICE_TYPE) {
                 Log.d(TAG, "Service discovery success: $service")
                 synchronized(services) {
@@ -87,6 +91,8 @@ class CUPSSettingsFragment : SetupFragment() {
         override fun onServiceLost(service: NsdServiceInfo) {
             // When the network service is no longer available.
             // Internal bookkeeping code goes here.
+            if (activity == null)
+                return
             Log.e(TAG, "Service lost: $service")
             synchronized(services) {
                 for (serv in services) {
@@ -102,18 +108,24 @@ class CUPSSettingsFragment : SetupFragment() {
 
         override fun onDiscoveryStopped(serviceType: String) {
             Log.i(TAG, "Discovery stopped: $serviceType")
+            if (activity == null)
+                return
             runOnUiThread {
                 view?.findViewById<Button>(R.id.btnAuto)?.isEnabled = services.isNotEmpty()
             }
         }
 
         override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
+            if (activity == null)
+                return
             Log.e(TAG, "Discovery failed: Error code:$errorCode")
             // TODO: Toast/Snackbar
             nsdManager.stopServiceDiscovery(this)
         }
 
         override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {
+            if (activity == null)
+                return
             Log.e(TAG, "Discovery failed: Error code:$errorCode")
             // TODO: Toast/Snackbar
             nsdManager.stopServiceDiscovery(this)
