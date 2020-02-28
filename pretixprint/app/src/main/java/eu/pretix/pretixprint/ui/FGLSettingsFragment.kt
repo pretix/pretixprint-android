@@ -25,7 +25,7 @@ class FGLSettingsFragment : SetupFragment() {
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startProtocolChoice()
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
@@ -42,5 +42,9 @@ class FGLSettingsFragment : SetupFragment() {
         }
 
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startProtocolChoice()
     }
 }

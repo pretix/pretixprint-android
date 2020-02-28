@@ -114,9 +114,13 @@ class ChooseByteProtocolFragment : SetupFragment() {
             }
         }
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startConnectionSettings()
+            back()
         }
 
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startConnectionSettings()
     }
 }

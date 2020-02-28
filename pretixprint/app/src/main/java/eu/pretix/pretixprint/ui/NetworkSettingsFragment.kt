@@ -30,7 +30,7 @@ class NetworkSettingsFragment : SetupFragment() {
         view.findViewById<TextInputEditText>(R.id.tePort).setText(currentPort)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startConnectionChoice()
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val ip = view.findViewById<TextInputEditText>(R.id.teIP).text.toString()
@@ -55,5 +55,9 @@ class NetworkSettingsFragment : SetupFragment() {
         }
 
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startConnectionChoice()
     }
 }

@@ -58,7 +58,7 @@ class USBSettingsFragment : SetupFragment() {
         view.findViewById<TextInputEditText>(R.id.teSerial).setText(currentSerial)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startConnectionChoice()
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val serial = view.findViewById<TextInputEditText>(R.id.teSerial).text.toString()
@@ -92,5 +92,9 @@ class USBSettingsFragment : SetupFragment() {
     override fun onPause() {
         super.onPause()
         context?.unregisterReceiver(usbReceiver)
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startConnectionChoice()
     }
 }

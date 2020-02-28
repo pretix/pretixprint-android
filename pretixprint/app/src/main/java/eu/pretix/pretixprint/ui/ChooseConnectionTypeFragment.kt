@@ -117,4 +117,8 @@ class ChooseConnectionTypeFragment : SetupFragment() {
 
         return view
     }
+
+    override fun back() {
+        activity?.finish()
+    }
 }

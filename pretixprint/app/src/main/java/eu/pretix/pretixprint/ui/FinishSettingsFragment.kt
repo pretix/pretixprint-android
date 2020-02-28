@@ -100,7 +100,7 @@ class FinishSettingsFragment : SetupFragment() {
             // TODO: other connections
         }
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            activity.startProtocolSettings(true)
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             activity.save()
@@ -108,5 +108,9 @@ class FinishSettingsFragment : SetupFragment() {
         }
 
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startProtocolSettings(true)
     }
 }

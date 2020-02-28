@@ -174,7 +174,7 @@ class CUPSSettingsFragment : SetupFragment() {
         view.findViewById<TextInputEditText>(R.id.teQueue).setText(currentName)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startConnectionChoice()
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val ip = view.findViewById<TextInputEditText>(R.id.teIP).text.toString()
@@ -214,5 +214,9 @@ class CUPSSettingsFragment : SetupFragment() {
             }
         }
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startConnectionChoice()
     }
 }

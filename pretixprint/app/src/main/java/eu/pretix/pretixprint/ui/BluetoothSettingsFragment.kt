@@ -48,7 +48,7 @@ class BluetoothSettingsFragment : SetupFragment() {
         view.findViewById<TextInputEditText>(R.id.teMAC).setText(currentIP)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
-            (activity as PrinterSetupActivity).startConnectionChoice()
+            back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val mac = view.findViewById<TextInputEditText>(R.id.teMAC).text.toString()
@@ -63,6 +63,10 @@ class BluetoothSettingsFragment : SetupFragment() {
         }
 
         return view
+    }
+
+    override fun back() {
+        (activity as PrinterSetupActivity).startConnectionChoice()
     }
 }
 

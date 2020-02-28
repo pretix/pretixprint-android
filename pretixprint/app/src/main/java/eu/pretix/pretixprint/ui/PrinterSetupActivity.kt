@@ -72,7 +72,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         }
     }
 
-    fun startProtocolSettings(is_back: Boolean=false) {
+    fun startProtocolSettings(is_back: Boolean = false) {
         if (is_back && settingsStagingArea.get("hardware_${useCase}printer_connection") == CUPSConnection().identifier) {
             // For proper backwards navigation from final page
             return startConnectionSettings()
@@ -108,8 +108,14 @@ class PrinterSetupActivity : AppCompatActivity() {
             defaultSharedPreferences.edit().putString(p.key, p.value).apply()
         }
     }
+
+    override fun onBackPressed() {
+        fragment.back()
+    }
 }
 
 abstract class SetupFragment : Fragment() {
     var useCase: String = "unknown"
+
+    abstract fun back()
 }
