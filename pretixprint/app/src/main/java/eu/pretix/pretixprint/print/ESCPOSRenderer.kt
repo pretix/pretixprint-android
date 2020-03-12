@@ -185,6 +185,23 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             }
             "paymentlines" -> {
                 when (receipt.getString("payment_type")) {
+                    "square_pos" -> {
+                        emphasize(true)
+                        text(ctx.getString(R.string.receiptline_paidcard))
+                        newline()
+                        emphasize(false)
+                        val payment_data = receipt.getJSONObject("payment_data")
+                        // These two could have been splitlines - but I'm too lazy to fix the splitline() function to work properly with these UUIDs
+                        text("LID: ")
+                        text(payment_data.getString("client_transactionId"))
+                        newline()
+                        if (payment_data.has("server_transactionId")) {
+                            text("SID: ")
+                            text(payment_data.getString("server_transactionId"))
+                            newline()
+                        }
+                        newline()
+                    }
                     "stripe_terminal" -> {
                         emphasize(true)
                         text(ctx.getString(R.string.receiptline_paidcard))
