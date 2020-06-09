@@ -2,6 +2,7 @@ package eu.pretix.pretixprint.print
 
 import android.content.Context
 import eu.pretix.pretixprint.R
+import org.joda.time.format.ISODateTimeFormat
 import org.json.JSONException
 import org.json.JSONObject
 import java.text.DateFormat
@@ -377,10 +378,9 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     private fun getDate(date: String) : String {
         val dfOut = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
         dfOut.timeZone = TimeZone.getDefault()
+        val parser = ISODateTimeFormat.dateTimeParser()
         return dfOut.format(
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mmX").parse(
-                    date.replace("Z", "+00:00")
-            )
+                parser.parseDateTime(date).toLocalDateTime().toDate()
         )
     }
 
