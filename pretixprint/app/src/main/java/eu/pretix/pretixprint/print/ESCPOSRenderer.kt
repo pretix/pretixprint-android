@@ -7,7 +7,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
@@ -246,6 +245,44 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
                         newline(2)
                         mode(doubleheight = true, doublewidth = true)
                         text(payment_data.getString("status"), CENTER)
+                        newline(2)
+                        mode()
+                        text(ctx.getString(R.string.receiptline_keepreceipt), CENTER)
+                        newline(2)
+                        text("-".repeat(charsPerLine), CENTER); newline()
+                    }
+                    "izettle" -> {
+                        val payment_data = receipt.getJSONObject("payment_data")
+                        text("-".repeat(charsPerLine), CENTER)
+                        newline(2)
+                        emphasize(true)
+                        text(ctx.getString(R.string.receiptline_customerreceipt), CENTER);
+                        newline(2)
+                        emphasize(false)
+                        //splitline(ctx.getString(R.string.receiptline_merchantid), payment_data.getString("merchant_code")); newline()
+                        //splitline(ctx.getString(R.string.receiptline_transactionid), payment_data.getString("tx_code")); newline()
+                        //splitline(ctx.getString(R.string.receiptline_terminalid), payment_data.getString("")); newline()
+                        //splitline(ctx.getString(R.string.receiptline_receiptnumber), payment_data.getString("")); newline()
+                        //newline()
+                        text(payment_data.getString("applicationName")); newline()
+                        text(payment_data.getString("maskedPan")); newline()
+                        //text("Max Mustermann"); newline()
+                        text(payment_data.getString("cardPaymentEntryMode"))
+                        newline(2)
+                        mode(doubleheight = true, doublewidth = true)
+                        text(ctx.getString(R.string.receiptline_paymentreceipt), CENTER); newline()
+                        mode()
+                        text(getDate(receipt.getString("datetime_closed")), CENTER)
+                        newline(2)
+                        emphasize(true)
+                        splitline(ctx.getString(R.string.receiptline_amount), receipt.getString("currency") + " " + DecimalFormat("0.00").format(calcTotal())); newline()
+                        newline(2)
+                        emphasize(false)
+                        text(ctx.getString(R.string.receiptline_cardissuerpaymenttext), CENTER)
+                        newline(2)
+                        mode(doubleheight = true, doublewidth = true)
+                        text(payment_data.getString("authorizationCode"), CENTER); newline()
+                        text(payment_data.getString("tvr"), CENTER)
                         newline(2)
                         mode()
                         text(ctx.getString(R.string.receiptline_keepreceipt), CENTER)
