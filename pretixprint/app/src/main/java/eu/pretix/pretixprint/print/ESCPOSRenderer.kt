@@ -83,6 +83,11 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             IndiaPunjabi(75),
             IndiaMarathi(82)
         }
+
+        enum class Cashdrawer(val number: Int) {
+            Drawer1(0),
+            Drawer2(1)
+        }
     }
 
 
@@ -101,6 +106,9 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
 
         newline(4)
         cut()
+        opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
+        opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
+
         return out.toByteArray()
     }
 
@@ -591,5 +599,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         } else {
             out.add(0)
         }
+    }
+
+    private fun opencashdrawer(drawer: Int, durationOn: Int, durationOff: Int) {
+        out.add(ESC)
+        out.add('p'.toByte())
+        out.add(drawer.toByte())
+        out.add(durationOn.toByte())
+        out.add(durationOff.toByte())
     }
 }
