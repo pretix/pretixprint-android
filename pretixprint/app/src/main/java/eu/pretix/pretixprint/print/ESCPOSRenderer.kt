@@ -9,20 +9,21 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.*
 
-class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine : Int, private val ctx: Context) {
+class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
     var taxrates = mutableListOf<String>()
     var taxvalues = mutableListOf<Double>()
     var reverseSale: Boolean = false
 
     companion object {
-        const val ESC : Byte = 0x1B
-        const val GS : Byte = 0x1D
-        const val FONTA : String = "a"
-        const val FONTB : String = "b"
-        const val LEFT : String = "left"
-        const val CENTER : String = "center"
-        const val RIGHT : String = "right"
+        const val ESC: Byte = 0x1B
+        const val GS: Byte = 0x1D
+        const val FONTA: String = "a"
+        const val FONTB: String = "b"
+        const val LEFT: String = "left"
+        const val CENTER: String = "center"
+        const val RIGHT: String = "right"
+
         enum class CharacterCodeTable(val codeTable: Int) {
             PC437(0),
             Katakana(1),
@@ -51,6 +52,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             UserDefined1(254),
             UserDefined2(255)
         }
+
         enum class InternationalCharacterSet(val country: Int) {
             USA(0),
             France(1),
@@ -72,7 +74,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             Vietnam(16),
             Arabia(17),
             IndiaDevanagari(66),
-            IndiaBengali (67),
+            IndiaBengali(67),
             IndiaTamil(68),
             IndiaTelugu(69),
             IndiaAssamese(70),
@@ -91,7 +93,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
     }
 
 
-    fun render() : ByteArray {
+    fun render(): ByteArray {
         out.clear()
         init()
         characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
@@ -104,30 +106,40 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             renderline(layoutLine)
         }
 
-        newline(4)
-        cut()
-        opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
-        opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
+        if (receipt.optBoolean("feedAfter", true)) {
+            newline(4)
+        }
+        if (receipt.optBoolean("cutAfter", true)) {
+            cut()
+        }
+        if (receipt.optBoolean("drawerAfter", true)) {
+            opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
+            opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
+        }
 
         return out.toByteArray()
     }
 
     private fun renderline(layoutLine: JSONObject) {
-        if (layoutLine.has("font")) {
-
-        }
+        val modekeys = listOf("font", "emph", "doubleheight", "doublewidth", "underline")
         when (layoutLine.getString("type")) {
             "textarea" -> {
                 val t = getText(layoutLine)
                 if (!t.isNullOrBlank()) {
-                    if (layoutLine.has("font")) {
-                        mode(layoutLine.getString("font"))
+                    if (modekeys.filter { layoutLine.has(it) }.isNotEmpty()) {
+                        mode(
+                                font = layoutLine.optString("font", "a"),
+                                emph = layoutLine.optBoolean("emph", false),
+                                doubleheight = layoutLine.optBoolean("doubleheight", false),
+                                doublewidth = layoutLine.optBoolean("doublewidth", false),
+                                underline = layoutLine.optBoolean("underline", false)
+                        )
                     }
                     text(
                             t,
                             if (layoutLine.has("align")) layoutLine.getString("align") else LEFT
                     )
-                    if (layoutLine.has("font")) {
+                    if (modekeys.filter { layoutLine.has(it) }.isNotEmpty()) {
                         mode()
                     }
                 }
@@ -183,7 +195,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
             "taxlines" -> {
                 processTaxes()
 
-                for (i in 0..(taxrates.count() -1)) {
+                for (i in 0..(taxrates.count() - 1)) {
                     splitline(
                             (i + 65).toChar() + " " + DecimalFormat("0.00").format(taxrates[i].toDouble()) + "%:",
                             DecimalFormat("0.00").format(taxvalues[i])
@@ -420,7 +432,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         return layoutLine.getString("text")
     }
 
-    private fun getDate(date: String) : String {
+    private fun getDate(date: String): String {
         val dfOut = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault())
         dfOut.timeZone = TimeZone.getDefault()
         val parser = ISODateTimeFormat.dateTimeParser()
@@ -429,7 +441,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         )
     }
 
-    private fun calcTotal() : Double {
+    private fun calcTotal(): Double {
         val positions = receipt.getJSONArray("positions")
         var total = 0.00
 
@@ -444,7 +456,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         return total
     }
 
-    private fun splitline(leftText : String, rightText: String, padding: Int = 2) {
+    private fun splitline(leftText: String, rightText: String, padding: Int = 2) {
         val limit = charsPerLine - rightText.length - padding
         val leftSplit = leftText.split(" ")
         var leftTextList = mutableListOf<String>()
@@ -478,7 +490,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         out.add('@'.toByte())
     }
 
-    private fun mode(font: String = "a", emph : Boolean = false, doubleheight : Boolean = false, doublewidth : Boolean = false, underline : Boolean = false) {
+    private fun mode(font: String = "a", emph: Boolean = false, doubleheight: Boolean = false, doublewidth: Boolean = false, underline: Boolean = false) {
         var modes = 0
 
         if (font == FONTB) {
@@ -510,7 +522,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         out.add(0x0A)
     }
 
-    private fun newline(lines : Int) {
+    private fun newline(lines: Int) {
         out.add(ESC)
         out.add('d'.toByte())
         out.add(lines.toByte())
@@ -567,19 +579,19 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         }
     }
 
-    private fun characterCodeTable(table : Int = 0) {
+    private fun characterCodeTable(table: Int = 0) {
         out.add(ESC)
         out.add('t'.toByte())
         out.add(table.toByte())
     }
 
-    private fun internationalCharacterSet(country : Int = 0) {
+    private fun internationalCharacterSet(country: Int = 0) {
         out.add(ESC)
         out.add('R'.toByte())
         out.add(country.toByte())
     }
 
-    private fun cut(partial : Boolean = false) {
+    private fun cut(partial: Boolean = false) {
         out.add(GS)
         out.add('V'.toByte())
 
@@ -590,7 +602,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine :
         }
     }
 
-    private fun emphasize(on : Boolean) {
+    private fun emphasize(on: Boolean) {
         out.add(ESC)
         out.add('E'.toByte())
 
