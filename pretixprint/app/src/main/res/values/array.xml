@@ -1,68 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="receipt_width">
-        <item>A</item>
-        <item>B</item>
-        <item>C</item>
-        <item>D</item>
-        <item>E</item>
-        <item>F</item>
-        <item>G</item>
-        <item>H</item>
-        <item>I</item>
-        <item>J</item>
-        <item>K</item>
-        <item>L</item>
-        <item>M</item>
-        <item>N</item>
-        <item>O</item>
-        <item>P</item>
-        <item>Q</item>
-        <item>R</item>
-        <item>S</item>
-        <item>T</item>
-        <item>U</item>
-        <item>V</item>
-        <item>W</item>
-        <item>X</item>
-        <item>Y</item>
-        <item>Z</item>
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>a</item>
-        <item>b</item>
-        <item>c</item>
-        <item>d</item>
-        <item>e</item>
-        <item>f</item>
-        <item>g</item>
-        <item>h</item>
-        <item>i</item>
-        <item>j</item>
-        <item>k</item>
-        <item>l</item>
-        <item>m</item>
-        <item>n</item>
-        <item>o</item>
-        <item>p</item>
-        <item>q</item>
-        <item>r</item>
-        <item>s</item>
-        <item>t</item>
-        <item>u</item>
-        <item>v</item>
-        <item>w</item>
-        <item>x</item>
-        <item>y</item>
-        <item>z</item>
+        <item>A / 1</item>
+        <item>B / 2</item>
+        <item>C / 3</item>
+        <item>D / 4</item>
+        <item>E / 5</item>
+        <item>F / 6</item>
+        <item>G / 7</item>
+        <item>H / 8</item>
+        <item>I / 9</item>
+        <item>J / 10</item>
+        <item>K / 11</item>
+        <item>L / 12</item>
+        <item>M / 13</item>
+        <item>N / 14</item>
+        <item>O / 15</item>
+        <item>P / 16</item>
+        <item>Q / 17</item>
+        <item>R / 18</item>
+        <item>S / 19</item>
+        <item>T / 20</item>
+        <item>U / 21</item>
+        <item>V / 22</item>
+        <item>W / 23</item>
+        <item>X / 24</item>
+        <item>Y / 25</item>
+        <item>Z / 26</item>
+        <item>0 / 27</item>
+        <item>1 / 28</item>
+        <item>2 / 29</item>
+        <item>3 / 30</item>
+        <item>4 / 31</item>
+        <item>5 / 32</item>
+        <item>6 / 33</item>
+        <item>7 / 34</item>
+        <item>8 / 35</item>
+        <item>9 / 36</item>
+        <item>a / 37</item>
+        <item>b / 38</item>
+        <item>c / 39</item>
+        <item>d / 40</item>
+        <item>e / 41</item>
+        <item>f / 42</item>
+        <item>g / 43</item>
+        <item>h / 44</item>
+        <item>i / 45</item>
+        <item>j / 46</item>
+        <item>k / 47</item>
+        <item>l / 48</item>
+        <item>m / 49</item>
+        <item>n / 50</item>
+        <item>o / 51</item>
+        <item>p / 52</item>
+        <item>q / 53</item>
+        <item>r / 54</item>
+        <item>s / 55</item>
+        <item>t / 56</item>
+        <item>u / 57</item>
+        <item>v / 58</item>
+        <item>w / 59</item>
+        <item>x / 60</item>
+        <item>y / 61</item>
+        <item>z / 62</item>
     </string-array>
 
     <string-array name="receipt_cpl">
