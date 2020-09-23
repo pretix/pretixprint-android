@@ -1,12 +1,22 @@
-package eu.pretix.pretixprint.socket
+package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import eu.pretix.pretixprint.R
+import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.math.min
-import com.tom_roush.pdfbox.rendering.PDFRenderer as PDFBoxRenderer
 
 
-class SLCSNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter(ip, port, dpi) {
+class SLCS : ByteProtocol<Bitmap> {
+    override val identifier = "SLCS"
+    override val nameResource = R.string.protocol_slcs
+
+    override fun allowedForUsecase(type: String): Boolean {
+        return type != "receipt"
+    }
+
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
         val ostream = ByteArrayOutputStream()
         val pixels = IntArray(img.width * img.height)
@@ -24,8 +34,8 @@ class SLCSNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter
         ostream.write(byteArrayOf((img.height and 0xFF).toByte(), ((img.height shr 8) and 0xFF).toByte()))
         val data = ByteArray(bytewidth * img.height)
 
-        for (y in 0..(img.height - 1)) {
-            for (xoffset in 0..(bytewidth - 1)) {
+        for (y in 0 until img.height) {
+            for (xoffset in 0 until bytewidth) {
                 var col = 0
                 for (j in 0..7) {
                     val px = pixels[min((xoffset * 8 + j) + img.width * y, pixels.size - 1)]
@@ -42,5 +52,13 @@ class SLCSNetworkPrinter(ip: String, port: Int, dpi: Int) : SocketNetworkPrinter
         ostream.write("P1\n".toByteArray())
         ostream.flush()
         return ostream.toByteArray()
+    }
+
+    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
+        for (f in pages) {
+            ostream.write(f.get())
+            ostream.flush()
+        }
+        Thread.sleep(2000)
     }
 }

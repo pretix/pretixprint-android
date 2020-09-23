@@ -30,6 +30,7 @@
     <string name="welcome_tutorial2">Currently, pretixPRINT knows how to talk to printers supporting IPP or shared with CUPS, i.e. all printers shared by a macOS or Linux computer and most modern printers with a network interface.</string>
     <string name="action_configure">Start finding a printer</string>
     <string name="headline_found_network_printers">Found network printers</string>
+    <string name="headline_found_usb_devices">Found USB devices</string>
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
@@ -41,18 +42,23 @@
     <string name="test_success">The connection test was successful.</string>
     <string name="err_resolv_failed">Resolving the network printer failed.</string>
     <string name="err_field_required">This field is required.</string>
+    <string name="err_field_invalid">This field is invalid.</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s (%s)</string>
     <string name="button_label_test">Print test page</string>
     <string name="bluetooth_printer">Bluetooth Printer</string>
     <string name="network_printer">Network Printer</string>
+    <string name="cups">CUPS/IPP</string>
+    <string name="usb">USB</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
+    <string name="err_usb_permission_denied">USB permission has been denied</string>
+    <string name="err_usb_connection">USB connection failed</string>
     <string name="field_label_macaddress">MAC address</string>
+    <string name="field_label_serial">Serial number</string>
     <string name="err_not_supported">Not supported</string>
     <string name="btn_auto">Auto-detected</string>
-    <string-array name="printer_modes">
-    </string-array>
+    <string-array name="printer_modes"></string-array>
     <string name="settings_label_receiptwidth">Width of receipt paper</string>
     <string name="receiptline_cancellation">*** CANCELLATION ***</string>
     <string name="receiptline_return">*** REVERSED SALE ***</string>
@@ -70,4 +76,22 @@
     <string name="receiptline_copy">RECEIPT COPY</string>
     <string name="receiptline_customerinformation">Customer Information:</string>
     <string name="pref_printer_cpl">%s characters</string>
+    <string name="setup_connection_type_headline">How is your printer connected?</string>
+    <string name="connection_type_network">Network (LAN/WLAN)</string>
+    <string name="connection_type_bluetooth">Bluetooth</string>
+    <string name="connection_type_usb">USB</string>
+    <string name="connection_type_cups">CUPS (Linux server)</string>
+    <string name="error_no_choice">Please choose an option</string>
+    <string name="btn_next">NEXT</string>
+    <string name="setup_network_settings">Where is your printer on the network?</string>
+    <string name="btn_prev">PREVIOUS</string>
+    <string name="protocol_fgl">FGL (Boca, Practical Automation)</string>
+    <string name="protocol_slcs">SLCS (BIXOLON, Metapace)</string>
+    <string name="protocol_escpos">ESC/POS (Epson and other receipt printers)</string>
+    <string name="setup_protocol">What protocol does your printer support?</string>
+    <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
+    <string name="setup_done">Okay, we\'ve got everything!</string>
+    <string name="btn_save">Save settings</string>
+    <string name="setup_bluetooth_settings" >Please select your printer</string>
+    <string name="setup_bluetooth_select">Select device</string>
 </resources>

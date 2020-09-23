@@ -11,6 +11,10 @@ import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.BluetoothConnection
+import eu.pretix.pretixprint.connections.CUPSConnection
+import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
@@ -68,12 +72,17 @@ class PrintService : IntentService("PrintService") {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action)
         //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
-        val renderer = if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"}
+        val renderer = if (type == "receipt") {
+            "ESCPOS"
+        } else {
+            "WYSIWYG"
+        }
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
         val pages = emptyList<CompletableFuture<File>>().toMutableList()
         var tmpfile: File?
+        var pagenum = 0
 
         val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
         val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
@@ -86,6 +95,7 @@ class PrintService : IntentService("PrintService") {
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
                 tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32").toInt(), this).render())
+                pagenum = 1
             }
             else -> {
                 try {
@@ -108,6 +118,7 @@ class PrintService : IntentService("PrintService") {
                             }
                             future.complete(_tmpfile)
                         }
+                        pagenum += 1
                         pages.add(future)
                     }
 
@@ -133,17 +144,31 @@ class PrintService : IntentService("PrintService") {
 
         when (connection) {
             "network_printer" -> {
-                NetworkPrintService(this, type, mode).print(tmpfile, pages.size)
+                if (mode == "CUPS/IPP") {
+                    // Backwards compatibility
+                    CUPSConnection().print(tmpfile, pagenum, this, type, null)
+                }
+                NetworkConnection().print(tmpfile, pagenum, this, type, null)
+            }
+            "cups" -> {
+                CUPSConnection().print(tmpfile, pagenum, this, type, null)
             }
             "bluetooth_printer" -> {
-                BluetoothPrintService(this, type).print(tmpfile, pages.size)
+                BluetoothConnection().print(tmpfile, pagenum, this, type, null)
+            }
+            "usb" -> {
+                if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    USBConnection().print(tmpfile, pagenum, this, type, null)
+                } else {
+                    throw PrintException("USB not supported on this Android version.")
+                }
             }
         }
 
     }
 
     private fun getType(intentAction: String): String {
-        return when(intentAction) {
+        return when (intentAction) {
             "eu.pretix.pretixpos.print.PRINT_TICKET" -> {
                 "ticket"
             }
