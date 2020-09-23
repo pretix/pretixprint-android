@@ -82,6 +82,7 @@ class PrintService : IntentService("PrintService") {
 
         val pages = emptyList<CompletableFuture<File>>().toMutableList()
         var tmpfile: File?
+        var pagenum = 0
 
         val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
         val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
@@ -94,6 +95,7 @@ class PrintService : IntentService("PrintService") {
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
                 tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32").toInt(), this).render())
+                pagenum = 1
             }
             else -> {
                 try {
@@ -116,6 +118,7 @@ class PrintService : IntentService("PrintService") {
                             }
                             future.complete(_tmpfile)
                         }
+                        pagenum += 1
                         pages.add(future)
                     }
 
@@ -143,19 +146,19 @@ class PrintService : IntentService("PrintService") {
             "network_printer" -> {
                 if (mode == "CUPS/IPP") {
                     // Backwards compatibility
-                    CUPSConnection().print(tmpfile, pages.size, this, type, null)
+                    CUPSConnection().print(tmpfile, pagenum, this, type, null)
                 }
-                NetworkConnection().print(tmpfile, pages.size, this, type, null)
+                NetworkConnection().print(tmpfile, pagenum, this, type, null)
             }
             "cups" -> {
-                CUPSConnection().print(tmpfile, pages.size, this, type, null)
+                CUPSConnection().print(tmpfile, pagenum, this, type, null)
             }
             "bluetooth_printer" -> {
-                BluetoothConnection().print(tmpfile, 1, this, type, null)
+                BluetoothConnection().print(tmpfile, pagenum, this, type, null)
             }
             "usb" -> {
                 if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    USBConnection().print(tmpfile, 1, this, type, null)
+                    USBConnection().print(tmpfile, pagenum, this, type, null)
                 } else {
                     throw PrintException("USB not supported on this Android version.")
                 }
