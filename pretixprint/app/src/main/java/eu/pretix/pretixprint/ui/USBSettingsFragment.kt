@@ -29,6 +29,7 @@ class USBSettingsFragment : SetupFragment() {
     private val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.settings.USB_PERMISSION"
 
     private val usbReceiver = object : BroadcastReceiver() {
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onReceive(context: Context, intent: Intent) {
             if (ACTION_USB_PERMISSION == intent.action) {
                 synchronized(this) {
