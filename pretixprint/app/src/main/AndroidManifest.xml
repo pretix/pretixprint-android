@@ -43,6 +43,30 @@
                 <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
             </intent-filter>
         </service>
+        <service
+            android:name=".print.TicketPrintService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="eu.pretix.pretixpos.print.PRINT_TICKET" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".print.BadgePrintService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="eu.pretix.pretixpos.print.PRINT_BADGE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".print.ReceiptPrintService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

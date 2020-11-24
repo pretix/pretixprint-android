@@ -26,7 +26,7 @@ import java8.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
 
-class PrintService : IntentService("PrintService") {
+abstract class AbstractPrintService(name: String) : IntentService(name) {
     protected var threadPool = Executors.newCachedThreadPool()
 
     companion object {
@@ -215,3 +215,11 @@ class PrintService : IntentService("PrintService") {
         stopForeground(true)
     }
 }
+
+// These services all do the same, but separating has the advantage of being able to run a
+// ticket print and a receipt print at the same time
+class TicketPrintService : AbstractPrintService("TicketPrintService")
+class ReceiptPrintService : AbstractPrintService("ReceiptPrintService")
+class BadgePrintService : AbstractPrintService("BadgePrintService")
+// Kept for legacy compatibility
+class PrintService : AbstractPrintService("PrintService")
