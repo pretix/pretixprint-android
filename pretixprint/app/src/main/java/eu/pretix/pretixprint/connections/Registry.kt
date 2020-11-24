@@ -3,6 +3,6 @@ package eu.pretix.pretixprint.connections
 val connectionTypes = listOf<ConnectionType>(
         NetworkConnection(),
         BluetoothConnection(),
-        //USBConnection(),
+        USBConnection(),
         CUPSConnection()
 )
