@@ -71,6 +71,10 @@ class FGL : ByteProtocol<Bitmap> {
     }
 
     override fun send(pages: List<java8.util.concurrent.CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
+        while (istream.available() > 0) {
+            // Flush buffer of error codes from previous prints
+            istream.read()
+        }
         for (f in pages) {
             ostream.write(f.get())
             ostream.flush()
