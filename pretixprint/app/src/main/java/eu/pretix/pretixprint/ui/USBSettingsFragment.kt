@@ -75,7 +75,7 @@ class USBSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
             val manager = activity!!.getSystemService(Context.USB_SERVICE) as UsbManager
             val deviceList = manager.deviceList.values.toList()
-            selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName} (${it.serialNumber})" }) { dialogInterface, i ->
+            selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName}" }) { dialogInterface, i ->
                 val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
                 manager.requestPermission(deviceList[i], permissionIntent)
             }
