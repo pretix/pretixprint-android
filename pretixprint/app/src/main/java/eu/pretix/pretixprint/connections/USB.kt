@@ -18,6 +18,7 @@ import eu.pretix.pretixprint.byteprotocols.SLCS
 import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.*
+import java.lang.Exception
 import java.nio.charset.Charset
 import kotlin.experimental.and
 
@@ -172,6 +173,7 @@ class USBConnection : ConnectionType {
         }
         var done = false
         val start = System.currentTimeMillis()
+        var err: Exception? = null
 
         val recv = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -218,10 +220,12 @@ class USBConnection : ConnectionType {
                                     }
                                 } catch (e: PrintError) {
                                     e.printStackTrace()
-                                    throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                    err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                    return@synchronized
                                 } catch (e: IOException) {
                                     e.printStackTrace()
-                                    throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                    err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                    return@synchronized
                                 } finally {
                                     istream.close()
                                     ostream.close()
@@ -230,7 +234,8 @@ class USBConnection : ConnectionType {
                                 }
 
                             } else {
-                                throw PrintException(context.getString(R.string.err_usb_permission_denied))
+                                err = PrintException(context.getString(R.string.err_usb_permission_denied))
+                                return
                             }
                         }
                     }
@@ -244,9 +249,12 @@ class USBConnection : ConnectionType {
         context.registerReceiver(recv, filter)
         val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), 0)
         manager.requestPermission(devices.values.first(), permissionIntent)
-        while (!done && System.currentTimeMillis() - start < 30000) {
+        while (!done && err == null && System.currentTimeMillis() - start < 30000) {
             // Wait for callback to be called
             Thread.sleep(50)
+        }
+        if (err != null) {
+            throw err!!
         }
         Thread.sleep(1000)
         Log.i("SNDUSB", "END OF MAIN THREAD")
