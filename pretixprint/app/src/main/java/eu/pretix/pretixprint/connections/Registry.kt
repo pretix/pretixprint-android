@@ -1,7 +1,8 @@
-package eu.pretix.pretixprint.byteprotocols
+package eu.pretix.pretixprint.connections
 
-val protocols = listOf<ByteProtocol<*>>(
-        FGL(),
-        SLCS(),
-        ESCPOS()
+val connectionTypes = listOf<ConnectionType>(
+        NetworkConnection(),
+        BluetoothConnection(),
+        //USBConnection(),
+        CUPSConnection()
 )
