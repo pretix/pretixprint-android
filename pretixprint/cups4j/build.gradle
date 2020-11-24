@@ -1,7 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
+    lintOptions {
+        abortOnError false
+    }
+
 }
 dependencies {
     implementation 'com.android.support:support-annotations:28.0.0'
