@@ -79,7 +79,7 @@
     <string name="setup_connection_type_headline">How is your printer connected?</string>
     <string name="connection_type_network">Network (LAN/WLAN)</string>
     <string name="connection_type_bluetooth">Bluetooth</string>
-    <string name="connection_type_usb">USB</string>
+    <string name="connection_type_usb">USB (exprimental, works on some devices)</string>
     <string name="connection_type_cups">CUPS (Linux server)</string>
     <string name="error_no_choice">Please choose an option</string>
     <string name="btn_next">NEXT</string>
