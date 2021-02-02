@@ -13,7 +13,7 @@ import java.io.InputStream
 
 
 
-class OrderPositionContentProvider(private val order: JSONObject, private val op: JSONObject) : ContentProvider {
+class OrderPositionContentProvider(private val order: JSONObject, private val op: JSONObject, private val imageMap: Map<String, InputStream>) : ContentProvider {
     override fun getTextContent(content: String?, text: String?): String {
         if (content == "other") {
             return text ?: ""
@@ -22,6 +22,10 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
         } else {
             return "???"
         }
+    }
+
+    override fun getImageContent(content: String?): InputStream? {
+        return imageMap[content]
     }
 
     override fun getBarcodeContent(content: String?): String {
@@ -35,11 +39,11 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
 }
 
 
-class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObject, private val positionIndex: Int, private val background: InputStream?, private val ctx: Context) {
+class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObject, private val positionIndex: Int, private val background: InputStream?, private val ctx: Context, private val imageMap: Map<String, InputStream>) {
     fun writePDF(outFile: File) {
         val positions = order.getJSONArray("positions")
         val posList = emptyList<ContentProvider>().toMutableList()
-        posList.add(OrderPositionContentProvider(order, positions.getJSONObject(positionIndex)))
+        posList.add(OrderPositionContentProvider(order, positions.getJSONObject(positionIndex), imageMap))
         try {
             val l = Layout(
                     layout,

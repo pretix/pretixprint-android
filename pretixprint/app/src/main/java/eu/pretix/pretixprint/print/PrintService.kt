@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.ResultReceiver
+import android.util.Log
 import com.itextpdf.text.Document
 import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
@@ -16,13 +17,14 @@ import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
+import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java8.util.concurrent.CompletableFuture
+import java.io.InputStream
 import java.util.concurrent.Executors
 
 
@@ -70,7 +72,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
-        val type = getType(intent.action)
+        val type = getType(intent.action!!)
         //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
         val renderer = if (type == "receipt") {
             "ESCPOS"
@@ -80,12 +82,12 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
-        val pages = emptyList<CompletableFuture<File>>().toMutableList()
+        val pages = emptyList<CompletableFuture<File?>>().toMutableList()
         var tmpfile: File?
         var pagenum = 0
 
-        val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData.getItemAt(0).uri)
-        val jsonData = JSONObject(dataInputStream.bufferedReader().use { it.readText() })
+        val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData!!.getItemAt(0).uri)
+        val jsonData = JSONObject(dataInputStream!!.bufferedReader().use { it.readText() })
         val positions = jsonData.getJSONArray("positions")
 
         when (renderer) {
@@ -94,28 +96,54 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
-                tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32").toInt(), this).render())
+                tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
                 pagenum = 1
             }
             else -> {
                 try {
-                    for (i in 0..(positions.length() - 1)) {
-                        val future = CompletableFuture<File>()
+                    for (i in 0 until positions.length()) {
+                        val future = CompletableFuture<File?>()
                         threadPool.submit {
+                            Log.i("PrintService", "Page $i: Starting render thread")
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout");
 
                             val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
-                            if (position.has("__file_index")) {
-                                val fileIndex = position.getInt("__file_index")
 
-                                val bgInputStream = this.contentResolver.openInputStream(intent.clipData.getItemAt(fileIndex).uri)
-                                bgInputStream.use {
-                                    WYSIWYGRenderer(layout, jsonData, i, it, this).writePDF(_tmpfile)
+                            val imageMap = mutableMapOf<String, InputStream>()
+                            if (position.has("__image_map")) {
+                                val im = position.getJSONObject("__image_map")
+                                for (k in im.keys()) {
+                                    imageMap[k] = this.contentResolver.openInputStream(intent.clipData!!.getItemAt(im.getInt(k)).uri)
                                 }
-                            } else {
-                                WYSIWYGRenderer(layout, jsonData, i, null, this).writePDF(_tmpfile)
                             }
+
+                            try {
+                                if (position.has("__file_index")) {
+                                    val fileIndex = position.getInt("__file_index")
+
+                                    val bgInputStream = this.contentResolver.openInputStream(intent.clipData!!.getItemAt(fileIndex).uri)
+                                    bgInputStream.use {
+                                        Log.i("PrintService", "Page $i: Starting WYSIWYG renderer")
+                                        WYSIWYGRenderer(layout, jsonData, i, it, this, imageMap).writePDF(_tmpfile)
+                                    }
+                                } else {
+                                    Log.i("PrintService", "Page $i: Starting WYSIWYG renderer")
+                                    WYSIWYGRenderer(layout, jsonData, i, null, this, imageMap).writePDF(_tmpfile)
+                                }
+                            } catch (e: java.lang.Exception) {
+                                e.printStackTrace()
+                                future.complete(null)
+                            } finally {
+                                try {
+                                    for (stream in imageMap.values) {
+                                        stream.close()
+                                    }
+                                } catch (e: java.lang.Exception) {
+                                    // pass
+                                }
+                            }
+                            Log.i("PrintService", "Page $i: Completing future")
                             future.complete(_tmpfile)
                         }
                         pagenum += 1
@@ -123,11 +151,13 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     }
 
                     tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
+                    Log.i("PrintService", "Writing to tmpfile $tmpfile")
                     val document = Document()
                     val copy = PdfCopy(document, FileOutputStream(tmpfile))
                     document.open()
                     for (page in pages) {
-                        val pagedoc = PdfReader(page.get().absolutePath)
+                        val pf = page.get() ?: throw java.lang.Exception("Rendering failed")
+                        val pagedoc = PdfReader(pf.absolutePath)
                         copy.addDocument(pagedoc)
                         pagedoc.close()
                     }
@@ -185,9 +215,9 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
 
-    override fun onHandleIntent(intent: Intent) {
+    override fun onHandleIntent(intent: Intent?) {
         var rr: ResultReceiver? = null
-        if (intent.hasExtra("resultreceiver")) {
+        if (intent!!.hasExtra("resultreceiver")) {
             rr = intent.getParcelableExtra("resultreceiver") as ResultReceiver
         }
 
@@ -221,5 +251,6 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 class TicketPrintService : AbstractPrintService("TicketPrintService")
 class ReceiptPrintService : AbstractPrintService("ReceiptPrintService")
 class BadgePrintService : AbstractPrintService("BadgePrintService")
+
 // Kept for legacy compatibility
 class PrintService : AbstractPrintService("PrintService")
