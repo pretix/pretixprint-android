@@ -7,9 +7,10 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
-import com.itextpdf.text.Document
-import com.itextpdf.text.pdf.PdfCopy
-import com.itextpdf.text.pdf.PdfReader
+import com.lowagie.text.Document
+import com.lowagie.text.pdf.PdfDocument
+import com.lowagie.text.pdf.PdfCopy
+import com.lowagie.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
@@ -106,11 +107,11 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         threadPool.submit {
                             Log.i("PrintService", "Page $i: Starting render thread")
                             val position = positions.getJSONObject(i)
-                            val layout = position.getJSONArray("__layout");
+                            val layout = position.getJSONArray("__layout")
 
                             val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
 
-                            val imageMap = mutableMapOf<String, InputStream>()
+                            val imageMap = mutableMapOf<String, InputStream?>()
                             if (position.has("__image_map")) {
                                 val im = position.getJSONObject("__image_map")
                                 for (k in im.keys()) {
@@ -137,7 +138,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             } finally {
                                 try {
                                     for (stream in imageMap.values) {
-                                        stream.close()
+                                        stream?.close()
                                     }
                                 } catch (e: java.lang.Exception) {
                                     // pass
@@ -152,16 +153,22 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
                     tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
                     Log.i("PrintService", "Writing to tmpfile $tmpfile")
-                    val document = Document()
-                    val copy = PdfCopy(document, FileOutputStream(tmpfile))
-                    document.open()
+                    var doc : Document? = null
+                    var copy : PdfCopy? = null
                     for (page in pages) {
                         val pf = page.get() ?: throw java.lang.Exception("Rendering failed")
                         val pagedoc = PdfReader(pf.absolutePath)
-                        copy.addDocument(pagedoc)
+                        if (copy == null) {
+                            doc = Document(pagedoc.getPageSizeWithRotation(1))
+                            copy = PdfCopy(doc, FileOutputStream(tmpfile))
+                            doc.open()
+                        }
+                        for (i in 0 until pagedoc.numberOfPages) {
+                            copy.addPage(copy.getImportedPage(pagedoc, i + 1))
+                        }
                         pagedoc.close()
                     }
-                    document.close()
+                    doc?.close()
                 } catch (e: IOException) {
                     e.printStackTrace()
                     throw PrintException(getString(R.string.err_files_io, e.message))
