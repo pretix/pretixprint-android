@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usb>
+    <!-- officially supported -->
+    <usb-device vendor-id="1208" /> <!-- Seiko Epson -->
+    <usb-device vendor-id="2627" /> <!-- Boca Systems -->
+    <usb-device vendor-id="5380" /> <!-- Bixolon -->
+    <!-- might work, maybe -->
+    <usb-device vendor-id="3540" /> <!-- CUSTOM -->
+    <usb-device vendor-id="4609" /> <!-- Practical Automation -->
+    <usb-device vendor-id="2655" /> <!-- Zebra -->
+    <usb-device vendor-id="4931" /> <!-- CITIZEN -->
+    <usb-device vendor-id="1305" /> <!-- Star Micronics -->
+    <usb-device vendor-id="5455" /> <!-- SNBC -->
+</usb>
