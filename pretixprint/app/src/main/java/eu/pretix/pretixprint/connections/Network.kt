@@ -45,6 +45,10 @@ class NetworkConnection : ConnectionType {
                 val proto = ESCPOS()
                 val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
                 proto.send(futures, istream, ostream)
+            } else if (mode == "LinkOS") {
+                val proto = LINKOS()
+                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "300")).toFloat(), numPages)
+                proto.send(futures, conf, type, context)
             }
         } catch (e: PrintError) {
             e.printStackTrace()

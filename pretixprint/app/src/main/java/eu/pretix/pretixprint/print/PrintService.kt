@@ -93,7 +93,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         when (renderer) {
             "ESCPOS" -> {
-                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id"), "escpos", this.cacheDir)
+                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id"), ".escpos", this.cacheDir)
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
@@ -109,7 +109,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout")
 
-                            val _tmpfile = File.createTempFile("print_$i", "pdf", ctx.cacheDir)
+                            val _tmpfile = File.createTempFile("print_$i", ".pdf", ctx.cacheDir)
 
                             val imageMap = mutableMapOf<String, InputStream?>()
                             if (position.has("__image_map")) {
@@ -151,7 +151,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         pages.add(future)
                     }
 
-                    tmpfile = File.createTempFile("print", "pdf", this.cacheDir)
+                    tmpfile = File.createTempFile("print_", ".pdf", this.cacheDir)
                     Log.i("PrintService", "Writing to tmpfile $tmpfile")
                     var doc : Document? = null
                     var copy : PdfCopy? = null

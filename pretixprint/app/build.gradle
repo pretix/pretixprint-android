@@ -85,7 +85,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'org.jetbrains.anko:anko:0.10.6'
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
@@ -111,6 +111,25 @@ dependencies {
     implementation(project(':libpretixprint')) {
         transitive = false
     }
+
+    // Zebra LinkOS SDK
+    // Comment == Version shipped by Zebra
+    implementation(project(':ZSDK')) {
+        transitive = false
+    }
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.56' // 1.48
+//    implementation 'commons-codec:commons-codec:1.15' // 1.15; already included for libpretixprint
+    implementation 'commons-io:commons-io:2.4' // 2.2
+    implementation 'org.apache.commons:commons-lang3:3.4' // 3.4
+//    implementation 'com.google.zxing:core:3.3.1' // 3.3.1; already included for libpretixprint
+    implementation 'dom4j:dom4j:1.6.1' // 1.6.1
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.10.1' // 2.2.3
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.10.1' // 2.2.3
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1' // 2.2.3
+    implementation 'jaxen:jaxen:1.2.0' // 1.1-beta-6
+    implementation 'org.simpleframework:simple-xml:2.7.1' // 2.7.1
+    implementation 'org.snmp4j:snmp4j:3.4.4' // 2.3.0
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.1"

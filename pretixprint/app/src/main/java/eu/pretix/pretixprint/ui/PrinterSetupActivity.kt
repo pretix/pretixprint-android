@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.byteprotocols.FGL
+import eu.pretix.pretixprint.byteprotocols.LINKOS
 import eu.pretix.pretixprint.byteprotocols.SLCS
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
@@ -88,6 +89,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragment = when (settingsStagingArea.get("hardware_${useCase}printer_mode") as String) {
             FGL().identifier -> FGLSettingsFragment()
             SLCS().identifier -> SLCSSettingsFragment()
+            LINKOS().identifier -> LINKOSSettingsFragment()
             else -> throw RuntimeException("Unknown protocol type")
         }
         fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""

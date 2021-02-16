@@ -88,10 +88,14 @@
     <string name="protocol_fgl">FGL (Boca, Practical Automation)</string>
     <string name="protocol_slcs">SLCS (BIXOLON, Metapace)</string>
     <string name="protocol_escpos">ESC/POS (Epson and other receipt printers)</string>
+    <string name="protocol_linkos">LinkOS (Zebra ZC-series card printers)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
     <string name="btn_save">Save settings</string>
     <string name="setup_bluetooth_settings">Please select your printer</string>
     <string name="setup_bluetooth_select">Select device</string>
+    <string name="field_label_print_double_sided">Print double sided (same image on both sides)</string>
+    <string name="field_label_card_source">Card Source</string>
+    <string name="field_label_card_destination">Card Destination</string>
 </resources>

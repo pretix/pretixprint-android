@@ -29,7 +29,8 @@ class FinishSettingsFragment : SetupFragment() {
         if (file.exists()) {
             file.delete()
         }
-        val asset = ctx.assets.open("demopage_8in_3.25in.pdf")
+        //val asset = ctx.assets.open("demopage_8in_3.25in.pdf")
+        val asset = ctx.assets.open("CR80.pdf")
         val output = FileOutputStream(file)
         val buffer = ByteArray(1024)
         var size = asset.read(buffer)
