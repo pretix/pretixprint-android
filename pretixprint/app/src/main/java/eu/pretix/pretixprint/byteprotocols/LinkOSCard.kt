@@ -26,13 +26,13 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-class LINKOS : ByteProtocol<Bitmap> {
-    override val identifier = "LinkOS"
+class LinkOSCard : ByteProtocol<Bitmap> {
+    override val identifier = "LinkOSCard"
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
     }
 
-    override val nameResource = R.string.protocol_linkos
+    override val nameResource = R.string.protocol_linkoscard
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
         val ostream = ByteArrayOutputStream()
@@ -41,7 +41,7 @@ class LINKOS : ByteProtocol<Bitmap> {
     }
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
-        throw PrintError("LinkOS uses the other send() function!")
+        throw PrintError("LinkOSCard uses the other send() function!")
     }
 
     fun send(pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
@@ -152,3 +152,4 @@ class LINKOS : ByteProtocol<Bitmap> {
 
     }
 }
+

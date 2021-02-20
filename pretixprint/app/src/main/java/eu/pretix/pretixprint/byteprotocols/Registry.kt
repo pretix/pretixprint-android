@@ -4,5 +4,6 @@ val protocols = listOf<ByteProtocol<*>>(
         FGL(),
         SLCS(),
         ESCPOS(),
-        LINKOS()
+        LinkOSCard(),
+        LinkOS()
 )

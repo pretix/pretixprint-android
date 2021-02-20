@@ -88,7 +88,8 @@
     <string name="protocol_fgl">FGL (Boca, Practical Automation)</string>
     <string name="protocol_slcs">SLCS (BIXOLON, Metapace)</string>
     <string name="protocol_escpos">ESC/POS (Epson and other receipt printers)</string>
-    <string name="protocol_linkos">LinkOS (Zebra ZC-series card printers)</string>
+    <string name="protocol_linkoscard">LinkOS Card printers (Zebra ZMotif and ZXP protocol card printers; for example ZC- and ZXP-series)</string>
+    <string name="protocol_linkos">LinkOS Thermal printers (Zebra CPCL and ZPL protocol)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
