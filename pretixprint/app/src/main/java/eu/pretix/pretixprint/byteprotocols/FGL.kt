@@ -8,9 +8,11 @@ import java.io.OutputStream
 import kotlin.math.min
 
 
-class FGL : ByteProtocol<Bitmap> {
+class FGL : StreamByteProtocol<Bitmap> {
     override val identifier = "FGL"
     override val nameResource = R.string.protocol_fgl
+    override val defaultDPI = 200
+    override val demopage = "demopage_8in_3.25in.pdf"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"

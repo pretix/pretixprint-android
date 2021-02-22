@@ -26,6 +26,10 @@ class PrinterSetupActivity : AppCompatActivity() {
         return settingsStagingArea.get("hardware_${useCase}printer_connection") ?: ""
     }
 
+    fun proto(): String {
+        return settingsStagingArea.get("hardware_${useCase}printer_mode") ?: ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)
@@ -86,8 +90,8 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragment = when (settingsStagingArea.get("hardware_${useCase}printer_mode") as String) {
             FGL().identifier -> FGLSettingsFragment()
             SLCS().identifier -> SLCSSettingsFragment()
-            LinkOSCard().identifier -> LINKOSCardSettingsFragment()
-            LinkOS().identifier -> LINKOSSettingsFragment()
+            LinkOSCard().identifier -> LinkOSCardSettingsFragment()
+            LinkOS().identifier -> LinkOSSettingsFragment()
             else -> throw RuntimeException("Unknown protocol type")
         }
         fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""

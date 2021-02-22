@@ -12,17 +12,14 @@ import android.widget.Button
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.zebra.sdk.comm.Connection
-import com.zebra.sdk.comm.TcpConnection
-import com.zebra.sdk.common.card.jobSettings.ZebraCardJobSettingNames
-import com.zebra.sdk.common.card.printer.ZebraCardPrinter
-import com.zebra.sdk.common.card.printer.ZebraCardPrinterFactory
+import com.zebra.sdk.common.card.enumerations.CardDestination
+import com.zebra.sdk.common.card.enumerations.CardSource
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.LinkOSCard
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 
-class LINKOSCardSettingsFragment : SetupFragment() {
+class LinkOSCardSettingsFragment : SetupFragment() {
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -30,14 +27,7 @@ class LINKOSCardSettingsFragment : SetupFragment() {
             savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_linkoscard_settings, container, false)
-
-        val currentIp = ((activity as PrinterSetupActivity).settingsStagingArea.get(
-                "hardware_${useCase}printer_ip"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
-
-        val currentPort = ((activity as PrinterSetupActivity).settingsStagingArea.get(
-                "hardware_${useCase}printer_port"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_port", "9100")
+        val proto = LinkOSCard()
 
         val currentDoubleSided = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_doublesided"
@@ -56,34 +46,15 @@ class LINKOSCardSettingsFragment : SetupFragment() {
 
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", "300")  // this is not our regular default, but it's allowed to deviate here
+        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
-        // ToDo: Make the printer connection blocking, displaying an error message if appropriate.
-        Thread {
-            Looper.prepare()
-            var connection: Connection? = null
-            var zebraCardPrinter: ZebraCardPrinter? = null
 
-            try {
-                connection = TcpConnection(currentIp, currentPort!!.toInt())
-                connection.open()
+        val cardSourcesAdapter = ArrayAdapter(requireContext(), R.layout.list_item, CardSource.values())
+        (view.findViewById<TextInputLayout>(R.id.tilCardSource).editText as? AutoCompleteTextView)?.setAdapter(cardSourcesAdapter)
 
-                zebraCardPrinter = ZebraCardPrinterFactory.getInstance(connection)
-
-                val cardSources = zebraCardPrinter.getJobSettingRange(ZebraCardJobSettingNames.CARD_SOURCE).split(',').toList() //.toTypedArray()
-                val cardSourcesAdapter = ArrayAdapter(requireContext(), R.layout.list_item, cardSources)
-                (view.findViewById<TextInputLayout>(R.id.tilCardSource).editText as? AutoCompleteTextView)?.setAdapter(cardSourcesAdapter)
-
-                val cardDestination = zebraCardPrinter.getJobSettingRange(ZebraCardJobSettingNames.CARD_DESTINATION).split(',').toList() //.toTypedArray()
-                val cardDestinationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, cardDestination)
-                (view.findViewById<TextInputLayout>(R.id.tilCardDestination).editText as? AutoCompleteTextView)?.setAdapter(cardDestinationAdapter)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                LinkOSCard().cleanUp(connection, zebraCardPrinter)
-            }
-        }.start()
+        val cardDestinationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, CardDestination.values())
+        (view.findViewById<TextInputLayout>(R.id.tilCardDestination).editText as? AutoCompleteTextView)?.setAdapter(cardDestinationAdapter)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()

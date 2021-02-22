@@ -8,47 +8,27 @@ import android.view.ViewGroup
 import android.widget.Button
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
-import kotlinx.coroutines.experimental.withTimeout
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.indeterminateProgressDialog
-import org.jetbrains.anko.support.v4.progressDialog
 import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileOutputStream
 
 class FinishSettingsFragment : SetupFragment() {
 
-    fun writeDemoPdf(): File {
-        val file = File(ctx.cacheDir, "demopage.pdf")
+    fun writeDemoPage(filename: String): File {
+        val file = File(ctx.cacheDir, filename)
         if (file.exists()) {
             file.delete()
         }
-        //val asset = ctx.assets.open("demopage_8in_3.25in.pdf")
-        val asset = ctx.assets.open("CR80.pdf")
-        val output = FileOutputStream(file)
-        val buffer = ByteArray(1024)
-        var size = asset.read(buffer)
-        while (size != -1) {
-            output.write(buffer, 0, size)
-            size = asset.read(buffer)
-        }
-        asset.close()
-        output.close()
-        return file
-    }
-
-    fun writeDemoTxt(): File {
-        val file = File(ctx.cacheDir, "demopage.txt")
-        if (file.exists()) {
-            file.delete()
-        }
-        val asset = ctx.assets.open("demopage.txt")
+        val asset = ctx.assets.open(filename)
         val output = FileOutputStream(file)
         val buffer = ByteArray(1024)
         var size = asset.read(buffer)
@@ -114,10 +94,10 @@ class FinishSettingsFragment : SetupFragment() {
 
     fun testprint() {
         val activity = activity as PrinterSetupActivity
-        val file = when (activity.useCase) {
-            "receipt" -> writeDemoTxt()
-            else -> writeDemoPdf()
-        }
+        val proto = getProtoClass(activity.proto())
+
+        val file = writeDemoPage(proto.demopage)
+
         when (activity.mode()) {
             NetworkConnection().identifier -> {
                 NetworkConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)

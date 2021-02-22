@@ -9,12 +9,10 @@ import android.hardware.usb.*
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.zebra.sdk.comm.UsbConnection
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.ESCPOS
-import eu.pretix.pretixprint.byteprotocols.FGL
-import eu.pretix.pretixprint.byteprotocols.PrintError
-import eu.pretix.pretixprint.byteprotocols.SLCS
+import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.*
@@ -163,10 +161,21 @@ class USBConnection : ConnectionType {
 
         val mode = getSetting("hardware_${type}printer_mode", "FGL")
         val serial = getSetting("hardware_${type}printer_ip", "0")
+        val proto = getProtoClass(mode)
 
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-        val devices = manager.deviceList.filter {
-            it.value.serialNumber == serial
+        val devices = mutableMapOf<String, UsbDevice>()
+
+        manager.deviceList.forEach() {
+            try {
+                if (it.value.serialNumber == serial) {
+                    devices[it.key] = it.value
+                }
+            } catch (e: SecurityException) {
+                // On Android 10, USBDevices that have not expressively been granted access to
+                // will raise an SecurityException upon accessing the Serial Number. We are just
+                // ignoring those devices.
+            }
         }
         if (devices.size != 1) {
             throw PrintException(context.getString(R.string.err_printer_not_found, serial))
@@ -202,21 +211,35 @@ class USBConnection : ConnectionType {
                                     throw PrintException(context.getString(R.string.err_usb_connection))
                                 }
 
-                                val istream = UsbSerialInputStream(conn, endpoint_in)
-                                val ostream = UsbSerialOutputStream(conn, endpoint_out)
                                 try {
-                                    if (mode == "FGL") {
-                                        val proto = FGL()
-                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                        proto.send(futures, istream, ostream)
-                                    } else if (mode == "SLCS") {
-                                        val proto = SLCS()
-                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                        proto.send(futures, istream, ostream)
-                                    } else if (mode == "ESC/POS") {
-                                        val proto = ESCPOS()
-                                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                                        proto.send(futures, istream, ostream)
+                                    when (proto) {
+                                        is StreamByteProtocol<*> -> {
+                                            val istream = UsbSerialInputStream(conn, endpoint_in)
+                                            val ostream = UsbSerialOutputStream(conn, endpoint_out)
+
+                                            try {
+                                                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+                                                proto.send(futures, istream, ostream)
+                                            } finally {
+                                                istream.close()
+                                                ostream.close()
+                                                conn.releaseInterface(intf)
+                                                conn.close()
+                                            }
+                                        }
+
+                                        is ZebraByteProtocol<*> -> {
+                                            val connection = UsbConnection(manager, device)
+
+                                            try {
+                                                connection.open()
+
+                                                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+                                                proto.send(futures, connection, conf, type, context)
+                                            } finally {
+                                                connection.close()
+                                            }
+                                        }
                                     }
                                 } catch (e: PrintError) {
                                     e.printStackTrace()
@@ -226,13 +249,7 @@ class USBConnection : ConnectionType {
                                     e.printStackTrace()
                                     err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
                                     return@synchronized
-                                } finally {
-                                    istream.close()
-                                    ostream.close()
-                                    conn.releaseInterface(intf)
-                                    conn.close()
                                 }
-
                             } else {
                                 err = PrintException(context.getString(R.string.err_usb_permission_denied))
                                 return

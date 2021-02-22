@@ -9,9 +9,11 @@ import java.io.OutputStream
 import kotlin.math.min
 
 
-class SLCS : ByteProtocol<Bitmap> {
+class SLCS : StreamByteProtocol<Bitmap> {
     override val identifier = "SLCS"
     override val nameResource = R.string.protocol_slcs
+    override val defaultDPI = 200
+    override val demopage = "demopage_8in_3.25in.pdf"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"

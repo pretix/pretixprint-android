@@ -6,9 +6,11 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-class ESCPOS : ByteProtocol<ByteArray> {
+class ESCPOS : StreamByteProtocol<ByteArray> {
     override val identifier = "ESC/POS"
     override val nameResource = R.string.protocol_escpos
+    override val defaultDPI = 200
+    override val demopage = "demopage.txt"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type == "receipt"
