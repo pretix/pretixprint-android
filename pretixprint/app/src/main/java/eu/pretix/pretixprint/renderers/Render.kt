@@ -54,14 +54,14 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
 
         if (previousBmpFuture != null) {
             previousBmpFuture.thenApplyAsync {
-                renderFileTo<T>(file, i, d, bmpFuture, T::class.java)
+                renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
             }
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
                 byteFuture.complete(protocol.convertPageToBytes(bmp1, i == numPages - 1, bmp2))
             }
         } else {
             threadPool.submit {
-                renderFileTo<T>(file, i, d, bmpFuture, T::class.java)
+                renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
             }
             bmpFuture.thenApplyAsync {
                 byteFuture.complete(protocol.convertPageToBytes(it, i == numPages - 1, null))

@@ -96,4 +96,8 @@ class LinkOS : CustomByteProtocol<Bitmap> {
     override fun createSettingsFragment(): SetupFragment? {
         return LinkOSSettingsFragment()
     }
+
+    override fun inputClass(): Class<Bitmap> {
+        return Bitmap::class.java
+    }
 }

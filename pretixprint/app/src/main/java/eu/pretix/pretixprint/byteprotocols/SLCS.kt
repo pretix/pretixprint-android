@@ -70,4 +70,8 @@ class SLCS : StreamByteProtocol<Bitmap> {
     override fun createSettingsFragment(): SetupFragment? {
         return SLCSSettingsFragment()
     }
+
+    override fun inputClass(): Class<Bitmap> {
+        return Bitmap::class.java
+    }
 }

@@ -32,4 +32,8 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
     override fun createSettingsFragment(): SetupFragment? {
         return null
     }
+
+    override fun inputClass(): Class<ByteArray> {
+        return ByteArray::class.java
+    }
 }

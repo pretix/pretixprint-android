@@ -166,4 +166,8 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     override fun createSettingsFragment(): SetupFragment? {
         return LinkOSCardSettingsFragment()
     }
+
+    override fun inputClass(): Class<Bitmap> {
+        return Bitmap::class.java
+    }
 }

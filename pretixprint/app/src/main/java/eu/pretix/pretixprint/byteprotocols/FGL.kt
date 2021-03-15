@@ -131,4 +131,8 @@ class FGL : StreamByteProtocol<Bitmap> {
     override fun createSettingsFragment(): SetupFragment? {
         return FGLSettingsFragment()
     }
+
+    override fun inputClass(): Class<Bitmap> {
+        return Bitmap::class.java
+    }
 }
