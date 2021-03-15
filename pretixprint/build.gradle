@@ -19,6 +19,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.jaredsburrows.license" version "0.8.90"
+}
+
 allprojects {
     repositories {
         jcenter()
