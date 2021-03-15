@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.connections
 
 import android.content.Context
-import com.zebra.sdk.comm.TcpConnection
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
@@ -35,6 +34,7 @@ class NetworkConnection : ConnectionType {
         val port = Integer.valueOf(getSetting("hardware_${type}printer_port", "9100"))
 
         try {
+            val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
             when (proto) {
                 is StreamByteProtocol<*> -> {
                     val socket = Socket(serverAddr, port)
@@ -42,7 +42,6 @@ class NetworkConnection : ConnectionType {
                     val istream = socket.getInputStream()
 
                     try {
-                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
                         proto.send(futures, istream, ostream)
                     } finally {
                         istream.close()
@@ -51,16 +50,8 @@ class NetworkConnection : ConnectionType {
                     }
                 }
 
-                is ZebraByteProtocol<*> -> {
-                    val connection = TcpConnection(serverAddr.hostAddress, port)
-                    try {
-                        connection.open()
-
-                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
-                        proto.send(futures, connection, conf, type, context)
-                    } finally {
-                        connection.close()
-                    }
+                is CustomByteProtocol<*> -> {
+                    proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
                 }
             }
         } catch (e: PrintError) {

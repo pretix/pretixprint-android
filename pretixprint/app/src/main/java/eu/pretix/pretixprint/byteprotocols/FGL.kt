@@ -1,7 +1,10 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.FGLSettingsFragment
+import eu.pretix.pretixprint.ui.SetupFragment
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -123,5 +126,9 @@ class FGL : StreamByteProtocol<Bitmap> {
             }
         }
         Thread.sleep(2000)
+    }
+
+    override fun createSettingsFragment(): SetupFragment? {
+        return FGLSettingsFragment()
     }
 }

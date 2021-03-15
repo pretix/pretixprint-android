@@ -3,8 +3,14 @@ package eu.pretix.pretixprint.byteprotocols
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.os.Looper
+import androidx.fragment.app.Fragment
+import com.zebra.sdk.comm.BluetoothConnectionInsecure
 import com.zebra.sdk.comm.Connection
+import com.zebra.sdk.comm.TcpConnection
+import com.zebra.sdk.comm.UsbConnection
 import com.zebra.sdk.common.card.containers.GraphicsInfo
 import com.zebra.sdk.common.card.enumerations.*
 import com.zebra.sdk.common.card.graphics.ZebraCardGraphics
@@ -15,13 +21,15 @@ import com.zebra.sdk.common.card.jobSettings.ZebraCardJobSettingNames
 import com.zebra.sdk.common.card.printer.ZebraCardPrinter
 import com.zebra.sdk.common.card.printer.ZebraCardPrinterFactory
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
+import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 
-class LinkOSCard : ZebraByteProtocol<Bitmap> {
+class LinkOSCard : CustomByteProtocol<Bitmap> {
     override val identifier = "LinkOSCard"
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
@@ -37,7 +45,37 @@ class LinkOSCard : ZebraByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+        val connection = UsbConnection(usbManager, usbDevice)
+        try {
+            connection.open()
+            send(pages, connection, conf, type, context)
+        } finally {
+            connection.close()
+        }
+    }
+
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+        val connection = TcpConnection(host, port)
+        try {
+            connection.open()
+            send(pages, connection, conf, type, context)
+        } finally {
+            connection.close()
+        }
+    }
+
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+        val connection = BluetoothConnectionInsecure(deviceAddress)
+        try {
+            connection.open()
+            send(pages, connection, conf, type, context)
+        } finally {
+            connection.close()
+        }
+    }
+
+    private fun send(pages: List<CompletableFuture<ByteArray>>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
             return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
@@ -123,7 +161,9 @@ class LinkOSCard : ZebraByteProtocol<Bitmap> {
         graphicsInfo.xOffset = xOffset
         graphicsInfo.yOffset = yOffset
         return graphicsInfo
+    }
 
+    override fun createSettingsFragment(): SetupFragment? {
+        return LinkOSCardSettingsFragment()
     }
 }
-

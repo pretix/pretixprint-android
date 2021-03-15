@@ -1,0 +1,1 @@
+Stub module for the Zebra SDK. Read main README to learn how to get these libraries.

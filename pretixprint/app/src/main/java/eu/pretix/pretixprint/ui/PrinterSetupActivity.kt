@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
@@ -33,7 +33,7 @@ class PrinterSetupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)
-        useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
+        useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         startConnectionChoice()
     }
 
@@ -54,7 +54,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             CUPSConnection().identifier -> CUPSSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }
-        fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
+        fragment.useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         fragmentTransaction.replace(R.id.frame, fragment)
         fragmentTransaction.commit()
     }
@@ -67,7 +67,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             }
             else -> {
                 fragment = ChooseByteProtocolFragment()
-                fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
+                fragment.useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
                 fragmentTransaction.replace(R.id.frame, fragment)
                 fragmentTransaction.commit()
             }
@@ -78,23 +78,33 @@ class PrinterSetupActivity : AppCompatActivity() {
         if (is_back && settingsStagingArea.get("hardware_${useCase}printer_connection") == CUPSConnection().identifier) {
             // For proper backwards navigation from final page
             return startConnectionSettings()
-        } else if (settingsStagingArea.get("hardware_${useCase}printer_mode") == ESCPOS().identifier) {
-            if (is_back) {
-                return startProtocolChoice()
-            } else {
-                return startFinalPage()
+        }
+
+
+        var fragmentFound = false
+        for (p in protocols) {
+            if (settingsStagingArea.get("hardware_${useCase}printer_mode") as String == p.identifier) {
+                val f = p.createSettingsFragment()
+                if (f == null) {
+                    // e.g. escpos for receipt printing
+                    if (is_back) {
+                        return startProtocolChoice()
+                    } else {
+                        return startFinalPage()
+                    }
+                } else {
+                    fragment = f
+                }
+                fragmentFound = true
+                break
             }
+        }
+        if (!fragmentFound) {
+            throw RuntimeException("Unknown protocol type")
         }
 
         val fragmentTransaction = fragmentManager.beginTransaction()
-        fragment = when (settingsStagingArea.get("hardware_${useCase}printer_mode") as String) {
-            FGL().identifier -> FGLSettingsFragment()
-            SLCS().identifier -> SLCSSettingsFragment()
-            LinkOSCard().identifier -> LinkOSCardSettingsFragment()
-            LinkOS().identifier -> LinkOSSettingsFragment()
-            else -> throw RuntimeException("Unknown protocol type")
-        }
-        fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
+        fragment.useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         fragmentTransaction.replace(R.id.frame, fragment)
         fragmentTransaction.commit()
     }
@@ -102,7 +112,7 @@ class PrinterSetupActivity : AppCompatActivity() {
     fun startFinalPage() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragment = FinishSettingsFragment()
-        fragment.useCase = intent.extras.getString(EXTRA_USECASE) ?: ""
+        fragment.useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         fragmentTransaction.replace(R.id.frame, fragment)
         fragmentTransaction.commit()
     }

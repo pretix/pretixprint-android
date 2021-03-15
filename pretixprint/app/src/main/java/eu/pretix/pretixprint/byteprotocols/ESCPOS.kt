@@ -1,6 +1,8 @@
 package eu.pretix.pretixprint.byteprotocols
 
+import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.InputStream
 import java.io.OutputStream
@@ -25,5 +27,9 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
             ostream.write(f.get())
             ostream.flush()
         }
+   }
+
+    override fun createSettingsFragment(): SetupFragment? {
+        return null
     }
 }

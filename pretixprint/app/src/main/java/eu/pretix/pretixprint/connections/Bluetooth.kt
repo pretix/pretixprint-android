@@ -3,10 +3,11 @@ package eu.pretix.pretixprint.connections
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import com.zebra.sdk.comm.BluetoothConnectionInsecure
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
+import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
+import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
@@ -17,7 +18,6 @@ class BluetoothConnection : ConnectionType {
     override val nameResource = R.string.connection_type_bluetooth
     override val inputType = ConnectionType.Input.PLAIN_BYTES
 
-    lateinit var escpos: ByteArray
     var context: Context? = null
 
     override fun allowedForUsecase(type: String): Boolean {
@@ -30,12 +30,14 @@ class BluetoothConnection : ConnectionType {
         fun getSetting(key: String, def: String): String {
             return conf!![key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
+
         val mode = getSetting("hardware_${type}printer_mode", "FGL")
         val proto = getProtoClass(mode)
         val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(getSetting("hardware_${type}printer_ip", ""))
 
         try {
-            escpos = tmpfile.readBytes()
+            val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+
             when (proto) {
                 is StreamByteProtocol<*> -> {
                     // Yes, unfortunately this is necessary when using Services/IntentServices to connect to BT devices.
@@ -64,18 +66,8 @@ class BluetoothConnection : ConnectionType {
                     }
                 }
 
-                is ZebraByteProtocol<*> -> {
-                    val connection = BluetoothConnectionInsecure(device.address)
-                    //val connection = BluetoothConnection(device.address)
-
-                    try {
-                        connection.open()
-
-                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
-                        proto.send(futures, connection, conf, type, context)
-                    } finally {
-                        connection.close()
-                    }
+                is CustomByteProtocol<*> -> {
+                    proto.sendBluetooth(device.address, futures, conf, type, context)
                 }
             }
         } catch (e: IOException) {

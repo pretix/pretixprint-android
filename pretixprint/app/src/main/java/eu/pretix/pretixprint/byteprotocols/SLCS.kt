@@ -1,7 +1,10 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.SLCSSettingsFragment
+import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -62,5 +65,9 @@ class SLCS : StreamByteProtocol<Bitmap> {
             ostream.flush()
         }
         Thread.sleep(2000)
+    }
+
+    override fun createSettingsFragment(): SetupFragment? {
+        return SLCSSettingsFragment()
     }
 }
