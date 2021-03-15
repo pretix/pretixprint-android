@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer
-import eu.pretix.pretixprint.byteprotocols.ByteProtocol
+import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import java8.util.concurrent.CompletableFuture
 import java.io.File
 import java.lang.RuntimeException
@@ -44,7 +44,7 @@ fun <T> renderFileTo(file: File, i: Int, d: Float, future: CompletableFuture<T>,
 
 val threadPool: ExecutorService = Executors.newCachedThreadPool()
 
-inline fun <reified T> renderPages(protocol: ByteProtocol<T>, file: File, d: Float, numPages: Int): List<CompletableFuture<ByteArray>> {
+inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, d: Float, numPages: Int): List<CompletableFuture<ByteArray>> {
     val futures = mutableListOf<CompletableFuture<ByteArray>>()
     var previousBmpFuture: CompletableFuture<T>? = null
 

@@ -90,10 +90,15 @@
     <string name="protocol_fgl">FGL (Boca, Practical Automation)</string>
     <string name="protocol_slcs">SLCS (BIXOLON, Metapace)</string>
     <string name="protocol_escpos">ESC/POS (Epson und die meisten anderen Bondrucker)</string>
+    <string name="protocol_linkoscard">LinkOS Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
+    <string name="protocol_linkos">LinkOS Thermodrucker (Zebra CPCL und ZPL Protokoll)</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>
     <string name="btn_save">Einstellungen speichern</string>
     <string name="setup_bluetooth_select">Gerät auswählen</string>
     <string name="setup_bluetooth_settings">Bitte wählen Sie Ihren Drucker aus</string>
+    <string name="field_label_print_double_sided">Motif beidseitig drucken (gleiches Motif auf beiden Seiten)</string>
+    <string name="field_label_card_source">Karteneingabe</string>
+    <string name="field_label_card_destination">Kartenausgabe</string>
 </resources>

@@ -1,7 +1,10 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.SLCSSettingsFragment
+import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -9,9 +12,11 @@ import java.io.OutputStream
 import kotlin.math.min
 
 
-class SLCS : ByteProtocol<Bitmap> {
+class SLCS : StreamByteProtocol<Bitmap> {
     override val identifier = "SLCS"
     override val nameResource = R.string.protocol_slcs
+    override val defaultDPI = 200
+    override val demopage = "demopage_8in_3.25in.pdf"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
@@ -60,5 +65,9 @@ class SLCS : ByteProtocol<Bitmap> {
             ostream.flush()
         }
         Thread.sleep(2000)
+    }
+
+    override fun createSettingsFragment(): SetupFragment? {
+        return SLCSSettingsFragment()
     }
 }

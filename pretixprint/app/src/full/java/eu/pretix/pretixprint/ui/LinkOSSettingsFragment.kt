@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.SLCS
+import eu.pretix.pretixprint.byteprotocols.LinkOS
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
-class SLCSSettingsFragment : SetupFragment() {
+
+class LinkOSSettingsFragment : SetupFragment() {
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -19,11 +20,11 @@ class SLCSSettingsFragment : SetupFragment() {
             savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_fgl_settings, container, false)
-        val proto = SLCS()
+        val proto = LinkOS()
 
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
+        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())  // this is not our regular default, but it's allowed to deviate here
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
@@ -37,8 +38,8 @@ class SLCSSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",
-                        dpi)
+
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi", dpi)
                 (activity as PrinterSetupActivity).startFinalPage()
             }
         }

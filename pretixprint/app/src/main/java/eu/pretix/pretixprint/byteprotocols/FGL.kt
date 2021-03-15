@@ -1,16 +1,21 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.FGLSettingsFragment
+import eu.pretix.pretixprint.ui.SetupFragment
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.math.min
 
 
-class FGL : ByteProtocol<Bitmap> {
+class FGL : StreamByteProtocol<Bitmap> {
     override val identifier = "FGL"
     override val nameResource = R.string.protocol_fgl
+    override val defaultDPI = 200
+    override val demopage = "demopage_8in_3.25in.pdf"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
@@ -121,5 +126,9 @@ class FGL : ByteProtocol<Bitmap> {
             }
         }
         Thread.sleep(2000)
+    }
+
+    override fun createSettingsFragment(): SetupFragment? {
+        return FGLSettingsFragment()
     }
 }

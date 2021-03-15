@@ -1,0 +1,8 @@
+configurations.maybeCreate("default")
+
+// Instead of including all the shipped .jars from Zebra, they are included in the apps' build.gradle
+// Leftovers here are not on MavenCentral or cause some kind of error during compilation
+artifacts.add("default", file('ZSDK_CARD_ANDROID_API.jar'))
+artifacts.add("default", file('ZSDK_ANDROID_API.jar'))
+artifacts.add("default", file('snmp6_1z.jar'))
+

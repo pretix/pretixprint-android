@@ -4,21 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.PreferenceFragment
-import android.text.Html
 import android.text.TextUtils
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
-import android.widget.TextView
+import android.webkit.WebView
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
+
 
 class SettingsFragment : PreferenceFragment() {
     val types = listOf("ticket", "badge", "receipt")
@@ -45,7 +40,7 @@ class SettingsFragment : PreferenceFragment() {
         }
 
         findPreference("licenses").setOnPreferenceClickListener {
-            asset_dialog(R.raw.about, R.string.settings_label_licenses)
+            asset_dialog(R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
         }
 
@@ -72,41 +67,17 @@ class SettingsFragment : PreferenceFragment() {
         findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) { getString(R.string.pref_printer_cpl, cpl.entries[31]) } else { getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString()) }
     }
 
-    private fun asset_dialog(@RawRes htmlRes: Int, @StringRes title: Int) {
+    private fun asset_dialog(@StringRes title: Int) {
+
+        val webView = WebView(activity!!)
+        webView.loadUrl("file:///android_asset/about.html")
+
         val view = LayoutInflater.from(activity).inflate(R.layout.dialog_about, null, false)
         val dialog = AlertDialog.Builder(activity)
                 .setTitle(title)
-                .setView(view)
+                .setView(webView)
                 .setPositiveButton(R.string.dismiss, null)
                 .create()
-
-        val textView = view.findViewById(R.id.aboutText) as TextView
-
-        var text = ""
-
-        val builder = StringBuilder()
-        val fis: InputStream
-        try {
-            fis = resources.openRawResource(htmlRes)
-            val reader = BufferedReader(InputStreamReader(fis, "utf-8"))
-            while (true) {
-                val line = reader.readLine()
-                if (line != null) {
-                    builder.append(line)
-                } else {
-                    break
-                }
-            }
-
-            text = builder.toString()
-            fis.close()
-        } catch (e: IOException) {
-            //Sentry.captureException(e)
-            e.printStackTrace()
-        }
-
-        textView.text = Html.fromHtml(text)
-        textView.movementMethod = LinkMovementMethod.getInstance()
 
         dialog.show()
     }

@@ -27,24 +27,32 @@ class NetworkConnection : ConnectionType {
             return conf!![key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
         val mode = getSetting("hardware_${type}printer_mode", "FGL")
+
+        val proto = getProtoClass(mode)
+
         val serverAddr = InetAddress.getByName(getSetting("hardware_${type}printer_ip", "127.0.0.1"))
         val port = Integer.valueOf(getSetting("hardware_${type}printer_port", "9100"))
-        val socket = Socket(serverAddr, port)
-        val ostream = socket.getOutputStream()
-        val istream = socket.getInputStream()
+
         try {
-            if (mode == "FGL") {
-                val proto = FGL()
-                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                proto.send(futures, istream, ostream)
-            } else if (mode == "SLCS") {
-                val proto = SLCS()
-                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                proto.send(futures, istream, ostream)
-            } else if (mode == "ESC/POS") {
-                val proto = ESCPOS()
-                val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", "200")).toFloat(), numPages)
-                proto.send(futures, istream, ostream)
+            val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+            when (proto) {
+                is StreamByteProtocol<*> -> {
+                    val socket = Socket(serverAddr, port)
+                    val ostream = socket.getOutputStream()
+                    val istream = socket.getInputStream()
+
+                    try {
+                        proto.send(futures, istream, ostream)
+                    } finally {
+                        istream.close()
+                        ostream.close()
+                        socket.close()
+                    }
+                }
+
+                is CustomByteProtocol<*> -> {
+                    proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
+                }
             }
         } catch (e: PrintError) {
             e.printStackTrace()
@@ -52,10 +60,6 @@ class NetworkConnection : ConnectionType {
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-        } finally {
-            istream.close()
-            ostream.close()
-            socket.close()
         }
     }
 }
