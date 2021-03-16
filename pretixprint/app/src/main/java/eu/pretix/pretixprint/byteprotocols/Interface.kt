@@ -16,7 +16,7 @@ interface ByteProtocolInterface<T> {
     val demopage: String
 
     fun allowedForUsecase(type: String): Boolean
-    fun convertPageToBytes(img: T, isLastPage: Boolean, previousPage: T?): ByteArray
+    fun convertPageToBytes(img: T, isLastPage: Boolean, previousPage: T?, conf: Map<String, String>, type: String): ByteArray
     fun createSettingsFragment(): SetupFragment?
     fun inputClass(): Class<T>
 }

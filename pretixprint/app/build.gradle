@@ -125,6 +125,8 @@ dependencies {
         transitive = false
     }
 
+    implementation 'com.github.anastaciocintra:escpos-coffee:4.0.2'
+
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
     fullImplementation(project(':ZSDK')) {

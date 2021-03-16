@@ -32,7 +32,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
 
     override val nameResource = R.string.protocol_linkos
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         img.compress(Bitmap.CompressFormat.PNG, 0, ostream)
         return ostream.toByteArray()

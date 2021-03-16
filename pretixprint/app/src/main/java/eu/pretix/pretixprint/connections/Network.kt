@@ -22,19 +22,22 @@ class NetworkConnection : ConnectionType {
     }
 
     override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
-        val conf = settings ?: emptyMap()
-        fun getSetting(key: String, def: String): String {
-            return conf!![key] ?: context.defaultSharedPreferences.getString(key, def)!!
+        val conf = settings?.toMutableMap() ?: mutableMapOf()
+        for (entry in context.defaultSharedPreferences.all.iterator()) {
+            if (!conf.containsKey(entry.key)) {
+                conf[entry.key] = entry.value.toString()
+            }
         }
-        val mode = getSetting("hardware_${type}printer_mode", "FGL")
+
+        val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
 
         val proto = getProtoClass(mode)
 
-        val serverAddr = InetAddress.getByName(getSetting("hardware_${type}printer_ip", "127.0.0.1"))
-        val port = Integer.valueOf(getSetting("hardware_${type}printer_port", "9100"))
+        val serverAddr = InetAddress.getByName(conf.get("hardware_${type}printer_ip") ?: "127.0.0.1")
+        val port = Integer.valueOf(conf.get("hardware_${type}printer_port") ?: "9100")
 
         try {
-            val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+            val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
             when (proto) {
                 is StreamByteProtocol<*> -> {
                     val socket = Socket(serverAddr, port)

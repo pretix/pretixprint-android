@@ -25,7 +25,7 @@ class FGL : StreamByteProtocol<Bitmap> {
     // to the last page. Could be faster,  but just causes more problems with most printers.
     val diffRendering = false
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         val w = img.width
         val h = img.height

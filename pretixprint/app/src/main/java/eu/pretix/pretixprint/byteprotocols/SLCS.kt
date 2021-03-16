@@ -22,7 +22,7 @@ class SLCS : StreamByteProtocol<Bitmap> {
         return type != "receipt"
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         val pixels = IntArray(img.width * img.height)
         img.getPixels(pixels, 0, img.width, 0, 0, img.width, img.height)

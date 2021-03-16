@@ -9,6 +9,7 @@ import com.tom_roush.pdfbox.rendering.PDFRenderer
 import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import java8.util.concurrent.CompletableFuture
 import java.io.File
+import java.lang.Exception
 import java.lang.RuntimeException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -44,7 +45,7 @@ fun <T> renderFileTo(file: File, i: Int, d: Float, future: CompletableFuture<T>,
 
 val threadPool: ExecutorService = Executors.newCachedThreadPool()
 
-inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, d: Float, numPages: Int): List<CompletableFuture<ByteArray>> {
+inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, d: Float, numPages: Int, conf: Map<String, String>, type: String): List<CompletableFuture<ByteArray>> {
     val futures = mutableListOf<CompletableFuture<ByteArray>>()
     var previousBmpFuture: CompletableFuture<T>? = null
 
@@ -54,17 +55,37 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
 
         if (previousBmpFuture != null) {
             previousBmpFuture.thenApplyAsync {
-                renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                try {
+                    renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    byteFuture.completeExceptionally(e)
+                }
             }
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
-                byteFuture.complete(protocol.convertPageToBytes(bmp1, i == numPages - 1, bmp2))
+                try {
+                    byteFuture.complete(protocol.convertPageToBytes(bmp1, i == numPages - 1, bmp2, conf, type))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    byteFuture.completeExceptionally(e)
+                }
             }
         } else {
             threadPool.submit {
-                renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                try {
+                    renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    byteFuture.completeExceptionally(e)
+                }
             }
             bmpFuture.thenApplyAsync {
-                byteFuture.complete(protocol.convertPageToBytes(it, i == numPages - 1, null))
+                try {
+                    byteFuture.complete(protocol.convertPageToBytes(it, i == numPages - 1, null, conf, type))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    byteFuture.completeExceptionally(e)
+                }
             }
         }
 

@@ -25,18 +25,21 @@ class BluetoothConnection : ConnectionType {
     }
 
     override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
-        val conf = settings ?: emptyMap()
         this.context = context
-        fun getSetting(key: String, def: String): String {
-            return conf!![key] ?: context.defaultSharedPreferences.getString(key, def)!!
+
+        val conf = settings?.toMutableMap() ?: mutableMapOf()
+        for (entry in context.defaultSharedPreferences.all.iterator()) {
+            if (!conf.containsKey(entry.key)) {
+                conf[entry.key] = entry.value.toString()
+            }
         }
 
-        val mode = getSetting("hardware_${type}printer_mode", "FGL")
+        val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
         val proto = getProtoClass(mode)
-        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(getSetting("hardware_${type}printer_ip", ""))
+        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(conf.get("hardware_${type}printer_ip") ?: "")
 
         try {
-            val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
+            val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
 
             when (proto) {
                 is StreamByteProtocol<*> -> {
@@ -57,7 +60,6 @@ class BluetoothConnection : ConnectionType {
                     val istream = fallbackSocket.inputStream
 
                     try {
-                        val futures = renderPages(proto, tmpfile, Integer.valueOf(getSetting("hardware_${type}printer_dpi", proto.defaultDPI.toString())).toFloat(), numPages)
                         proto.send(futures, istream, ostream)
                     } finally {
                         istream.close()

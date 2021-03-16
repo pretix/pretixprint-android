@@ -18,7 +18,7 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
         return type == "receipt"
     }
 
-    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?): ByteArray {
+    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String): ByteArray {
         return img
     }
 
