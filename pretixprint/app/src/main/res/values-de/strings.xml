@@ -103,6 +103,7 @@
     <string name="btn_save">Einstellungen speichern</string>
     <string name="setup_bluetooth_select">Gerät auswählen</string>
     <string name="setup_bluetooth_settings">Bitte wählen Sie Ihren Drucker aus</string>
+    <string name="field_label_rotate90">Motiv um 90 ° drehen</string>
     <string name="field_label_print_double_sided">Motiv beidseitig drucken (gleiches Motiv auf beiden Seiten)</string>
     <string name="field_label_card_source">Karteneingabe</string>
     <string name="field_label_card_destination">Kartenausgabe</string>

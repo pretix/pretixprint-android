@@ -1,9 +1,13 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import com.github.anastaciocintra.escpos.EscPos
 import com.github.anastaciocintra.escpos.EscPosConst
-import com.github.anastaciocintra.escpos.image.*
+import com.github.anastaciocintra.escpos.image.BitonalThreshold
+import com.github.anastaciocintra.escpos.image.CoffeeImage
+import com.github.anastaciocintra.escpos.image.EscPosImage
+import com.github.anastaciocintra.escpos.image.GraphicsImageWrapper
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.ui.GraphicESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
@@ -33,20 +37,33 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
                 ?: defaultDPI.toString()).toFloat()
         val targetWidth = (targetWidthMM * 0.0393701 * dpi).toInt()
 
-        val scaled = if (img.width > targetWidth) {
-            val targetHeight = (targetWidth.toFloat() / img.width.toFloat() * img.height.toFloat()).toInt()
-            Bitmap.createScaledBitmap(img, targetWidth, targetHeight, true)
+        var rotated = if (conf.get("hardware_${type}printer_rotate90") == "true") {
+            val matrix = Matrix()
+            matrix.postRotate(90f)
+            Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
         } else {
             img
         }
 
-        val algorithm = BitonalThreshold(127)
-        val escposImage = EscPosImage(CoffeeImageAndroidImpl(scaled), algorithm)
+        val scaled = if (rotated.width > targetWidth) {
+            val targetHeight = (targetWidth.toFloat() / rotated.width.toFloat() * rotated.height.toFloat()).toInt()
+            Bitmap.createScaledBitmap(rotated, targetWidth, targetHeight, true)
+        } else {
+            rotated
+        }
 
-        val imageWrapper = GraphicsImageWrapper()
-        imageWrapper.setGraphicsImageBxBy(GraphicsImageWrapper.GraphicsImageBxBy.Normal_Default)
-        imageWrapper.setJustification(EscPosConst.Justification.Center)
-        escpos.write(imageWrapper, escposImage)
+        var yoff = 0
+        val maxheight = 200  // printer will crash if image is larger than its buffer, so we split it. 200 is a guess, probably the limit is around 250.
+        while (yoff < scaled.height) {
+            val cropped = Bitmap.createBitmap(scaled, 0, yoff, scaled.width, Math.min(scaled.height - yoff, maxheight), null, false)
+            val algorithm = BitonalThreshold(127)
+            val escposImage = EscPosImage(CoffeeImageAndroidImpl(cropped), algorithm)
+            val imageWrapper = GraphicsImageWrapper()
+            imageWrapper.setGraphicsImageBxBy(GraphicsImageWrapper.GraphicsImageBxBy.Normal_Default)
+            escpos.write(imageWrapper, escposImage)
+            yoff += maxheight
+        }
+
 
         escpos.feed(5)
         escpos.cut(EscPos.CutMode.PART)
