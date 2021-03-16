@@ -32,7 +32,10 @@
     <string name="headline_found_bluetooth_printers">Gefundene Bluetoothdrucker</string>
     <string name="headline_add_printer">Drucker konfigurieren</string>
     <string name="field_label_ipaddress">IP-Adresse</string>
+    <string name="field_helper_ipaddress">Die meisten Drucker sind in der Lage, ihre IP-Adresse auszudrucken. Bei Boca-Drucker können Sie z.B. den "Test"-Knopf auf der Seite drücken oder bei Bixolon- oder Metapace-Etikettendrucker den unbeschrifteten Knopf auf der Rückseite. Epson-Bondrucker drucken die IP-Adresse nach dem Start selbstständig.</string>
     <string name="field_label_port">Port</string>
+    <string name="field_helper_port">Für fast alle Drucker sollte Port 9100 verwendet werden.</string>
+    <string name="field_helper_port_cups">Für fast alle Drucker sollte Port 631 verwendet werden.</string>
     <string name="field_label_queue">Druckername</string>
     <string name="resolving">Adresse auflösen…</string>
     <string name="testing">Testdruck…</string>
@@ -51,7 +54,7 @@
     <string name="err_bluetooth_not_available">Bluetooth ist nicht verfügbar</string>
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">Die Auflösung des Druckers, normalerweise zwischen 150 und 300, im Datenblatt des Druckers beschrieben. Ein falscher Wert kann zu übergroßem oder zu kleinem Druckbild führen.</string>
-    <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
+    <string name="field_label_maxwidth">Maximale Druckbreite (in mm)</string>
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
     <string name="err_not_supported">Nicht unterstüzt</string>
@@ -100,7 +103,7 @@
     <string name="btn_save">Einstellungen speichern</string>
     <string name="setup_bluetooth_select">Gerät auswählen</string>
     <string name="setup_bluetooth_settings">Bitte wählen Sie Ihren Drucker aus</string>
-    <string name="field_label_print_double_sided">Motif beidseitig drucken (gleiches Motif auf beiden Seiten)</string>
+    <string name="field_label_print_double_sided">Motiv beidseitig drucken (gleiches Motiv auf beiden Seiten)</string>
     <string name="field_label_card_source">Karteneingabe</string>
     <string name="field_label_card_destination">Kartenausgabe</string>
 </resources>

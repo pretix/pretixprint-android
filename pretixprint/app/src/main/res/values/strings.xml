@@ -34,7 +34,10 @@
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
     <string name="headline_add_printer">Configure printer</string>
     <string name="field_label_ipaddress">IP address</string>
+    <string name="field_helper_ipaddress">Most printers are able to print out their IP address. For Boca printers, press the "Test" button on the side. For Bixolon or Metapace label printers, press the unlabeled button on the back side. For Epson receipt printers, the IP address is printed after power up.</string>
     <string name="field_label_port">Port</string>
+    <string name="field_helper_port">Use port 9100 for almost all printers.</string>
+    <string name="field_helper_port_cups">Use port 631 for almost all printers.</string>
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
