@@ -13,6 +13,7 @@ import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
+import io.sentry.Sentry
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
@@ -66,6 +67,14 @@ class FinishSettingsFragment : SetupFragment() {
                         if (this@FinishSettingsFragment.activity == null)
                             return@uiThread
                         alert(e.message).show()
+                    }
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                    Sentry.capture(e)
+                    uiThread {
+                        if (this@FinishSettingsFragment.activity == null)
+                            return@uiThread
+                        alert(e.toString()).show()
                     }
                 } finally {
                     uiThread {

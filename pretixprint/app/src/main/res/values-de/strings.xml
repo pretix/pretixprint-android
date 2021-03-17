@@ -83,6 +83,7 @@
     <string name="err_usb_permission_denied">USB-Berechtigung wurde nicht erteilt</string>
     <string name="err_usb_connection">USB-Verbindung fehlgeschlagen</string>
     <string name="field_label_serial">Seriennummer</string>
+    <string name="field_label_usbcompat">Kompatibilitätsmodus (benötigt z.B. für Boca-Drucker auf HP-Geräten)</string>
     <string name="setup_connection_type_headline">Wie ist Ihr Drucker verbunden?</string>
     <string name="connection_type_network">Netzwerk (LAN/WLAN)</string>
     <string name="connection_type_bluetooth">Bluetooth</string>

@@ -87,6 +87,7 @@ class FGL : StreamByteProtocol<Bitmap> {
             wait@ while (true) {
                 val r = istream.read()
                 when (r) {
+                    -1 -> Thread.sleep(10)
                     0 -> Thread.sleep(10)
                     1 -> break@wait  // reject bin warning
                     2 -> throw PrintError("Reject bin error")

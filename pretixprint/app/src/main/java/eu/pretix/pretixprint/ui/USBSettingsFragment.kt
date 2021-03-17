@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.getSystemService
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.support.v4.act
@@ -58,15 +59,22 @@ class USBSettingsFragment : SetupFragment() {
         ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
         view.findViewById<TextInputEditText>(R.id.teSerial).setText(currentSerial)
 
+        val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_usbcompat"
+        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_usbcompat", "false")!!.toBoolean()
+        view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked = currentCompat
+
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val serial = view.findViewById<TextInputEditText>(R.id.teSerial).text.toString()
+            val compat = view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked
             if (TextUtils.isEmpty(serial)) {
                 view.findViewById<TextInputEditText>(R.id.teSerial).error = getString(R.string.err_field_required)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teSerial).error = null
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_usbcompat", compat.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
                         serial)
                 (activity as PrinterSetupActivity).startProtocolChoice()

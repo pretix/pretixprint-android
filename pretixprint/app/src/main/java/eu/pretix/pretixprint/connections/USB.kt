@@ -16,6 +16,7 @@ import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
+import org.apache.commons.io.IOUtils
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
@@ -23,6 +24,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import java.util.concurrent.TimeoutException
+import kotlin.math.min
 
 /*
 With inspiration and parts taken from
@@ -112,7 +115,7 @@ object UsbDeviceHelper {
 }
 
 
-class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice) : OutputStream() {
+class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: Boolean) : OutputStream() {
     private var usbConnection: UsbDeviceConnection?
     private var usbInterface: UsbInterface?
     private var usbEndpoint: UsbEndpoint?
@@ -135,18 +138,29 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice) : OutputStre
         if (!usbConnection!!.claimInterface(usbInterface, true)) {
             throw IOException("Error during claim USB interface.")
         }
-        Log.i("SNDUSB", "Start Write " + bytes.toString(Charset.defaultCharset()))
-        val buffer = ByteBuffer.wrap(bytes)
-        val usbRequest = UsbRequest()
-        try {
-            usbRequest.initialize(usbConnection, usbEndpoint)
-            if (!usbRequest.queue(buffer, bytes.size)) {
-                throw IOException("Error queueing USB request.")
+        val buffer = ByteBuffer.wrap(bytes.copyOfRange(offset, offset + length))
+
+
+        if (compat) {
+            var count = length
+            var offset = offset
+            while (count > 0) {
+                val l = min(usbEndpoint!!.maxPacketSize, count)
+                val snd = usbConnection!!.bulkTransfer(usbEndpoint, bytes, offset, l, 10000)
+                count -= snd
+                offset += snd
             }
-            usbConnection!!.requestWait()
-            Log.i("SNDUSB", "Write done")
-        } finally {
-            usbRequest.close()
+        } else {
+            val usbRequest = UsbRequest()
+            try {
+                usbRequest.initialize(usbConnection, usbEndpoint)
+                if (!usbRequest.queue(buffer, bytes.size)) {
+                    throw IOException("Error queueing USB request.")
+                }
+                usbConnection!!.requestWait()
+            } finally {
+                usbRequest.close()
+            }
         }
     }
 
@@ -181,12 +195,13 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice) : OutputStre
 }
 
 
-class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice) : InputStream() {
+class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: Boolean) : InputStream() {
     private var usbConnection: UsbDeviceConnection?
     private var usbInterface: UsbInterface?
     private var usbEndpoint: UsbEndpoint?
     private var bufferArray = byteArrayOf()
     private var bufferOffset = 0
+    private val readTimeout = 5000L
 
     override fun available(): Int {
         return bufferArray.size - bufferOffset
@@ -201,21 +216,37 @@ class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice) : InputStream
                 throw IOException("Error during claim USB interface.")
             }
 
-            Log.i("SNDUSB", "Start Read")
-            val usbRequest = UsbRequest()
-            val buffer = ByteBuffer.allocate(usbEndpoint!!.maxPacketSize)
-            try {
-                usbRequest.initialize(usbConnection, usbEndpoint)
-                if (!usbRequest.queue(buffer, buffer.capacity())) {
-                    throw IOException("Error queueing USB request.")
-                }
-                usbConnection!!.requestWait()
-                bufferArray = buffer.array()
+            if (compat) {
+                val inbuf = ByteArray(usbEndpoint!!.maxPacketSize)
+                val rcvd = usbConnection!!.bulkTransfer(usbEndpoint, inbuf, inbuf.size, readTimeout.toInt())
+                bufferArray = inbuf.copyOfRange(0, rcvd)
                 bufferOffset = 0
-                Log.i("SNDUSB", "Read done: " + bufferArray.toString(Charset.defaultCharset()))
-            } finally {
-                usbRequest.close()
+            } else {
+                val usbRequest = UsbRequest()
+                val buffer = ByteBuffer.allocate(usbEndpoint!!.maxPacketSize)
+                try {
+                    usbRequest.initialize(usbConnection, usbEndpoint)
+                    if (!usbRequest.queue(buffer, buffer.capacity())) {
+                        throw IOException("Error queueing USB request.")
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        try {
+                            usbConnection!!.requestWait(readTimeout)
+                        } catch (e: TimeoutException) {
+                            return -1
+                        }
+                    } else {
+                        usbConnection!!.requestWait()
+                    }
+                    bufferArray = buffer.array()
+                    bufferOffset = 0
+                } finally {
+                    usbRequest.close()
+                }
             }
+        }
+        if (bufferArray.isEmpty())  {
+            return -1
         }
         val r = bufferArray[bufferOffset].toInt()
         bufferOffset += 1
@@ -273,6 +304,7 @@ class USBConnection : ConnectionType {
 
         val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
         val serial = conf.get("hardware_${type}printer_ip") ?: "0"
+        val compat = (conf.get("hardware_${type}printer_usbcompat") ?: "false") == "true"
         val proto = getProtoClass(mode)
 
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
@@ -308,8 +340,8 @@ class USBConnection : ConnectionType {
                                         ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
                                 when (proto) {
                                     is StreamByteProtocol<*> -> {
-                                        val ostream = UsbOutputStream(manager, device)
-                                        val istream = UsbInputStream(manager, device)
+                                        val ostream = UsbOutputStream(manager, device, compat)
+                                        val istream = UsbInputStream(manager, device, compat)
 
                                         try {
                                             proto.send(futures, istream, ostream)
@@ -355,6 +387,5 @@ class USBConnection : ConnectionType {
             throw err!!
         }
         Thread.sleep(1000)
-        Log.i("SNDUSB", "END OF MAIN THREAD")
     }
 }
