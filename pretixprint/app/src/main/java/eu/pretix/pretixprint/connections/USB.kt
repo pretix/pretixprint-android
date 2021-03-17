@@ -16,7 +16,6 @@ import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
-import org.apache.commons.io.IOUtils
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
