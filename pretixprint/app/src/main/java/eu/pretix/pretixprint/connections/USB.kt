@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.*
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -16,14 +15,12 @@ import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
-import org.apache.commons.io.IOUtils
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.nio.charset.Charset
 import java.util.concurrent.TimeoutException
 import kotlin.math.min
 
