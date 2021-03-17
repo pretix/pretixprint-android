@@ -16,13 +16,238 @@ import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
+import org.apache.commons.io.IOUtils
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.ByteBuffer
 import java.nio.charset.Charset
-import kotlin.experimental.and
+
+/*
+With inspiration and parts taken from
+
+https://github.com/DantSu/ESCPOS-ThermalPrinter-Android
+
+Copyright (c) 2019 Franck ALARY
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
+
+
+object UsbDeviceHelper {
+    /**
+     * Find the correct USB interface for printing
+     *
+     * @param usbDevice USB device
+     * @return correct USB interface for printing, null if not found
+     */
+    fun findPrinterInterface(usbDevice: UsbDevice?): UsbInterface? {
+        if (usbDevice == null) {
+            return null
+        }
+        val interfacesCount = usbDevice.interfaceCount
+        for (i in 0 until interfacesCount) {
+            val usbInterface = usbDevice.getInterface(i)
+            if (usbInterface.interfaceClass == UsbConstants.USB_CLASS_PRINTER) {
+                return usbInterface
+            }
+        }
+        return usbDevice.getInterface(0)
+    }
+
+    /**
+     * Find the USB endpoint for device input
+     *
+     * @param usbInterface USB interface
+     * @return Input endpoint or null if not found
+     */
+    fun findEndpointIn(usbInterface: UsbInterface?): UsbEndpoint? {
+        if (usbInterface != null) {
+            val endpointsCount = usbInterface.endpointCount
+            for (i in 0 until endpointsCount) {
+                val endpoint = usbInterface.getEndpoint(i)
+                if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_OUT) {
+                    return endpoint
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Find the USB endpoint for device output
+     *
+     * @param usbInterface USB interface
+     * @return Output endpoint or null if not found
+     */
+    fun findEndpointOut(usbInterface: UsbInterface?): UsbEndpoint? {
+        if (usbInterface != null) {
+            val endpointsCount = usbInterface.endpointCount
+            for (i in 0 until endpointsCount) {
+                val endpoint = usbInterface.getEndpoint(i)
+                if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_IN) {
+                    return endpoint
+                }
+            }
+        }
+        return null
+    }
+}
+
+
+class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice) : OutputStream() {
+    private var usbConnection: UsbDeviceConnection?
+    private var usbInterface: UsbInterface?
+    private var usbEndpoint: UsbEndpoint?
+
+    @Throws(IOException::class)
+    override fun write(i: Int) {
+        this.write(byteArrayOf(i.toByte()))
+    }
+
+    @Throws(IOException::class)
+    override fun write(bytes: ByteArray) {
+        this.write(bytes, 0, bytes.size)
+    }
+
+    @Throws(IOException::class)
+    override fun write(bytes: ByteArray, offset: Int, length: Int) {
+        if (usbInterface == null || usbEndpoint == null || usbConnection == null) {
+            throw IOException("Unable to connect to USB device.")
+        }
+        if (!usbConnection!!.claimInterface(usbInterface, true)) {
+            throw IOException("Error during claim USB interface.")
+        }
+        Log.i("SNDUSB", "Start Write " + bytes.toString(Charset.defaultCharset()))
+        val buffer = ByteBuffer.wrap(bytes)
+        val usbRequest = UsbRequest()
+        try {
+            usbRequest.initialize(usbConnection, usbEndpoint)
+            if (!usbRequest.queue(buffer, bytes.size)) {
+                throw IOException("Error queueing USB request.")
+            }
+            usbConnection!!.requestWait()
+            Log.i("SNDUSB", "Write done")
+        } finally {
+            usbRequest.close()
+        }
+    }
+
+    @Throws(IOException::class)
+    override fun flush() {
+    }
+
+    @Throws(IOException::class)
+    override fun close() {
+        if (usbConnection != null) {
+            usbConnection!!.close()
+            usbInterface = null
+            usbEndpoint = null
+            usbConnection = null
+        }
+    }
+
+    init {
+        usbInterface = UsbDeviceHelper.findPrinterInterface(usbDevice)
+        if (usbInterface == null) {
+            throw IOException("Unable to find USB interface.")
+        }
+        usbEndpoint = UsbDeviceHelper.findEndpointIn(usbInterface)
+        if (usbEndpoint == null) {
+            throw IOException("Unable to find USB endpoint.")
+        }
+        usbConnection = usbManager.openDevice(usbDevice)
+        if (usbConnection == null) {
+            throw IOException("Unable to open USB connection.")
+        }
+    }
+}
+
+
+class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice) : InputStream() {
+    private var usbConnection: UsbDeviceConnection?
+    private var usbInterface: UsbInterface?
+    private var usbEndpoint: UsbEndpoint?
+    private var bufferArray = byteArrayOf()
+    private var bufferOffset = 0
+
+    override fun available(): Int {
+        return bufferArray.size - bufferOffset
+    }
+
+    override fun read(): Int {
+        if (bufferOffset >= bufferArray.size) {
+            if (usbInterface == null || usbEndpoint == null || usbConnection == null) {
+                throw IOException("Unable to connect to USB device.")
+            }
+            if (!usbConnection!!.claimInterface(usbInterface, true)) {
+                throw IOException("Error during claim USB interface.")
+            }
+
+            Log.i("SNDUSB", "Start Read")
+            val usbRequest = UsbRequest()
+            val buffer = ByteBuffer.allocate(usbEndpoint!!.maxPacketSize)
+            try {
+                usbRequest.initialize(usbConnection, usbEndpoint)
+                if (!usbRequest.queue(buffer, buffer.capacity())) {
+                    throw IOException("Error queueing USB request.")
+                }
+                usbConnection!!.requestWait()
+                bufferArray = buffer.array()
+                bufferOffset = 0
+                Log.i("SNDUSB", "Read done: " + bufferArray.toString(Charset.defaultCharset()))
+            } finally {
+                usbRequest.close()
+            }
+        }
+        val r = bufferArray[bufferOffset].toInt()
+        bufferOffset += 1
+        return r
+    }
+
+    @Throws(IOException::class)
+    override fun close() {
+        if (usbConnection != null) {
+            usbConnection!!.close()
+            usbInterface = null
+            usbEndpoint = null
+            usbConnection = null
+        }
+    }
+
+    init {
+        usbInterface = UsbDeviceHelper.findPrinterInterface(usbDevice)
+        if (usbInterface == null) {
+            throw IOException("Unable to find USB interface.")
+        }
+        usbEndpoint = UsbDeviceHelper.findEndpointOut(usbInterface)
+        if (usbEndpoint == null) {
+            throw IOException("Unable to find USB endpoint.")
+        }
+        usbConnection = usbManager.openDevice(usbDevice)
+        if (usbConnection == null) {
+            throw IOException("Unable to open USB connection.")
+        }
+    }
+}
 
 
 class USBConnection : ConnectionType {
@@ -30,124 +255,6 @@ class USBConnection : ConnectionType {
     override val nameResource = R.string.connection_type_usb
     override val inputType = ConnectionType.Input.PLAIN_BYTES
     private val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.connections.USB_PERMISSION"
-    private val DEFAULT_READ_TIMEOUT_MS = 30000
-    private val DEFAULT_WRITE_TIMEOUT_MS = 2000
-
-
-    protected inner class UsbSerialInputStream(private val mUsbConnection: UsbDeviceConnection,
-                                               private val mUsbEndpoint: UsbEndpoint,
-                                               writeTmoutMs: Int
-    ) : InputStream() {
-        /*
-        The stream classes are from https://github.com/illarionov/RtkGps
-
-        Copyright (c) 2013, Alexey Illarionov. All rights reserved.
-
-        Redistribution and use in source and binary forms, with or without
-        modification, are permitted provided that the following conditions
-        are met:
-        1. Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
-        2. Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-
-        THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-        ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-        ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-        OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-        HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-        LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-        OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-        SUCH DAMAGE.
-         */
-        private var mTimeout = DEFAULT_READ_TIMEOUT_MS
-        private var rcvPkt: ByteArray? = null
-
-        init {
-            mTimeout = writeTmoutMs
-            rcvPkt = ByteArray(mUsbEndpoint.maxPacketSize)
-        }
-
-        constructor(connection: UsbDeviceConnection,
-                    bulkOutEndpoint: UsbEndpoint) : this(connection, bulkOutEndpoint, DEFAULT_READ_TIMEOUT_MS) {
-        }
-
-        @Throws(IOException::class)
-        override fun read(): Int {
-            synchronized(this) {
-                val rcvd = read(rcvPkt, 0, 1)
-                if (rcvd == 0) throw IOException("timeout")
-                return (rcvPkt!![0] and 0xff.toByte()).toInt()
-            }
-        }
-
-        @Throws(IOException::class)
-        override fun read(buffer: ByteArray?, offset: Int, count: Int): Int {
-            val rcvd: Int
-
-            synchronized(this) {
-                if (offset == 0) {
-                    rcvd = mUsbConnection.bulkTransfer(mUsbEndpoint, buffer,
-                            count, mTimeout)
-                    if (rcvd < 0) throw IOException("bulkTransfer() error")
-                    //if (D) Log.d(TAG, "Received " + rcvd + " bytes aligned");
-                    return rcvd
-                } else {
-                    rcvd = mUsbConnection.bulkTransfer(mUsbEndpoint,
-                            rcvPkt,
-                            Math.min(count, rcvPkt!!.size),
-                            mTimeout)
-                    if (rcvd < 0)
-                        throw IOException("bulkTransfer() error")
-                    else if (rcvd > 0) {
-                        System.arraycopy(rcvPkt!!, 0, buffer!!, offset, rcvd)
-                    }
-                    return rcvd
-                }
-            }
-        }
-    }
-
-    protected inner class UsbSerialOutputStream @JvmOverloads constructor(private val mUsbConnection: UsbDeviceConnection,
-                                                                          private val mUsbEndpoint: UsbEndpoint,
-                                                                          writeTmoutMs: Int = DEFAULT_WRITE_TIMEOUT_MS
-    ) : OutputStream() {
-        private var mTimeout = DEFAULT_WRITE_TIMEOUT_MS
-        private var sndPkt: ByteArray? = null
-
-        init {
-            mTimeout = writeTmoutMs
-            sndPkt = ByteArray(mUsbEndpoint.maxPacketSize)
-        }
-
-        @Throws(IOException::class)
-        override fun write(arg0: Int) {
-            write(byteArrayOf(arg0.toByte()))
-        }
-
-        @Throws(IOException::class)
-        override fun write(buffer: ByteArray, offset: Int, count: Int) {
-            var offset = offset
-            var count = count
-            synchronized(this) {
-                while (count > 0) {
-                    /* XXX: timeout */
-                    val length = if (count > sndPkt!!.size) sndPkt!!.size else count
-                    System.arraycopy(buffer, offset, sndPkt!!, 0, length)
-                    val snd = mUsbConnection.bulkTransfer(mUsbEndpoint, sndPkt, length, mTimeout)
-                    if (snd < 0) throw IOException("bulkTransfer() failed")
-                    Log.i("SNDUSB", "package $offset ($length): ${sndPkt!!.toString(Charset.defaultCharset())}|")
-                    count -= snd
-                    offset += snd
-                }
-            }
-        }
-    }
-
 
     override fun allowedForUsecase(type: String): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -172,7 +279,7 @@ class USBConnection : ConnectionType {
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         val devices = mutableMapOf<String, UsbDevice>()
 
-        manager.deviceList.forEach() {
+        manager.deviceList.forEach {
             try {
                 if (it.value.serialNumber == serial) {
                     devices[it.key] = it.value
@@ -195,62 +302,40 @@ class USBConnection : ConnectionType {
                 try {
                     context.unregisterReceiver(this)
                     if (ACTION_USB_PERMISSION == intent.action) {
-                        synchronized(this) {
-                            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                                val intf = device!!.getInterface(0)  // TODO: does this work for all supported devices?
-                                var endpoint_out: UsbEndpoint? = null
-                                var endpoint_in: UsbEndpoint? = null
-                                for (epid in 0 until intf.endpointCount) {
-                                    val endpoint = intf.getEndpoint(epid)
-                                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_OUT) {
-                                        endpoint_out = endpoint
-                                    }
-                                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK && endpoint.direction == UsbConstants.USB_DIR_IN) {
-                                        endpoint_in = endpoint
-                                    }
-                                }
-                                val conn = manager.openDevice(device)
-                                        ?: throw PrintException(context.getString(R.string.err_usb_connection))
-                                conn.claimInterface(intf, true)
-                                if (endpoint_in == null || endpoint_out == null) {
-                                    throw PrintException(context.getString(R.string.err_usb_connection))
-                                }
+                        val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            try {
+                                val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi")
+                                        ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
+                                when (proto) {
+                                    is StreamByteProtocol<*> -> {
+                                        val ostream = UsbOutputStream(manager, device)
+                                        val istream = UsbInputStream(manager, device)
 
-                                try {
-                                    val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
-                                    when (proto) {
-                                        is StreamByteProtocol<*> -> {
-                                            val istream = UsbSerialInputStream(conn, endpoint_in)
-                                            val ostream = UsbSerialOutputStream(conn, endpoint_out)
-
-                                            try {
-                                                proto.send(futures, istream, ostream)
-                                            } finally {
-                                                istream.close()
-                                                ostream.close()
-                                                conn.releaseInterface(intf)
-                                                conn.close()
-                                            }
-                                        }
-
-                                        is CustomByteProtocol<*> -> {
-                                            proto.sendUSB(manager, device, futures, conf, type, context)
+                                        try {
+                                            proto.send(futures, istream, ostream)
+                                        } finally {
+                                            istream.close()
+                                            ostream.close()
                                         }
                                     }
-                                } catch (e: PrintError) {
-                                    e.printStackTrace()
-                                    err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                                    return@synchronized
-                                } catch (e: IOException) {
-                                    e.printStackTrace()
-                                    err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                                    return@synchronized
+
+                                    is CustomByteProtocol<*> -> {
+                                        proto.sendUSB(manager, device, futures, conf, type, context)
+                                    }
                                 }
-                            } else {
-                                err = PrintException(context.getString(R.string.err_usb_permission_denied))
+                            } catch (e: PrintError) {
+                                e.printStackTrace()
+                                err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                                return
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                                err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
                                 return
                             }
+                        } else {
+                            err = PrintException(context.getString(R.string.err_usb_permission_denied))
+                            return
                         }
                     }
                 } finally {
