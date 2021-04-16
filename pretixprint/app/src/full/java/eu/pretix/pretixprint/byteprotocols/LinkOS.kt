@@ -88,7 +88,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
                 Thread.sleep(2000)
             } catch (e: Exception) {
                 e.printStackTrace()
-                throw IOException(e.message)
+                throw PrintError(e.message ?: e.toString())
             }
         }.start()
     }
