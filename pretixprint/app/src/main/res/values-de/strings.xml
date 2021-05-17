@@ -55,6 +55,7 @@
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">Die Auflösung des Druckers, normalerweise zwischen 150 und 300, im Datenblatt des Druckers beschrieben. Ein falscher Wert kann zu übergroßem oder zu kleinem Druckbild führen.</string>
     <string name="field_label_maxwidth">Maximale Druckbreite (in mm)</string>
+    <string name="field_label_waitafterpage">Wartezeit nach Seite (in Millisekunden)</string>
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
     <string name="err_not_supported">Nicht unterstüzt</string>

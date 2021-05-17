@@ -59,7 +59,7 @@ class SLCS : StreamByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
+    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
             ostream.write(f.get())
             ostream.flush()

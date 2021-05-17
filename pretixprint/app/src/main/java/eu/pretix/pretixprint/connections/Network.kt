@@ -45,7 +45,7 @@ class NetworkConnection : ConnectionType {
                     val istream = socket.getInputStream()
 
                     try {
-                        proto.send(futures, istream, ostream)
+                        proto.send(futures, istream, ostream, conf, type)
                     } finally {
                         istream.close()
                         ostream.close()

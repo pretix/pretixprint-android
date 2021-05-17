@@ -72,12 +72,13 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
+    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
             ostream.write(f.get())
             ostream.flush()
         }
-        Thread.sleep(2000)  // todo: check if necessary
+        val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000")
+        Thread.sleep(wap.toLong())
     }
 
     override fun createSettingsFragment(): SetupFragment? {

@@ -33,6 +33,12 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 ?: defaultSharedPreferences.getString("hardware_${useCase}printer_maxwidth", "72")
         view.findViewById<TextInputEditText>(R.id.teMaxWidth).setText(currentMaxWidth)
 
+        val currentWaitAfterPage = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_waitafterpage"
+        ) as String?)
+                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_waitafterpage", "2000")
+        view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
+
         val currentRotate90 = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_rotate90"
         )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotate90", "false")!!.toBoolean()
@@ -43,12 +49,17 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
+            val wap = view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).text.toString()
             val mw = view.findViewById<TextInputEditText>(R.id.teMaxWidth).text.toString()
             val rotate90 = view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked
             if (TextUtils.isEmpty(mw)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(mw)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_invalid)
+            } else if (TextUtils.isEmpty(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_required)
+            } else if (!TextUtils.isDigitsOnly(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_invalid)
             } else if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(dpi)) {
@@ -60,6 +71,8 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotate90", rotate90.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_maxwidth",
                         mw)
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_waitafterpage",
+                        wap)
                 (activity as PrinterSetupActivity).startFinalPage()
             }
         }

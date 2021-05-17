@@ -41,6 +41,7 @@
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
+    <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
     <string name="field_label_queue">Printer name</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>

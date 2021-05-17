@@ -60,7 +60,7 @@ class BluetoothConnection : ConnectionType {
                     val istream = fallbackSocket.inputStream
 
                     try {
-                        proto.send(futures, istream, ostream)
+                        proto.send(futures, istream, ostream, conf, type)
                     } finally {
                         istream.close()
                         ostream.close()

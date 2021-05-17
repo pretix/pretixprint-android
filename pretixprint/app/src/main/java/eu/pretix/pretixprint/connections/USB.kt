@@ -341,7 +341,7 @@ class USBConnection : ConnectionType {
                                         val istream = UsbInputStream(manager, device, compat)
 
                                         try {
-                                            proto.send(futures, istream, ostream)
+                                            proto.send(futures, istream, ostream, conf, type)
                                         } finally {
                                             istream.close()
                                             ostream.close()

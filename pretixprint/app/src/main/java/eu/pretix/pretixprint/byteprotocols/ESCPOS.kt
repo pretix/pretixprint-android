@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.ui.ESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.InputStream
@@ -22,15 +22,18 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
         return img
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream) {
+    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
             ostream.write(f.get())
             ostream.flush()
+
+            val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100")
+            Thread.sleep(wap.toLong())
         }
    }
 
     override fun createSettingsFragment(): SetupFragment? {
-        return null
+        return ESCPOSSettingsFragment()
     }
 
     override fun inputClass(): Class<ByteArray> {
