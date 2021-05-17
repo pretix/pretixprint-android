@@ -7,6 +7,7 @@ apply plugin: 'com.jaredsburrows.license'
 android {
     compileSdkVersion 29
     buildToolsVersion '28.0.3'
+    ndkVersion "21.0.6113669"
 
     defaultConfig {
         applicationId "eu.pretix.pretixprint"
@@ -134,6 +135,10 @@ dependencies {
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
     fullImplementation(project(':ZSDK')) {
+        transitive = false
+    }
+    // EPSON ePOS SDK
+    fullImplementation(project(':ePOS')) {
         transitive = false
     }
     fullImplementation 'org.bouncycastle:bcprov-jdk15on:1.56' // 1.48

@@ -98,6 +98,7 @@
     <string name="protocol_escpos">ESC/POS-Bondrucker (z.B. Epson, Bixolon, …)</string>
     <string name="protocol_linkoscard">Zebra-Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
+    <string name="protocol_epsonepos">Original EPSON-Bondrucker</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>

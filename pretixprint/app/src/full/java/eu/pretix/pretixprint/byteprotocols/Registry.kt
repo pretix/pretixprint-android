@@ -5,6 +5,7 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         SLCS(),
         ESCPOS(),
         GraphicESCPOS(),
+        EpsonEpos(),
         LinkOSCard(),
         LinkOS()
 )

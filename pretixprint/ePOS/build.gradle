@@ -1,0 +1,6 @@
+configurations.maybeCreate("default")
+
+// Instead of including all the shipped .jars from Zebra, they are included in the apps' build.gradle
+// Leftovers here are not on MavenCentral or cause some kind of error during compilation
+artifacts.add("default", file('ePOS2.jar'))
+
