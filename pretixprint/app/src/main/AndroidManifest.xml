@@ -20,7 +20,7 @@
         android:logo="@drawable/ic_logo"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.USBAttachedActivity">
+        <activity android:name=".ui.USBAttachedActivity" android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
