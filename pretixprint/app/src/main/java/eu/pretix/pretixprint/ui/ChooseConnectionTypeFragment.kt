@@ -55,6 +55,7 @@ internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
         val binding = ItemConnectionTypeBinding.inflate(inflater, parent, false)
         binding.root.tag = binding
         binding.root.setOnClickListener(this)
+        binding.radioButton.setOnCheckedChangeListener(this)
         return BindingHolder(binding)
     }
 
@@ -64,11 +65,15 @@ internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
         selectedValue = binding.ct
 
         if (list != null) {
-            if (previous != null) {
-                notifyItemChanged(list!!.indexOf(previous), CHECKED_CHANGE)
-            }
-            if (selectedValue != null) {
-                notifyItemChanged(list!!.indexOf(selectedValue!!), CHECKED_CHANGE)
+            try {
+                if (previous != null) {
+                    notifyItemChanged(list!!.indexOf(previous), CHECKED_CHANGE)
+                }
+                if (selectedValue != null) {
+                    notifyItemChanged(list!!.indexOf(selectedValue!!), CHECKED_CHANGE)
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
             }
         }
     }
