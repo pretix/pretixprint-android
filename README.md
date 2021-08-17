@@ -19,6 +19,9 @@ If you want to perform a full build, you need to do get a few libraries first:
   install it, and extract the three Java archives ``ZSDK_ANDROID_API.jar``, ``ZSDK_CARD_ANDROID_API.jar``, and ``snmp6_1z.jar``
   into the ``ZSDK/`` folder.
 
+* Download the [EPSON ePOS SDK](https://download.epson-biz.com/modules/pos/index.php?page=soft&scat=61) and extract the
+  ``ePOS2.jar`` into the ``ePOS/`` folder. Then, add the architecture folders (``armeabi`` etc.) to ``app/src/full/jniLibs/``.
+
 Then, execute:
 
 	./gradlew assembleFullDebug
