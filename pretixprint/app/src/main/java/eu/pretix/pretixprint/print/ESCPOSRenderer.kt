@@ -178,6 +178,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
                             DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
                     )
                     newline()
+                    if (position.has("subevent_text") && !position.optString("subevent_text").isNullOrBlank() && position.optString("subevent_text") != "null") {
+                        splitline(
+                                position.getString("subevent_text"),
+                                "        ",
+                                indentation=2
+                        )
+                    }
 
                     if (position.getBoolean("canceled")) {
                         emphasize(true)
@@ -456,8 +463,8 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         return total
     }
 
-    private fun splitline(leftText: String, rightText: String, padding: Int = 2) {
-        val limit = charsPerLine - rightText.length - padding
+    private fun splitline(leftText: String, rightText: String, padding: Int = 2, indentation: Int = 0) {
+        val limit = charsPerLine - rightText.length - padding - indentation
         val leftSplit = leftText.split(" ")
         var leftTextList = mutableListOf<String>()
 
@@ -478,11 +485,11 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         }
 
         for (i in 0..(leftTextList.count() - 2)) {
-            text(leftTextList[i], LEFT)
+            text(" ".repeat(indentation) + leftTextList[i], LEFT)
             newline()
         }
 
-        text(leftTextList.last() + " ".repeat(charsPerLine - leftTextList.last().length - rightText.length) + rightText, LEFT)
+        text(" ".repeat(indentation) + leftTextList.last() + " ".repeat(charsPerLine - leftTextList.last().length - rightText.length - indentation) + rightText, LEFT)
     }
 
     private fun init() {
