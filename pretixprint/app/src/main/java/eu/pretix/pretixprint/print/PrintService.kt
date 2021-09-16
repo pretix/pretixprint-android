@@ -202,6 +202,15 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
+        cleanupOldFiles()
+    }
+
+    fun cleanupOldFiles() {
+        for (file in this.cacheDir.listFiles { file, s -> s.startsWith("print_") }) {
+            if (System.currentTimeMillis() - file.lastModified() > 3600 * 1000) {
+                file.delete()
+            }
+        }
     }
 
     private fun getType(intentAction: String): String {
