@@ -20,13 +20,20 @@
         android:logo="@drawable/ic_logo"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ui.USBAttachedActivity" android:directBootAware="true">
+        <activity android:name=".ui.FileViewerEscposActivity"
+            android:label="@string/title_activity_fileviewer"></activity>
+        <activity android:name=".ui.FileViewerPdfActivity"
+            android:label="@string/title_activity_fileviewer"></activity>
+        <activity
+            android:name=".ui.USBAttachedActivity"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
+
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />

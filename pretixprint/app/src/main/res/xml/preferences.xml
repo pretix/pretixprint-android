@@ -26,6 +26,13 @@
             android:title="@string/settings_label_receiptwidth" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/settings_label_debugging">
+        <Preference
+            android:key="last_prints"
+            android:title="@string/settings_label_last_prints"
+            />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/settings_label_about">
         <Preference
             android:key="licenses"

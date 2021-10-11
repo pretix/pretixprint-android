@@ -2,11 +2,14 @@
 <resources>
     <string name="app_name">pretixPRINT</string>
     <string name="title_activity_main">pretixPRINT</string>
+    <string name="title_activity_fileviewer">Druckjob-Anzeige</string>
     <string name="action_label_settings">Einstellungen</string>
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticketdrucker</string>
     <string name="settings_label_badgeprinter">Badgedrucker</string>
     <string name="settings_label_receiptprinter">Belegdrucker</string>
+    <string name="settings_label_debugging">Debugging</string>
+    <string name="settings_label_last_prints">Letzte Druckjobs</string>
     <string name="settings_label_about">Über diese App</string>
     <string name="settings_label_licenses">Autoren und Lizenzen</string>
     <string name="settings_label_find">Drucker einrichten</string>

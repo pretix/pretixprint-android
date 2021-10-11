@@ -7,12 +7,17 @@ import android.preference.PreferenceFragment
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.webkit.WebView
-import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.selector
+import java.lang.RuntimeException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.min
 
 
 class SettingsFragment : PreferenceFragment() {
@@ -37,6 +42,11 @@ class SettingsFragment : PreferenceFragment() {
             val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
             findPreference("hardware_receiptprinter_cpl").summary = getString(R.string.pref_printer_cpl, newValue)
             return@setOnPreferenceChangeListener true
+        }
+
+        findPreference("last_prints").setOnPreferenceClickListener {
+            show_last_prints()
+            return@setOnPreferenceClickListener true
         }
 
         findPreference("licenses").setOnPreferenceClickListener {
@@ -64,7 +74,11 @@ class SettingsFragment : PreferenceFragment() {
         }
 
         val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
-        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) { getString(R.string.pref_printer_cpl, cpl.entries[31]) } else { getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString()) }
+        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) {
+            getString(R.string.pref_printer_cpl, cpl.entries[31])
+        } else {
+            getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
+        }
     }
 
     private fun asset_dialog(@StringRes title: Int) {
@@ -82,6 +96,37 @@ class SettingsFragment : PreferenceFragment() {
         dialog.show()
     }
 
+    fun show_last_prints() {
+        val f = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val files = activity!!.cacheDir
+                .listFiles { file, s -> s.startsWith("print_") }!!
+                .toList()
+                .sortedByDescending { it.lastModified() }
+        val names = files
+                .subList(0, min(files.size, 10))
+                .map {
+                    "${f.format(Date(it.lastModified()))} (${it.name.split(".")[1]})"
+                }
+
+        selector(getString(R.string.settings_label_last_prints), names) { dialogInterface, i ->
+            val file = files[i]
+            val extension = file.name.split(".")[1]
+            when (extension) {
+                "escpos" -> {
+                    val intent = intentFor<FileViewerEscposActivity>()
+                    intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
+                    activity!!.startActivity(intent)
+                }
+                "pdf" -> {
+                    val intent = intentFor<FileViewerPdfActivity>()
+                    intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
+                    activity!!.startActivity(intent)
+                }
+                else -> throw RuntimeException("Unknown file type for file $file")
+            }
+
+        }
+    }
 }
 
 class SettingsActivity : AppCompatPreferenceActivity() {
