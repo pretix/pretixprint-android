@@ -101,6 +101,9 @@ class SettingsFragment : PreferenceFragment() {
         val files = activity!!.cacheDir
                 .listFiles { file, s -> s.startsWith("print_") }!!
                 .toList()
+                .filter {
+                    System.currentTimeMillis() - it.lastModified() < 3600 * 1000
+                }
                 .sortedByDescending { it.lastModified() }
         val names = files
                 .subList(0, min(files.size, 10))
