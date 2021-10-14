@@ -37,7 +37,11 @@ class USBSettingsFragment : SetupFragment() {
                     val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.serialNumber)
+                        if (device!!.serialNumber != null && device!!.serialNumber != "null") {
+                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.serialNumber)
+                        } else {
+                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.deviceName)
+                        }
                     } else {
                         toast(R.string.err_usb_permission_denied)
                     }
