@@ -311,6 +311,8 @@ class USBConnection : ConnectionType {
             try {
                 if (it.value.serialNumber == serial) {
                     devices[it.key] = it.value
+                } else if (it.value.deviceName == serial) {
+                    devices[it.key] = it.value
                 }
             } catch (e: SecurityException) {
                 // On Android 10, USBDevices that have not expressively been granted access to
