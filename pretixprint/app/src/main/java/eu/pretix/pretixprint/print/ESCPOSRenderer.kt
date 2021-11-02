@@ -404,6 +404,13 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
                         }
                     }
                 }
+                "seat" -> {
+                    try {
+                        receipt.getJSONObject("seat").optString(content[1])
+                    } catch (ex: JSONException) {
+                        ""
+                    }
+                }
                 else -> {
                     if (fullContent.startsWith("datetime")) {
                         getDate(receipt.getString(fullContent))
