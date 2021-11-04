@@ -332,7 +332,7 @@ class USBConnection : ConnectionType {
                 try {
                     context.unregisterReceiver(this)
                     if (ACTION_USB_PERMISSION == intent.action) {
-                        val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                        val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                             try {
                                 val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi")

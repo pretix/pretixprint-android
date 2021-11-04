@@ -234,7 +234,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     override fun onHandleIntent(intent: Intent?) {
         var rr: ResultReceiver? = null
         if (intent!!.hasExtra("resultreceiver")) {
-            rr = intent.getParcelableExtra("resultreceiver") as ResultReceiver
+            rr = intent.getParcelableExtra<ResultReceiver>("resultreceiver")!! as ResultReceiver
         }
 
         startForegroundNotification()
