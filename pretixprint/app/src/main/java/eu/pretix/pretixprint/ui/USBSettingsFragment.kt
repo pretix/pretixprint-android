@@ -40,7 +40,7 @@ class USBSettingsFragment : SetupFragment() {
                         if (device!!.serialNumber != null && device!!.serialNumber != "null") {
                             view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.serialNumber)
                         } else {
-                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.deviceName)
+                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText("${Integer.toHexString(device!!.vendorId)}:${Integer.toHexString(device!!.productId)}")
                         }
                     } else {
                         toast(R.string.err_usb_permission_denied)
@@ -87,7 +87,7 @@ class USBSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
             val manager = activity!!.getSystemService(Context.USB_SERVICE) as UsbManager
             val deviceList = manager.deviceList.values.toList()
-            selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName}" }) { dialogInterface, i ->
+            selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName} (${Integer.toHexString(it.vendorId)}:${Integer.toHexString(it.productId)})" }) { dialogInterface, i ->
                 val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
                 manager.requestPermission(deviceList[i], permissionIntent)
             }
