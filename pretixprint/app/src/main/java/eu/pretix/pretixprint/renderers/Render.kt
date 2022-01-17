@@ -57,7 +57,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             previousBmpFuture.thenApplyAsync {
                 try {
                     renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
                 }
@@ -65,7 +65,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
                 try {
                     byteFuture.complete(protocol.convertPageToBytes(bmp1, i == numPages - 1, bmp2, conf, type))
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
                 }
@@ -74,7 +74,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             threadPool.submit {
                 try {
                     renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
                 }
@@ -82,7 +82,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             bmpFuture.thenApplyAsync {
                 try {
                     byteFuture.complete(protocol.convertPageToBytes(it, i == numPages - 1, null, conf, type))
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
                 }
