@@ -27,6 +27,7 @@ import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 class LinkOSCard : CustomByteProtocol<Bitmap> {
@@ -99,7 +100,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
 
-                    val graphicsData = drawGraphics(zebraCardPrinter, f.get(), doubleSided, context)
+                    val graphicsData = drawGraphics(zebraCardPrinter, f.get(60, TimeUnit.SECONDS), doubleSided, context)
 
                     zebraCardPrinter.print(1, graphicsData)
                 }

@@ -12,6 +12,7 @@ import eu.pretix.pretixprint.renderers.renderPages
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeoutException
 
 class BluetoothConnection : ConnectionType {
     override val identifier = "bluetooth_printer"
@@ -72,6 +73,9 @@ class BluetoothConnection : ConnectionType {
                     proto.sendBluetooth(device.address, futures, conf, type, context)
                 }
             }
+        } catch (e: TimeoutException) {
+            e.printStackTrace()
+            throw PrintException("Rendering timeout, thread may have crashed")
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_files_io, e.message))

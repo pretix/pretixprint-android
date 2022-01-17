@@ -6,6 +6,7 @@ import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 
 
 class ESCPOS : StreamByteProtocol<ByteArray> {
@@ -24,7 +25,7 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
-            ostream.write(f.get())
+            ostream.write(f.get(60, TimeUnit.SECONDS))
             ostream.flush()
 
             val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100")

@@ -8,6 +8,7 @@ import eu.pretix.pretixprint.ui.SetupFragment
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 
@@ -81,7 +82,7 @@ class FGL : StreamByteProtocol<Bitmap> {
             istream.read()
         }
         for (f in pages) {
-            ostream.write(f.get())
+            ostream.write(f.get(60, TimeUnit.SECONDS))
             ostream.flush()
             val loopStarted = System.currentTimeMillis()
             wait@ while (true) {

@@ -357,6 +357,9 @@ class USBConnection : ConnectionType {
                                         proto.sendUSB(manager, device, futures, conf, type, context)
                                     }
                                 }
+                            } catch (e: TimeoutException) {
+                                e.printStackTrace()
+                                throw PrintException("Rendering timeout, thread may have crashed")
                             } catch (e: PrintError) {
                                 e.printStackTrace()
                                 err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))

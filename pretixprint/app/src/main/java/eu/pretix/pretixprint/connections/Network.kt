@@ -10,6 +10,7 @@ import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Socket
+import java.util.concurrent.TimeoutException
 
 
 class NetworkConnection : ConnectionType {
@@ -57,6 +58,9 @@ class NetworkConnection : ConnectionType {
                     proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
                 }
             }
+        } catch (e: TimeoutException) {
+            e.printStackTrace()
+            throw PrintException("Rendering timeout, thread may have crashed")
         } catch (e: PrintError) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))

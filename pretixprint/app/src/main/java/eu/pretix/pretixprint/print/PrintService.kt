@@ -26,6 +26,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 
 abstract class AbstractPrintService(name: String) : IntentService(name) {
@@ -151,7 +153,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     var doc : Document? = null
                     var copy : PdfCopy? = null
                     for (page in pages) {
-                        val pf = page.get() ?: throw java.lang.Exception("Rendering failed")
+                        val pf = page.get(60, TimeUnit.SECONDS) ?: throw java.lang.Exception("Rendering failed")
                         val pagedoc = PdfReader(pf.absolutePath)
                         if (copy == null) {
                             doc = Document(pagedoc.getPageSizeWithRotation(1))
@@ -164,6 +166,9 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         pagedoc.close()
                     }
                     doc?.close()
+                } catch (e: TimeoutException) {
+                    e.printStackTrace()
+                    throw PrintException("Rendering timeout, thread may have crashed")
                 } catch (e: IOException) {
                     e.printStackTrace()
                     throw PrintException(getString(R.string.err_files_io, e.message))
