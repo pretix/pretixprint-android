@@ -26,11 +26,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.Executors
 
 
 abstract class AbstractPrintService(name: String) : IntentService(name) {
-    protected var threadPool = Executors.newCachedThreadPool()
 
     companion object {
         val CHANNEL_ID = "pretixprint_print_channel"
@@ -104,7 +102,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 try {
                     for (i in 0 until positions.length()) {
                         val future = CompletableFuture<File?>()
-                        threadPool.submit {
+                        future.completeAsync {
                             Log.i("PrintService", "Page $i: Starting render thread")
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout")
@@ -132,9 +130,6 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                                     Log.i("PrintService", "Page $i: Starting WYSIWYG renderer")
                                     WYSIWYGRenderer(layout, jsonData, i, null, this, imageMap).writePDF(_tmpfile)
                                 }
-                            } catch (e: java.lang.Exception) {
-                                e.printStackTrace()
-                                future.complete(null)
                             } finally {
                                 try {
                                     for (stream in imageMap.values) {
@@ -145,7 +140,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                                 }
                             }
                             Log.i("PrintService", "Page $i: Completing future")
-                            future.complete(_tmpfile)
+                            _tmpfile
                         }
                         pagenum += 1
                         pages.add(future)
