@@ -20,6 +20,8 @@ import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 
 
 class LinkOS : CustomByteProtocol<Bitmap> {
@@ -78,24 +80,29 @@ class LinkOS : CustomByteProtocol<Bitmap> {
             return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
 
-        // ToDo: Make the printer connection blocking, displaying an error message if appropriate.
-        Thread {
+        val future = CompletableFuture<Void>()
+        future.completeAsync {
             Looper.prepare()
             var zebraPrinter: ZebraPrinter? = null
 
-            try {
-                zebraPrinter = ZebraPrinterFactory.getInstance(connection)
+            zebraPrinter = ZebraPrinterFactory.getInstance(connection)
 
-                for (f in pages) {
-                    // ToDo: Proper path or use ZebraImage
-                    zebraPrinter.printImage("/path/to/graphics.jpg", 0, 0)
-                }
-                Thread.sleep(2000)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                throw PrintError(e.message ?: e.toString())
+            for (f in pages) {
+                // ToDo: Proper path or use ZebraImage
+                zebraPrinter.printImage("/path/to/graphics.jpg", 0, 0)
             }
-        }.start()
+            Thread.sleep(2000)
+            null
+        }
+        try {
+            future.get(5, TimeUnit.MINUTES)
+        } catch (e: ExecutionException) {
+            e.printStackTrace()
+            throw PrintError(e.cause?.message ?: e.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw PrintError(e.message ?: e.toString())
+        }
     }
 
     override fun createSettingsFragment(): SetupFragment? {
