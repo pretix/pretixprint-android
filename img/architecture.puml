@@ -1,0 +1,41 @@
+@startuml
+
+partition pretix {
+    (*) --> "Ticket Layout (PDF and JSON)"
+    (*) --> "Ticket data (JSON)"
+}
+partition pretixSCAN/pretixPOS {
+    "Ticket Layout (PDF and JSON)" -->[REST API] "Local database"
+    "Ticket data (JSON)" -->[REST API] "Local database"
+}
+partition pretixPRINT {
+    "Local database" -->[Android intent] "PrintService"
+    "PrintService" -->[JSON+PDF] "WYSIWYGRenderer"
+    "PrintService" -->[JSON] "ESCPOSRenderer"
+    partition libpretixprint {
+        "WYSIWYGRenderer" -->[Layout\nBackground\nContentProvider] "Layout.render"
+    }
+    "Layout.render"  -->[PDF] "PdfRenderer"
+    partition ByteProtocols {
+        "PdfRenderer" -->[Bitmap] "FGL, SLCS, LinkOS, ESCPOS, ..."
+        "ESCPOSRenderer" -->[Text] ESCPOS
+    }
+    partition Connections {
+        "Layout.render" -->[PDF] CUPS/IPP
+        "FGL, SLCS, LinkOS, ESCPOS, ..." --> Bluetooth
+        "FGL, SLCS, LinkOS, ESCPOS, ..." --> USB
+        "FGL, SLCS, LinkOS, ESCPOS, ..." --> TCP
+        ESCPOS --> Bluetooth
+        ESCPOS --> USB
+        ESCPOS --> TCP
+    }
+}
+
+"CUPS/IPP" --> Printer
+USB --> Printer
+TCP --> Printer
+Bluetooth --> Printer
+Printer --> (*)
+
+@enduml
+

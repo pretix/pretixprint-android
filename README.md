@@ -5,6 +5,11 @@ Android app that drives the printers used by other pretix applications. This con
 print logic, but no application logic. It is called by other applications using system
 broadcasts.
 
+Architecture
+------------
+
+![Architecture diagram](img/architecture.png)
+
 Building
 --------
 
