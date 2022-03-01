@@ -4,5 +4,6 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         FGL(),
         SLCS(),
         GraphicESCPOS(),
-        ESCPOS()
+        ESCPOS(),
+        BrotherRaster()
 )
