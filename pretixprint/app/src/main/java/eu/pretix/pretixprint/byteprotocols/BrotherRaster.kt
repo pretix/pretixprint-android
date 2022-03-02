@@ -21,13 +21,14 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
 
     // Label data list extracted from
     // https://download.brother.com/welcome/docp100366/cv_ql1100_eng_raster_100.pdf
-    enum class Label(val id: Int, val width: Int, val height: Int, val continuous: Boolean, val printableWidth: Int, val printableHeight: Int) {
+    enum class Label(val id: Int, val width: Int, val height: Int, val continuous: Boolean, val printableWidth: Int, val printableHeight: Int, val twoColor: Boolean = false) {
         c12mm(257, 12, 0, true, 106, 0),
         c29mm(258, 29, 0, true, 306, 0),
         c38mm(264, 38, 0, true, 413, 0),
         c50mm(262, 50, 0, true, 554, 0),
         c54mm(261, 54, 0, true, 590, 0),
         c62mm(259, 62, 0, true, 696, 0),
+        c62mm_rb(259, 62, 0, true, 696, 0, true),
         c102mm(260, 102, 0, true, 1164, 0),
         c103mm(265, 103, 0, true, 1200, 0),
         d17x54(269, 17, 54, false, 165, 566),
@@ -45,15 +46,12 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         d102x152(366, 102, 152, false, 1164, 1660),
         d103x164(385, 103, 164, false, 1200, 1822);
 
-        fun size() : String {
-            if (this.continuous) {
-                return "${this.width} mm"
-            }
-            return "${this.width} mm × ${this.height} mm"
-        }
-
         override fun toString(): String {
-            return size()
+            var n = if (this.continuous) "${this.width} mm" else "${this.width} mm × ${this.height} mm"
+            if (this.twoColor) {
+                n += " (red/black)"
+            }
+            return n
         }
     }
 
@@ -93,20 +91,21 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'a'.code.toByte(), 0x01)) // Mode: raster
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'S'.code.toByte())) // request statusinfo
 
+        val rasterHeight = maxHeight * (if(label.twoColor) 2 else 1)
         ostream.write(byteArrayOf(
             0x1B, 'i'.code.toByte(), 'z'.code.toByte(), // Media information
-            0xC6.toByte(),
+            if (label.twoColor) 0x86.toByte() else 0xC6.toByte(),
             if (label.continuous) 0x0A else 0x0B,
             label.width.toByte(),
             if (label.continuous) 0x00 else label.height.toByte(),
-            maxHeight.toByte(),
-            (maxHeight shr 8).toByte(),
-            (maxHeight shr 16).toByte(),
-            (maxHeight shr 24).toByte(),
+            rasterHeight.toByte(),
+            (rasterHeight shr 8).toByte(),
+            (rasterHeight shr 16).toByte(),
+            (rasterHeight shr 24).toByte(),
             if (previousPage != null) 0x01 else 0x00,
             0x00
         ))
-        ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'K'.code.toByte(), 0x08)) // Cut at end, 300dpi
+        ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'K'.code.toByte(), if (label.twoColor) 0x09 else 0x08)) // Cut at end, 300dpi
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'M'.code.toByte(), 0x40)) // Auto Cut
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'A'.code.toByte(), 0x01)) // Cut after every label
         if (label.continuous) {
@@ -138,12 +137,21 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
                 row[xoffset] = col.toByte()
             }
 
-            ostream.write('g'.code)
-            ostream.write(0x00) // default color
+            ostream.write(if (label.twoColor) 'w'.code else 'g'.code)
+            ostream.write(if (label.twoColor) 0x01 else 0x00) // default color
             val len = min(90, row.size)
             ostream.write(len)
             ostream.write(row, 0, len)
             ostream.flush()
+
+            // HACK for printing usual black/white on red/black labels
+            if (label.twoColor) {
+                ostream.write('w'.code)
+                ostream.write(0x02) // second color
+                ostream.write(90)
+                ostream.write(ByteArray(90), 0, 90) // simply nothing
+                ostream.flush()
+            }
         }
 
         // Print command with feeding
@@ -152,14 +160,6 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         } else {
             ostream.write(0x0C)
         }
-
-        /*
-        val sb = StringBuffer(ostream.size()*3)
-        for (b in ostream.toByteArray()) {
-            var i = b.toInt() and 0xFF
-            sb.append(" " + "0123456789ABCDEF"[i shr 4] + "0123456789ABCDEF"[i and 0x0F])
-        }
-        */
 
         return ostream.toByteArray()
     }
