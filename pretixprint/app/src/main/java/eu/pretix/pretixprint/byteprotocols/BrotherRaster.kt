@@ -19,8 +19,18 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
     override val defaultDPI = 300
     override val demopage = "demopage_8in_3.25in.pdf"
 
-    // Label data list extracted from
-    // https://download.brother.com/welcome/docp100366/cv_ql1100_eng_raster_100.pdf
+    /**
+     * Label data list extracted from 2.3.2 Page size in the following documents:
+     * @url https://download.brother.com/welcome/docp100278/cv_ql800_eng_raster_100.pdf
+     * @url https://download.brother.com/welcome/docp100366/cv_ql1100_eng_raster_100.pdf
+     *
+     * @param width the paper/label width in mm. See 2.3.2 Page size, column Tape/Label Size
+     * @param height the paper/label height in mm. See 2.3.2 Page size, column Tape/Label Size. 0 for endless paper
+     * @param continuous does the roll contain single labels (false) or is endless paper (true)?
+     * @param printableWidth in dots. See 2.3.2 Page size, column 3 Print area width
+     * @param printableHeight in dots. See 2.3.2 Page size, column 4 Print area length. 0 for endless paper
+     * @param twoColor some labels support red/black
+     */
     enum class Label(val id: Int, val width: Int, val height: Int, val continuous: Boolean, val printableWidth: Int, val printableHeight: Int, val twoColor: Boolean = false) {
         c12mm(257, 12, 0, true, 106, 0),
         c29mm(258, 29, 0, true, 306, 0),
@@ -179,8 +189,7 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
             ostream.flush()
         }
 
-        val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000")
-        Thread.sleep(wap.toLong())
+        Thread.sleep(2000)
     }
 
     override fun createSettingsFragment(): SetupFragment? {
