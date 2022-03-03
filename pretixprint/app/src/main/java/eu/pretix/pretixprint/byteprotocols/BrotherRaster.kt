@@ -16,7 +16,7 @@ import kotlin.math.min
 class BrotherRaster : StreamByteProtocol<Bitmap> {
     override val identifier = "BrotherRaster"
     override val nameResource = R.string.protocol_brother
-    override val defaultDPI = 300
+    override val defaultDPI = 600
     override val demopage = "demopage_8in_3.25in.pdf"
 
     /**
