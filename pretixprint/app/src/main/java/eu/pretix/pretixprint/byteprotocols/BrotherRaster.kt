@@ -101,10 +101,15 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'a'.code.toByte(), 0x01)) // Mode: raster
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'S'.code.toByte())) // request statusinfo
 
+        // Note: printing twoColor labels doesn't support the quality flag
+        var mediaFlag = 0x86
+        if (!label.twoColor && conf.get("hardware_${type}printer_quality") == "true") {
+            mediaFlag = 0xC6
+        }
         val rasterHeight = maxHeight * (if(label.twoColor) 2 else 1)
         ostream.write(byteArrayOf(
             0x1B, 'i'.code.toByte(), 'z'.code.toByte(), // Media information
-            if (label.twoColor) 0x86.toByte() else 0xC6.toByte(),
+            mediaFlag.toByte(),
             if (label.continuous) 0x0A else 0x0B,
             label.width.toByte(),
             if (label.continuous) 0x00 else label.height.toByte(),

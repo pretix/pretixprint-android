@@ -41,11 +41,17 @@ class BrotherRasterSettingsFragment : SetupFragment() {
         )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotate90", "false")!!.toBoolean()
         view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked = currentRotate90
 
+        val currentQuality = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_quality"
+        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_quality", "false")!!.toBoolean()
+        view.findViewById<SwitchMaterial>(R.id.swQuality).isChecked = currentQuality
+
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val label = view.findViewById<TextInputLayout>(R.id.tilLabel).editText?.text.toString()
+            val quality = view.findViewById<SwitchMaterial>(R.id.swQuality).isChecked
             val rotate90 = view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked
             if (TextUtils.isEmpty(label)) {
                 view.findViewById<TextInputEditText>(R.id.tilLabel).error = getString(R.string.err_field_required)
@@ -53,6 +59,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
                 val mappedLabel = BrotherRaster.Label.values().find { it.toString() == label }!!.name
 
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotate90", rotate90.toString())
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_quality", quality.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_label",
                     mappedLabel)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",

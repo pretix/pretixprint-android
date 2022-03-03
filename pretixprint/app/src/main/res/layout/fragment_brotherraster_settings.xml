@@ -66,6 +66,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tilLabel" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/swQuality"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/field_label_quality"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/swRotate90" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
