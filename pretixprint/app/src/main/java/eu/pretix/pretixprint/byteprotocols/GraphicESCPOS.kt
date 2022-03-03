@@ -9,6 +9,7 @@ import com.github.anastaciocintra.escpos.image.CoffeeImage
 import com.github.anastaciocintra.escpos.image.EscPosImage
 import com.github.anastaciocintra.escpos.image.GraphicsImageWrapper
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.GraphicESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -26,6 +27,10 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {

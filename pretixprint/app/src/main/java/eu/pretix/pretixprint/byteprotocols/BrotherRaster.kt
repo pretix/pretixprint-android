@@ -3,6 +3,8 @@ package eu.pretix.pretixprint.byteprotocols
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.BrotherRasterSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -67,6 +69,10 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return type is NetworkConnection
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
