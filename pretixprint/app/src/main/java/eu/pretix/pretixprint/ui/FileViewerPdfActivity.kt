@@ -31,6 +31,8 @@ class FileViewerPdfActivity : AppCompatActivity() {
     }
 
     fun load(page: Int) {
+        val renderDpi = 300f  // 600 will crash on A4 paper size on most devices
+
         tvPdfInfo.text = "Loading…"
         pageIndex = page
         val file = File(intent.getStringExtra(EXTRA_PATH))
@@ -39,7 +41,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
                 val renderer = android.graphics.pdf.PdfRenderer(fd)
                 val page = renderer.openPage(page)
-                val img = Bitmap.createBitmap((page.width / 72.0 * 600).toInt(), (page.height / 72.0 * 600).toInt(), Bitmap.Config.ARGB_8888)
+                val img = Bitmap.createBitmap((page.width / 72.0 * renderDpi).toInt(), (page.height / 72.0 * renderDpi).toInt(), Bitmap.Config.ARGB_8888)
                 img.eraseColor(Color.WHITE)
                 page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
 
@@ -57,7 +59,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
             } else {
                 val doc = PDDocument.load(file.inputStream())
                 val renderer = PDFRenderer(doc)
-                val img = renderer.renderImageWithDPI(page, 600f)
+                val img = renderer.renderImageWithDPI(page, renderDpi)
                 img.eraseColor(Color.WHITE)
                 runOnUiThread {
                     tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
