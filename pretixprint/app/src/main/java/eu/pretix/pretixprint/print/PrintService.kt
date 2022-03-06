@@ -109,7 +109,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout")
 
-                            val _tmpfile = File.createTempFile("print_$i", ".pdf", ctx.cacheDir)
+                            val _tmpfile = File.createTempFile("page_$i", ".pdf", ctx.cacheDir)
 
                             val imageMap = mutableMapOf<String, InputStream?>()
                             if (position.has("__image_map")) {
@@ -163,6 +163,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         for (i in 0 until pagedoc.numberOfPages) {
                             copy.addPage(copy.getImportedPage(pagedoc, i + 1))
                         }
+                        pf.deleteOnExit()
                         pagedoc.close()
                     }
                     doc?.close()
@@ -206,7 +207,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     fun cleanupOldFiles() {
-        for (file in this.cacheDir.listFiles { file, s -> s.startsWith("print_") }) {
+        for (file in this.cacheDir.listFiles { file, s -> s.startsWith("print_")  || s.startsWith("page_")}) {
             if (System.currentTimeMillis() - file.lastModified() > 3600 * 1000) {
                 file.delete()
             }
