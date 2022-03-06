@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
 import com.lowagie.text.Document
-import com.lowagie.text.pdf.PdfDocument
 import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
@@ -18,14 +17,12 @@ import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
+import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.ctx
 import org.jetbrains.anko.defaultSharedPreferences
 import org.json.JSONObject
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
+import java.io.*
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -71,6 +68,20 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         startForeground(ONGOING_NOTIFICATION_ID, notification)
     }
 
+    private fun logException(e: Throwable) {
+        try {
+            val log = File.createTempFile("error_", ".log", this.cacheDir)
+            val fw = FileWriter(log)
+            val pw = PrintWriter(fw)
+            e.printStackTrace(pw)
+            pw.flush()
+            fw.close()
+        } catch (ee: Throwable) {
+            Sentry.capture(ee)
+            ee.printStackTrace()
+        }
+    }
+
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action!!)
@@ -93,7 +104,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         when (renderer) {
             "ESCPOS" -> {
-                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id"), ".escpos", this.cacheDir)
+                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id") + "_", ".escpos", this.cacheDir)
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
@@ -169,12 +180,15 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     doc?.close()
                 } catch (e: TimeoutException) {
                     e.printStackTrace()
+                    logException(e)
                     throw PrintException("Rendering timeout, thread may have crashed")
                 } catch (e: IOException) {
                     e.printStackTrace()
+                    logException(e)
                     throw PrintException(getString(R.string.err_files_io, e.message))
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    logException(e)
                     throw PrintException(getString(R.string.err_files_generic, e.message))
                 }
             }
@@ -207,7 +221,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     fun cleanupOldFiles() {
-        for (file in this.cacheDir.listFiles { file, s -> s.startsWith("print_")  || s.startsWith("page_")}) {
+        for (file in this.cacheDir.listFiles { file, s -> s.startsWith("print_")  || s.startsWith("page_") || s.startsWith("error_")}!!) {
             if (System.currentTimeMillis() - file.lastModified() > 3600 * 1000) {
                 file.delete()
             }
@@ -246,12 +260,14 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 rr.send(0, b)
             }
         } catch (e: PrintException) {
+            logException(e)
             if (rr != null) {
                 val b = Bundle()
                 b.putString("message", e.message)
                 rr.send(1, b)
             }
         } catch (e: Exception) {
+            logException(e)
             e.printStackTrace()
             if (rr != null) {
                 val b = Bundle()

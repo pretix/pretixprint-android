@@ -22,6 +22,8 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".ui.FileViewerEscposActivity"
             android:label="@string/title_activity_fileviewer"></activity>
+        <activity android:name=".ui.FileViewerLogActivity"
+            android:label="@string/title_activity_fileviewer"></activity>
         <activity android:name=".ui.FileViewerPdfActivity"
             android:label="@string/title_activity_fileviewer"></activity>
         <activity

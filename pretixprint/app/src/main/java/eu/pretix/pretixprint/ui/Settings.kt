@@ -99,14 +99,14 @@ class SettingsFragment : PreferenceFragment() {
     fun show_last_prints() {
         val f = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val files = activity!!.cacheDir
-                .listFiles { file, s -> s.startsWith("print_") }!!
+                .listFiles { file, s -> s.startsWith("print_") || s.startsWith("error_") }!!
                 .toList()
                 .filter {
                     System.currentTimeMillis() - it.lastModified() < 3600 * 1000
                 }
                 .sortedByDescending { it.lastModified() }
         val names = files
-                .subList(0, min(files.size, 10))
+                .subList(0, min(files.size, 20))
                 .map {
                     "${f.format(Date(it.lastModified()))} (${it.name.split(".")[1]})"
                 }
@@ -120,9 +120,14 @@ class SettingsFragment : PreferenceFragment() {
                     intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
                     activity!!.startActivity(intent)
                 }
+                "log" -> {
+                    val intent = intentFor<FileViewerLogActivity>()
+                    intent.putExtra(FileViewerLogActivity.EXTRA_PATH, file.absolutePath)
+                    activity!!.startActivity(intent)
+                }
                 "pdf" -> {
                     val intent = intentFor<FileViewerPdfActivity>()
-                    intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
+                    intent.putExtra(FileViewerPdfActivity.EXTRA_PATH, file.absolutePath)
                     activity!!.startActivity(intent)
                 }
                 else -> throw RuntimeException("Unknown file type for file $file")

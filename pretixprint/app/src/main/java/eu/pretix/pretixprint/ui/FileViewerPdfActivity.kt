@@ -43,6 +43,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 img.eraseColor(Color.WHITE)
                 page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
 
+
                 val pageCount = renderer.pageCount
                 runOnUiThread {
                     tvPdfInfo.text = "page ${page.index + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
