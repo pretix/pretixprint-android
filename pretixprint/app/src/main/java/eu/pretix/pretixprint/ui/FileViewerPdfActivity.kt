@@ -43,7 +43,10 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 img.eraseColor(Color.WHITE)
                 page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
 
-                tvPdfInfo.text = "page ${page.index + 1} of ${renderer.pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
+                val pageCount = renderer.pageCount
+                runOnUiThread {
+                    tvPdfInfo.text = "page ${page.index + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
+                }
                 numPages = renderer.pageCount
 
                 draw(img)
@@ -55,7 +58,9 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 val renderer = PDFRenderer(doc)
                 val img = renderer.renderImageWithDPI(page, 600f)
                 img.eraseColor(Color.WHITE)
-                tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
+                runOnUiThread {
+                    tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
+                }
                 numPages = doc.numberOfPages
                 draw(img)
             }
