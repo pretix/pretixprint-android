@@ -5,6 +5,7 @@ import android.graphics.Matrix
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.BrotherRasterSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -72,7 +73,7 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type is NetworkConnection
+        return type is NetworkConnection || type is USBConnection
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
@@ -139,7 +140,8 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         scaled.getPixels(pixels, 0, scaled.width, 0, 0, scaled.width, scaled.height)
         val bytewidth = scaled.width / 8
         for (y in 0 until maxHeight) {
-            val row = ByteArray(bytewidth)
+            // for usb to work, raster width has always be 90 bytes
+            val row = ByteArray(90)
             for (xoffset in 0 until bytewidth) {
                 var col = 0
                 // check for overprinting (more height than scaled image)
@@ -160,10 +162,8 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
 
             ostream.write(if (label.twoColor) 'w'.code else 'g'.code)
             ostream.write(if (label.twoColor) 0x01 else 0x00) // default color
-            val len = min(90, row.size)
-            ostream.write(len)
-            ostream.write(row, 0, len)
-            ostream.flush()
+            ostream.write(90)
+            ostream.write(row, 0, 90)
 
             // HACK for printing usual black/white on red/black labels
             if (label.twoColor) {
@@ -171,7 +171,6 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
                 ostream.write(0x02) // second color
                 ostream.write(90)
                 ostream.write(ByteArray(90), 0, 90) // simply nothing
-                ostream.flush()
             }
         }
 
@@ -186,18 +185,17 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
     }
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
-        // Invalidate
-        for (i in 0 until 400) {
-            ostream.write(0x00)
-        }
-        ostream.flush()
+        // Invalidate: 200 bytes full of 0x00
+        ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'a'.code.toByte(), 0x01) + ByteArray(200)) // Mode: raster
 
         // Initialize
-        ostream.write(byteArrayOf(0x1B, '@'.code.toByte()))
+        var prefix = byteArrayOf(0x1B, '@'.code.toByte())
 
         for (f in pages) {
-            ostream.write(f.get())
+            ostream.write(prefix + f.get())
             ostream.flush()
+            // prefix is only needed for the first page
+            prefix = byteArrayOf()
         }
 
         Thread.sleep(2000)
