@@ -151,7 +151,7 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: 
             val usbRequest = UsbRequest()
             try {
                 usbRequest.initialize(usbConnection, usbEndpoint)
-                if (!usbRequest.queue(buffer, bytes.size)) {
+                if (!usbRequest.queue(buffer, length)) {
                     throw IOException("Error queueing USB request.")
                 }
                 usbConnection!!.requestWait()
