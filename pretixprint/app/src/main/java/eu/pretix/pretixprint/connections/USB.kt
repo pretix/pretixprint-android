@@ -113,6 +113,13 @@ object UsbDeviceHelper {
 
 
 class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: Boolean) : OutputStream() {
+    companion object {
+        /**
+         * @see android.hardware.usb.UsbRequest#queue(ByteBuffer, int) buffer param description
+         */
+        const val MAX_USBFS_BUFFER_SIZE: Int = 16384
+    }
+
     private var usbConnection: UsbDeviceConnection?
     private var usbInterface: UsbInterface?
     private var usbEndpoint: UsbEndpoint?
@@ -151,8 +158,16 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: 
             val usbRequest = UsbRequest()
             try {
                 usbRequest.initialize(usbConnection, usbEndpoint)
-                if (!usbRequest.queue(buffer, length)) {
-                    throw IOException("Error queueing USB request.")
+                if (length < MAX_USBFS_BUFFER_SIZE) {
+                    if (!usbRequest.queue(buffer, length)) {
+                        throw IOException("Error queueing USB request.")
+                    }
+                } else {
+                    buffer.array().asIterable().chunked(MAX_USBFS_BUFFER_SIZE/2).forEach {
+                        if (!usbRequest.queue(ByteBuffer.wrap(it.toByteArray()), it.size)) {
+                            throw IOException("Error queueing USB request.")
+                        }
+                    }
                 }
                 usbConnection!!.requestWait()
             } finally {
