@@ -5,10 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.protocols
-import eu.pretix.pretixprint.connections.BluetoothConnection
-import eu.pretix.pretixprint.connections.CUPSConnection
-import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.USBConnection
+import eu.pretix.pretixprint.connections.*
 import org.jetbrains.anko.defaultSharedPreferences
 import java.lang.RuntimeException
 
@@ -47,7 +44,11 @@ class PrinterSetupActivity : AppCompatActivity() {
 
     fun startConnectionSettings() {
         val fragmentTransaction = fragmentManager.beginTransaction()
-        fragment = when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
+        val connection = settingsStagingArea.get("hardware_${useCase}printer_connection") as String
+        if (connection == SystemConnection().identifier) {
+            return startFinalPage()
+        }
+        fragment = when (connection) {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
             USBConnection().identifier -> USBSettingsFragment()
@@ -75,9 +76,12 @@ class PrinterSetupActivity : AppCompatActivity() {
     }
 
     fun startProtocolSettings(is_back: Boolean = false) {
-        if (is_back && settingsStagingArea.get("hardware_${useCase}printer_connection") == CUPSConnection().identifier) {
-            // For proper backwards navigation from final page
-            return startConnectionSettings()
+        // For proper backwards navigation from final page
+        if (is_back) {
+            when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
+                CUPSConnection().identifier -> return startConnectionSettings()
+                SystemConnection().identifier -> return startConnectionChoice()
+            }
         }
 
 

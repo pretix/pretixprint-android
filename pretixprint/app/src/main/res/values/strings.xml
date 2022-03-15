@@ -91,6 +91,7 @@
     <string name="connection_type_bluetooth">Bluetooth</string>
     <string name="connection_type_usb">USB (exprimental, works on some devices)</string>
     <string name="connection_type_cups">CUPS (Linux server)</string>
+    <string name="connection_type_system">Android Print Service</string>
     <string name="error_no_choice">Please choose an option</string>
     <string name="btn_next">NEXT</string>
     <string name="setup_network_settings">Where is your printer on the network?</string>

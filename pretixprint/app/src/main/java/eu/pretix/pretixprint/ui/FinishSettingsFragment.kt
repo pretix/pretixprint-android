@@ -9,10 +9,7 @@ import android.widget.Button
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
-import eu.pretix.pretixprint.connections.BluetoothConnection
-import eu.pretix.pretixprint.connections.CUPSConnection
-import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.USBConnection
+import eu.pretix.pretixprint.connections.*
 import io.sentry.Sentry
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.alert
@@ -123,6 +120,9 @@ class FinishSettingsFragment : SetupFragment() {
                 } else {
                     throw Exception("USB not supported on this Android version.")
                 }
+            }
+            SystemConnection().identifier -> {
+                SystemConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
             }
         }
     }

@@ -4,5 +4,6 @@ val connectionTypes = listOf<ConnectionType>(
         NetworkConnection(),
         BluetoothConnection(),
         USBConnection(),
-        CUPSConnection()
+        CUPSConnection(),
+        SystemConnection()
 )
