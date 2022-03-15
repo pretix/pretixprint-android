@@ -113,4 +113,6 @@
     <string name="field_label_card_destination">Card Destination</string>
     <string name="field_label_label">Label size</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
+    <string name="label_two_color">red/black</string>
+    <string name="label_continuous">continuous</string>
 </resources>

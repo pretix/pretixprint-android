@@ -59,8 +59,12 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         d102x152(366, 102, 152, false, 1164, 1660),
         d103x164(385, 103, 164, false, 1200, 1822);
 
+        fun size(): String {
+            return if (this.continuous) "${this.width} mm" else "${this.width} mm × ${this.height} mm"
+        }
+
         override fun toString(): String {
-            var n = if (this.continuous) "${this.width} mm" else "${this.width} mm × ${this.height} mm"
+            var n = size()
             if (this.twoColor) {
                 n += " (red/black)"
             }

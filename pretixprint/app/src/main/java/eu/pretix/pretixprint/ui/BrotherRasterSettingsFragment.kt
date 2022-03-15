@@ -17,6 +17,21 @@ import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class BrotherRasterSettingsFragment : SetupFragment() {
 
+    private fun translatedLabelName(label: BrotherRaster.Label): String {
+        var suffix = ""
+        if (label.continuous) {
+            suffix = getString(R.string.label_continuous)
+        }
+        if (label.twoColor) {
+            if (suffix != "") {
+                suffix += ", " + getString(R.string.label_two_color)
+            } else {
+                suffix = getString(R.string.label_two_color)
+            }
+        }
+        return label.size() + (if (suffix != "") " (${suffix})" else "")
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -25,14 +40,16 @@ class BrotherRasterSettingsFragment : SetupFragment() {
         val view = inflater.inflate(R.layout.fragment_brotherraster_settings, container, false)
         val proto = BrotherRaster()
 
-        val labelAdapter = ArrayAdapter(requireContext(), R.layout.list_item, BrotherRaster.Label.values())
+        val labelAdapter = ArrayAdapter(requireContext(), R.layout.list_item, BrotherRaster.Label.values().map {
+            translatedLabelName(it)
+        })
         (view.findViewById<TextInputLayout>(R.id.tilLabel).editText as? AutoCompleteTextView)?.setAdapter(labelAdapter)
 
         val chosenLabelId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_label"
         )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_label", "")
         if (chosenLabelId?.isNotEmpty() == true) {
-            val chosenLabel = BrotherRaster.Label.values().find { it.name == chosenLabelId }.toString()
+            val chosenLabel = translatedLabelName(BrotherRaster.Label.values().find { it.name == chosenLabelId }!!)
             (view.findViewById<TextInputLayout>(R.id.tilLabel).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
         }
 
@@ -56,7 +73,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
             if (TextUtils.isEmpty(label)) {
                 view.findViewById<TextInputEditText>(R.id.tilLabel).error = getString(R.string.err_field_required)
             } else {
-                val mappedLabel = BrotherRaster.Label.values().find { it.toString() == label }!!.name
+                val mappedLabel = BrotherRaster.Label.values().find { translatedLabelName(it) == label }!!.name
 
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotate90", rotate90.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_quality", quality.toString())
