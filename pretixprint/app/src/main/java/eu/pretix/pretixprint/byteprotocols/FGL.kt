@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.byteprotocols
 import android.graphics.Bitmap
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.FGLSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java.io.ByteArrayOutputStream
@@ -20,6 +21,10 @@ class FGL : StreamByteProtocol<Bitmap> {
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
     }
 
     // With diffRendering=true, in a multi-page file we'd only send the pixels that changed compared

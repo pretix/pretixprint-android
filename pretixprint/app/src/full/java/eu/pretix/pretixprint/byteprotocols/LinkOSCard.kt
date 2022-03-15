@@ -21,6 +21,7 @@ import com.zebra.sdk.common.card.jobSettings.ZebraCardJobSettingNames
 import com.zebra.sdk.common.card.printer.ZebraCardPrinter
 import com.zebra.sdk.common.card.printer.ZebraCardPrinterFactory
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -32,13 +33,18 @@ import java.util.concurrent.TimeUnit
 
 class LinkOSCard : CustomByteProtocol<Bitmap> {
     override val identifier = "LinkOSCard"
-    override fun allowedForUsecase(type: String): Boolean {
-        return type != "receipt"
-    }
     override val defaultDPI = 300
     override val demopage = "CR80.pdf"
 
     override val nameResource = R.string.protocol_linkoscard
+
+    override fun allowedForUsecase(type: String): Boolean {
+        return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
+    }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()

@@ -99,6 +99,7 @@
     <string name="btn_prev">ZURÜCK</string>
     <string name="protocol_fgl">FGL-Ticketdrucker (z.B. Boca, Practical Automation, …)</string>
     <string name="protocol_slcs">SLCS-Etikettendrucker (z.B. Bixolon, Metapace, …)</string>
+    <string name="protocol_brother">Brother-Etikettendrucker (QL-Serie)</string>
     <string name="protocol_escpos">ESC/POS-Bondrucker (z.B. Epson, Bixolon, …)</string>
     <string name="protocol_linkoscard">Zebra-Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
@@ -112,4 +113,8 @@
     <string name="field_label_print_double_sided">Motiv beidseitig drucken (gleiches Motiv auf beiden Seiten)</string>
     <string name="field_label_card_source">Karteneingabe</string>
     <string name="field_label_card_destination">Kartenausgabe</string>
+    <string name="field_label_label">Papiergröße</string>
+    <string name="field_label_quality">Druckqualität erhöhen (etwas langsamer)</string>
+    <string name="label_two_color">rot/schwarz</string>
+    <string name="label_continuous">endlos</string>
 </resources>

@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.ESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -17,6 +18,10 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
 
     override fun allowedForUsecase(type: String): Boolean {
         return type == "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
     }
 
     override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String): ByteArray {

@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.byteprotocols
 import android.graphics.Bitmap
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.SLCSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -20,6 +21,10 @@ class SLCS : StreamByteProtocol<Bitmap> {
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {

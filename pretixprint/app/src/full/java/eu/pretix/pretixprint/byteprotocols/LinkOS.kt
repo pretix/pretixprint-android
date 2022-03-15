@@ -13,6 +13,7 @@ import com.zebra.sdk.comm.UsbConnection
 import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.LinkOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -23,14 +24,18 @@ import java.io.IOException
 
 class LinkOS : CustomByteProtocol<Bitmap> {
     override val identifier = "LinkOS"
-    override fun allowedForUsecase(type: String): Boolean {
-        return type != "receipt"
-    }
-
     override val defaultDPI = 203
     override val demopage = "demopage_8in_3.25in.pdf"
 
     override val nameResource = R.string.protocol_linkos
+
+    override fun allowedForUsecase(type: String): Boolean {
+        return type != "receipt"
+    }
+
+    override fun allowedForConnection(type: ConnectionType): Boolean {
+        return true
+    }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()

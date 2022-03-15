@@ -151,6 +151,9 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: 
             while (count > 0) {
                 val l = min(usbEndpoint!!.maxPacketSize, count)
                 val snd = usbConnection!!.bulkTransfer(usbEndpoint, bytes, offset, l, 10000)
+                if (snd < 0) {
+                    throw IOException("Error sending USB data.")
+                }
                 count -= snd
                 offset += snd
             }
@@ -378,15 +381,12 @@ class USBConnection : ConnectionType {
                             } catch (e: PrintError) {
                                 e.printStackTrace()
                                 err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                                return
                             } catch (e: IOException) {
                                 e.printStackTrace()
                                 err = PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                                return
                             }
                         } else {
                             err = PrintException(context.getString(R.string.err_usb_permission_denied))
-                            return
                         }
                     }
                 } finally {
