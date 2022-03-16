@@ -155,7 +155,6 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             Log.i("PrintService", "Page $i: Completing future")
                             _tmpfile
                         }
-                        pagenum += 1
                         pages.add(future)
                     }
 
@@ -174,6 +173,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         for (i in 0 until pagedoc.numberOfPages) {
                             copy.addPage(copy.getImportedPage(pagedoc, i + 1))
                         }
+                        pagenum += pagedoc.numberOfPages
                         pf.deleteOnExit()
                         pagedoc.close()
                     }
