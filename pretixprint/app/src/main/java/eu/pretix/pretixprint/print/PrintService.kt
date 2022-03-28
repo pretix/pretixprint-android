@@ -77,7 +77,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             pw.flush()
             fw.close()
         } catch (ee: Throwable) {
-            Sentry.capture(ee)
+            Sentry.captureException(ee)
             ee.printStackTrace()
         }
     }

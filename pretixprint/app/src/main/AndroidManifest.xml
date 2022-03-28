@@ -90,6 +90,8 @@
                 <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
             </intent-filter>
         </service>
+
+        <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_DSN}" />
     </application>
 
 </manifest>

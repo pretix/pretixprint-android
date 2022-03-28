@@ -70,7 +70,7 @@ class FinishSettingsFragment : SetupFragment() {
                     }
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
-                    Sentry.capture(e)
+                    Sentry.captureException(e)
                     uiThread {
                         if (this@FinishSettingsFragment.activity == null)
                             return@uiThread
