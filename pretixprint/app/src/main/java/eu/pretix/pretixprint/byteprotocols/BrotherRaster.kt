@@ -143,9 +143,10 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         val pixels = IntArray(scaled.width * scaled.height)
         scaled.getPixels(pixels, 0, scaled.width, 0, 0, scaled.width, scaled.height)
         val bytewidth = scaled.width / 8
+        val rasterDataWidth = if (scaled.width <= Label.c62mm.printableWidth) 90 else 162
         for (y in 0 until maxHeight) {
             // for usb to work, raster width has always be 90 bytes
-            val row = ByteArray(90)
+            val row = ByteArray(rasterDataWidth)
             for (xoffset in 0 until bytewidth) {
                 var col = 0
                 // check for overprinting (more height than scaled image)
@@ -166,15 +167,15 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
 
             ostream.write(if (label.twoColor) 'w'.code else 'g'.code)
             ostream.write(if (label.twoColor) 0x01 else 0x00) // default color
-            ostream.write(90)
-            ostream.write(row, 0, 90)
+            ostream.write(rasterDataWidth)
+            ostream.write(row, 0, rasterDataWidth)
 
             // HACK for printing usual black/white on red/black labels
             if (label.twoColor) {
                 ostream.write('w'.code)
                 ostream.write(0x02) // second color
-                ostream.write(90)
-                ostream.write(ByteArray(90), 0, 90) // simply nothing
+                ostream.write(rasterDataWidth)
+                ostream.write(ByteArray(rasterDataWidth), 0, rasterDataWidth) // simply nothing
             }
         }
 
