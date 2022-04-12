@@ -42,7 +42,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     }
 
     private fun interpolate(str: String): String {
-        return str.replace(Regex("\\{([a-zA-Z0-9_]+)\\}")) { match ->
+        return str.replace(Regex("\\{([a-zA-Z0-9:_]+)\\}")) { match ->
             getTextContent(match.groups[1]!!.value, null, null)
         }
     }
@@ -64,7 +64,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     }
 
     override fun getBarcodeContent(content: String?, text: String?, textI18n: JSONObject?): String {
-        return when(content) {
+        return when (content) {
             "secret" -> op.getString("secret")  // the one in textcontent might be shortened
             "pseudonymization_id" -> op.getString("pseudonymization_id")  // required for backwards compatibility
             else -> getTextContent(content, text, textI18n)
