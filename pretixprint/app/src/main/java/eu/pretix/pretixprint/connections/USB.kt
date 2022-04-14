@@ -15,6 +15,7 @@ import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
+import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
@@ -321,6 +322,15 @@ class USBConnection : ConnectionType {
         val serial = conf.get("hardware_${type}printer_ip") ?: "0"
         val compat = (conf.get("hardware_${type}printer_usbcompat") ?: "false") == "true"
         val proto = getProtoClass(mode)
+        val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.mode", mode)
+            scope.setTag("printer.type", type)
+            scope.setContexts("printer.ip", serial)
+            scope.setContexts("printer.usbcompat", compat)
+            scope.setContexts("printer.dpi", dpi)
+        }
 
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         val devices = mutableMapOf<String, UsbDevice>()
@@ -356,8 +366,7 @@ class USBConnection : ConnectionType {
                         val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                             try {
-                                val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi")
-                                        ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
+                                val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
                                 when (proto) {
                                     is StreamByteProtocol<*> -> {
                                         val ostream = UsbOutputStream(manager, device, compat)

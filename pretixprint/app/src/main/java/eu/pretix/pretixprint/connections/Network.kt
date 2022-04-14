@@ -5,6 +5,7 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.renderers.renderPages
+import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
@@ -34,11 +35,22 @@ class NetworkConnection : ConnectionType {
 
         val proto = getProtoClass(mode)
 
-        val serverAddr = InetAddress.getByName(conf.get("hardware_${type}printer_ip") ?: "127.0.0.1")
+        val ip = conf.get("hardware_${type}printer_ip") ?: "127.0.0.1"
         val port = Integer.valueOf(conf.get("hardware_${type}printer_port") ?: "9100")
+        val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.mode", mode)
+            scope.setTag("printer.type", type)
+            scope.setContexts("printer.ip", ip)
+            scope.setContexts("printer.port", port)
+            scope.setContexts("printer.dpi", dpi)
+        }
+
+        val serverAddr = InetAddress.getByName(ip)
 
         try {
-            val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
             when (proto) {
                 is StreamByteProtocol<*> -> {
                     val socket = Socket(serverAddr, port)
