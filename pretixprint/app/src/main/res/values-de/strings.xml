@@ -59,6 +59,7 @@
     <string name="field_helper_dpi">Die Auflösung des Druckers, normalerweise zwischen 150 und 300, im Datenblatt des Druckers beschrieben. Ein falscher Wert kann zu übergroßem oder zu kleinem Druckbild führen.</string>
     <string name="field_label_maxwidth">Maximale Druckbreite (in mm)</string>
     <string name="field_label_waitafterpage">Wartezeit nach Seite (in Millisekunden)</string>
+    <string name="field_label_eposprintxml_deviceid">Device ID (Standardmäßig: local_printer)</string>
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
     <string name="err_not_supported">Nicht unterstüzt</string>
@@ -103,6 +104,7 @@
     <string name="protocol_escpos">ESC/POS-Bondrucker (z.B. Epson, Bixolon, …)</string>
     <string name="protocol_linkoscard">Zebra-Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
+    <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent-Bondrucker (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>
