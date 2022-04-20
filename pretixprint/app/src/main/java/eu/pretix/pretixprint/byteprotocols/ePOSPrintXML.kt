@@ -10,6 +10,7 @@ import eu.pretix.pretixprint.ui.SetupFragment
 import eu.pretix.pretixprint.ui.ePOSPrintXMLSettingsFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -56,13 +57,14 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
             with(url.openConnection() as HttpURLConnection) {
                 requestMethod = "POST"
                 setRequestProperty("Content-Type", "text/xml; charset=utf-8")
-//                setRequestProperty("SOAPAction", "\"\"")
-                doOutput = true
-                with (outputStream.bufferedWriter()) {
-                    val foo = f.get(60, TimeUnit.SECONDS)
-                    write(String(foo))
-                    flush()
-                }
+                setRequestProperty("SOAPAction", "\"\"")
+
+                val wr = OutputStreamWriter(outputStream)
+                wr.write(String(f.get(60, TimeUnit.SECONDS)))
+                wr.flush()
+                wr.close()
+
+                responseCode
             }
         }
     }
