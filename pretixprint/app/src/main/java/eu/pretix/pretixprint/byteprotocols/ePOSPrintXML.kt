@@ -20,7 +20,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
     override val identifier = "ePOSPrintXML"
     override val nameResource = R.string.protocol_eposprintxml
     override val defaultDPI = 200
-    override val demopage = "demopage.txt"
+    override val demopage = "demopage.eposprintxml"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type == "receipt"
