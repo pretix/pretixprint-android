@@ -18,7 +18,7 @@ class SystemConnection : ConnectionType {
     override val inputType = ConnectionType.Input.PDF
 
     override fun allowedForUsecase(type: String): Boolean {
-        return true
+        return type != "receipt"
     }
 
     override fun print(
@@ -38,11 +38,6 @@ class SystemConnection : ConnectionType {
         if (rot == 90 || rot == 180) {
             mediaSize = MediaSize.UNKNOWN_LANDSCAPE
         }
-
-        // TODO: match MediaSize.getAllPredefinedSizes()
-        // if not found, then create
-        //mediaSize = MediaSize("CUSTOM", "FIXME", size.width.toInt(), size.height.toInt())
-
         pdf.close()
         `in`.close()
 
@@ -73,7 +68,7 @@ class SystemPrintDocumentAdapter(var tmpfile: File, var numPages: Int) : PrintDo
             .setPageCount(numPages)
             .build()
 
-        callback.onLayoutFinished(info, true) // FIXME: false that
+        callback.onLayoutFinished(info, true)
     }
 
     override fun onWrite(
@@ -87,7 +82,6 @@ class SystemPrintDocumentAdapter(var tmpfile: File, var numPages: Int) : PrintDo
             return
         }
 
-        // FIXME: cut down by pages
         val out = FileOutputStream(destination!!.fileDescriptor)
         val `in` = FileInputStream(tmpfile)
         val buffer = ByteArray(1024)
@@ -99,6 +93,6 @@ class SystemPrintDocumentAdapter(var tmpfile: File, var numPages: Int) : PrintDo
         `in`.close()
         out.close()
 
-        callback.onWriteFinished(pages)
+        callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
     }
 }
