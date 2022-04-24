@@ -7,11 +7,15 @@ class ePOSPrintXMLRenderer(private val receipt: JSONObject, private val charsPer
     fun render(): ByteArray {
         val escposdata = ESCPOSRenderer(receipt, charsPerLine, ctx).render().toHex()
         return """
-            <epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">
-                <command>
-                    $escposdata
-                </command>
-            </epos-print>
+            <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+                <s:Body>
+                    <epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">
+                        <command>
+                            $escposdata
+                        </command>
+                    </epos-print>
+                </s:Body>
+            </s:Envelope>
         """.trimIndent().toByteArray()
     }
 
