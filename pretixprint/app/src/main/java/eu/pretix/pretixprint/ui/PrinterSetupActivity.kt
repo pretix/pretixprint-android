@@ -46,6 +46,9 @@ class PrinterSetupActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
         val connection = settingsStagingArea.get("hardware_${useCase}printer_connection") as String
         if (connection == SystemConnection().identifier) {
+            settingsStagingArea.put("hardware_${useCase}printer_mode", "")
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "")
+            settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             return startFinalPage()
         }
         fragment = when (connection) {
