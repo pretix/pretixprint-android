@@ -7,6 +7,7 @@ import android.os.ParcelFileDescriptor
 import android.print.*
 import android.print.PrintAttributes.*
 import com.lowagie.text.pdf.PdfReader
+import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import java.io.File
 import java.io.FileInputStream
@@ -45,7 +46,17 @@ class SystemConnection : ConnectionType {
             .setMediaSize(mediaSize)
             .build()
 
-        printManager.print(jobName, SystemPrintDocumentAdapter(tmpfile, numPages), pa)
+        val pj = printManager.print(jobName, SystemPrintDocumentAdapter(tmpfile, numPages), pa)
+
+        if (pj.isBlocked || pj.isCancelled || pj.isFailed) {
+            val msg = when {
+                pj.isBlocked -> "blocked"
+                pj.isCancelled -> "cancelled"
+                pj.isFailed -> "failed"
+                else -> "unknown"
+            }
+            throw PrintException(context.applicationContext.getString(R.string.err_job_io, msg))
+        }
     }
 
 }
