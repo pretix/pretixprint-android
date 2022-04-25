@@ -55,10 +55,12 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s (%s)</string>
+    <string name="pref_printer_current_short">Currently using printer %s</string>
     <string name="button_label_test">Print test page</string>
     <string name="bluetooth_printer">Bluetooth Printer</string>
     <string name="network_printer">Network Printer</string>
     <string name="cups">CUPS/IPP</string>
+    <string name="system">Android Print Service</string>
     <string name="usb">USB</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
     <string name="err_usb_permission_denied">USB permission has been denied</string>
