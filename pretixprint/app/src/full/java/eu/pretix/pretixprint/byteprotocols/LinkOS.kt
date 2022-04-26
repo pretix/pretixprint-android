@@ -2,14 +2,16 @@ package eu.pretix.pretixprint.byteprotocols
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import com.zebra.sdk.comm.BluetoothConnectionInsecure
 import com.zebra.sdk.comm.Connection
 import com.zebra.sdk.comm.TcpConnection
 import com.zebra.sdk.comm.UsbConnection
+import com.zebra.sdk.graphics.ZebraImageFactory
 import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
 import eu.pretix.pretixprint.R
@@ -18,8 +20,10 @@ import eu.pretix.pretixprint.ui.LinkOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.IOException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
 
 
 class LinkOS : CustomByteProtocol<Bitmap> {
@@ -38,8 +42,15 @@ class LinkOS : CustomByteProtocol<Bitmap> {
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
+        // ZebraImageFactory does not cope well with transparency - it's just black.
+        // So we're actively drawing the original picture on a white background.
+        val backgroundedImage = Bitmap.createBitmap(img.width, img.height, img.config)
+        val canvas = Canvas(backgroundedImage)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(img, 0f, 0f, null)
+
         val ostream = ByteArrayOutputStream()
-        img.compress(Bitmap.CompressFormat.PNG, 0, ostream)
+        backgroundedImage.compress(Bitmap.CompressFormat.PNG, 0, ostream)
         return ostream.toByteArray()
     }
 
@@ -78,24 +89,29 @@ class LinkOS : CustomByteProtocol<Bitmap> {
             return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
 
-        // ToDo: Make the printer connection blocking, displaying an error message if appropriate.
-        Thread {
+        val future = CompletableFuture<Void>()
+        future.completeAsync {
             Looper.prepare()
             var zebraPrinter: ZebraPrinter? = null
 
-            try {
-                zebraPrinter = ZebraPrinterFactory.getInstance(connection)
+            zebraPrinter = ZebraPrinterFactory.getInstance(connection)
 
-                for (f in pages) {
-                    // ToDo: Proper path or use ZebraImage
-                    zebraPrinter.printImage("/path/to/graphics.jpg", 0, 0)
-                }
-                Thread.sleep(2000)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                throw PrintError(e.message ?: e.toString())
+            for (f in pages) {
+                val img = ZebraImageFactory.getImage(ByteArrayInputStream(f.get(60, TimeUnit.SECONDS)))
+                zebraPrinter.printImage(img, 0, 0, img.width, img.height, false)
             }
-        }.start()
+            Thread.sleep(2000)
+            null
+        }
+        try {
+            future.get(5, TimeUnit.MINUTES)
+        } catch (e: ExecutionException) {
+            e.printStackTrace()
+            throw PrintError(e.cause?.message ?: e.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw PrintError(e.message ?: e.toString())
+        }
     }
 
     override fun createSettingsFragment(): SetupFragment? {

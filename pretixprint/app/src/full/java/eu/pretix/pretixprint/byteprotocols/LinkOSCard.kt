@@ -28,6 +28,7 @@ import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
 
@@ -87,8 +88,8 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
             return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
 
-        // ToDo: Make the printer connection blocking, displaying an error message if appropriate.
-        Thread {
+        val future = CompletableFuture<Void>()
+        future.completeAsync {
             Looper.prepare()
             var zebraCardPrinter: ZebraCardPrinter? = null
 
@@ -101,7 +102,6 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
                 doubleSided = (zebraCardPrinter.printCapability == TransferType.DualSided && doubleSided)
 
-
                 for (f in pages) {
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
@@ -111,13 +111,20 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
                     zebraCardPrinter.print(1, graphicsData)
                 }
                 Thread.sleep(2000)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                throw PrintError(e.message ?: e.toString())
             } finally {
                 zebraCardPrinter?.destroy()
             }
-        }.start()
+            null
+        }
+        try {
+            future.get(5, TimeUnit.MINUTES)
+        } catch (e: ExecutionException) {
+            e.printStackTrace()
+            throw PrintError(e.cause?.message ?: e.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw PrintError(e.message ?: e.toString())
+        }
     }
 
     private fun drawGraphics(zebraCardPrinter: ZebraCardPrinter, imageData: ByteArray, doubleSided: Boolean, context: Context) : List<GraphicsInfo> {
