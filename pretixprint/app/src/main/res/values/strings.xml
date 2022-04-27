@@ -20,6 +20,7 @@
     <string name="dismiss">Close</string>
     <string name="notification_channel_print">Print jobs</string>
     <string name="notification_channel_print_description">Shows a notification during a print job</string>
+    <string name="print_now_notification">Print prepared. Touch to open print dialog</string>
     <string name="print_notification">Printing…</string>
     <string name="err_printer_not_found">Printer %s not found</string>
     <string name="err_no_printer_found">No printer not found</string>
