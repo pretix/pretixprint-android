@@ -20,7 +20,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
     override val identifier = "ePOSPrintXML"
     override val nameResource = R.string.protocol_eposprintxml
     override val defaultDPI = 200
-    override val demopage = "demopage.eposprintxml"
+    override val demopage = "demopage.txt"
 
     override fun allowedForUsecase(type: String): Boolean {
         return type == "receipt"
@@ -38,14 +38,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
         return ByteArray::class.java
     }
 
-    override fun sendNetwork(
-        host: String,
-        port: Int,
-        pages: List<CompletableFuture<ByteArray>>,
-        conf: Map<String, String>,
-        type: String,
-        context: Context
-    ) {
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
             return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
         }
@@ -60,7 +53,18 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
                 setRequestProperty("SOAPAction", "\"\"")
 
                 val wr = OutputStreamWriter(outputStream)
-                wr.write(String(f.get(60, TimeUnit.SECONDS)))
+                val escposdata = f.get(60, TimeUnit.SECONDS).toHex()
+                wr.write("""
+                    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+                        <s:Body>
+                            <epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">
+                                <command>
+                                    $escposdata
+                                </command>
+                            </epos-print>
+                        </s:Body>
+                    </s:Envelope>
+                """.trimIndent())
                 wr.flush()
                 wr.close()
 
@@ -69,28 +73,17 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
         }
     }
 
-    override fun sendUSB(
-        usbManager: UsbManager,
-        usbDevice: UsbDevice,
-        pages: List<CompletableFuture<ByteArray>>,
-        conf: Map<String, String>,
-        type: String,
-        context: Context
-    ) {
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
         TODO("Not yet implemented")
     }
 
-    override fun sendBluetooth(
-        deviceAddress: String,
-        pages: List<CompletableFuture<ByteArray>>,
-        conf: Map<String, String>,
-        type: String,
-        context: Context
-    ) {
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
         TODO("Not yet implemented")
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
         return type is NetworkConnection
     }
+
+    fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 }

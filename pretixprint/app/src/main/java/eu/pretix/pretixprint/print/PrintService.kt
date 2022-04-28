@@ -105,19 +105,13 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
 
         when (renderer) {
-            "ESC/POS" -> {
+            "ESC/POS",
+            "ePOSPrintXML"-> {
                 tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id") + "_", ".escpos", this.cacheDir)
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
                 tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
-                pagenum = 1
-            }
-            "ePOSPrintXML" -> {
-                tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id"), ".eposprintxml", this.cacheDir)
-                // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
-                // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
-                tmpfile.writeBytes(ePOSPrintXMLRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
                 pagenum = 1
             }
             else -> {
