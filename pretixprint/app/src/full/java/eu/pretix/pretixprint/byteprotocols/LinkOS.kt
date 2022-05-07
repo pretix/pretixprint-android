@@ -91,7 +91,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
 
         val future = CompletableFuture<Void>()
         future.completeAsync {
-            Looper.prepare()
+            if (Looper.myLooper() == null) Looper.prepare()
             var zebraPrinter: ZebraPrinter? = null
 
             zebraPrinter = ZebraPrinterFactory.getInstance(connection)

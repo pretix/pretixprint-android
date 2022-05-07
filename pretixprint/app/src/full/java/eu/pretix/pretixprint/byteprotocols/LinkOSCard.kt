@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 class LinkOSCard : CustomByteProtocol<Bitmap> {
     override val identifier = "LinkOSCard"
     override val defaultDPI = 300
-    override val demopage = "CR80.pdf"
+    override val demopage = "demopage_cr80.pdf"
 
     override val nameResource = R.string.protocol_linkoscard
 
@@ -90,7 +90,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
         val future = CompletableFuture<Void>()
         future.completeAsync {
-            Looper.prepare()
+            if (Looper.myLooper() == null) Looper.prepare()
             var zebraCardPrinter: ZebraCardPrinter? = null
 
             try {

@@ -128,13 +128,17 @@ dependencies {
 
     implementation 'com.github.anastaciocintra:escpos-coffee:4.0.2'
 
+    // Evolis SDK
+    fullImplementation(project(':EvolisSDK')) {
+        transitive = true
+    }
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
     fullImplementation(project(':ZSDK')) {
         transitive = false
     }
     fullImplementation 'org.bouncycastle:bcprov-jdk15on:1.65.01' // 1.48
-     fullImplementation 'commons-codec:commons-codec:1.15' // 1.15; already included for libpretixprint
+    fullImplementation 'commons-codec:commons-codec:1.15' // 1.15; already included for libpretixprint
     fullImplementation 'commons-io:commons-io:2.7' // 2.2
     fullImplementation 'org.apache.commons:commons-lang3:3.4' // 3.4
     // fullImplementation 'com.google.zxing:core:3.3.1' // 3.3.1; already included for libpretixprint
