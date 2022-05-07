@@ -5,6 +5,20 @@ Android app that drives the printers used by other pretix applications. This con
 print logic, but no application logic. It is called by other applications using system
 broadcasts.
 
+Printer Compatibility
+---------------------
+
+| Printer type | Network | USB | Bluetooth | Allowed for |
+| -- | -- | -- | -- | -- |
+| FGL ticket printers (Boca, Practical Automation) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| SLCS label printers (Bixolon, Metapace) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| ESC/POS recept printers (Epson, Bixolon, SNBC, Metapace, …) | ✔️ | ✔️ | ✔️ (some) | Ticket printing, badge printing, receipt printing |
+| Brother label printers (QL series) | ✔️ | ✔️ |  | Ticket printing, badge printing |
+| Zebra label printers | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| Zebra card printers (ZC, ZXP series) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| Printers connected to a Linux CUPS service, some IPP printers | ✔️ |  |  | Ticket printing, badge printing |
+
+
 Architecture
 ------------
 
