@@ -38,6 +38,9 @@ If you want to perform a full build, you need to do get a few libraries first:
   install it, and extract the three Java archives ``ZSDK_ANDROID_API.jar``, ``ZSDK_CARD_ANDROID_API.jar``, and ``snmp6_1z.jar``
   into the ``ZSDK/`` folder.
 
+* Download the [Evolis SDK](https://myplace.evolis.com/s/sdk?language=en_US), and extract the file ``platforms/android/library/direct_to_device/libevolis-release.aar``
+  into the ``EvolisSDK/`` folder.
+
 Then, execute:
 
 	./gradlew assembleFullDebug
