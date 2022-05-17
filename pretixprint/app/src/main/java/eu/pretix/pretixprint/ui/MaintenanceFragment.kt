@@ -16,12 +16,10 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.databinding.FragmentMaintenanceBinding
 import java8.util.concurrent.CompletableFuture
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.DataInputStream
-import java.io.EOFException
+import java.io.IOException
 
 private const val ARG_PRINTER_TYPE = "printer_type"
 
@@ -33,6 +31,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private lateinit var binding: FragmentMaintenanceBinding
     private lateinit var connection: ConnectionType
     private lateinit var streamHolder: CompletableFuture<StreamHolder>
+    private var responseListener: Job? = null
 
     // FIXME: can the dialog close itself when app receives another intent?
     // FIXME: can the dialog close itself when app loses focus? (bad for copying)
@@ -115,16 +114,17 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
             fail(errorMsg)
         } else {
             streamHolder.thenAccept() { streamHolder ->
-                lifecycleScope.launch(Dispatchers.IO) {
+                responseListener = lifecycleScope.launch(Dispatchers.IO) {
                     val dis = DataInputStream(streamHolder.inputStream)
-                    while (true) {
+                    while (isActive) {
                         try {
                             val byte = dis.readByte()
                             withContext(Dispatchers.Main) {
                                 @SuppressLint("SetTextI18n")
                                 binding.tvOutput.text = binding.tvOutput.text.toString() + "%02x ".format(byte)
                             }
-                        } catch (e: EOFException) {
+                        } catch (e: IOException) {
+                            if (!isActive) break // got canceled
                             withContext(Dispatchers.Main) {
                                 fail(e.message ?: "Connection lost")
                             }
@@ -170,8 +170,10 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
 
     override fun onStop() {
         try {
-            // FIXME: could crash, other scope?
-            streamHolder.get().close()
+            responseListener?.cancel()
+            lifecycleScope.launch(Dispatchers.IO) {
+                streamHolder.get().close()
+            }
         } catch(e: Exception) { } // ignore
         super.onStop()
     }
