@@ -82,6 +82,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 setOnMenuItemClickListener = { menuItem ->
                     when (menuItem.itemId) {
                         R.id.testpage -> { printTestPage(type); true }
+                        R.id.maintenance -> { openMaintainPrinter(type); true }
                         R.id.remove -> { confirmRemovePrinter(type); true }
                         else -> false
                     }
@@ -405,6 +406,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
             }
         }
+    }
+
+    fun openMaintainPrinter(type: String) {
+        MaintenanceFragment.newInstance(type).show(childFragmentManager, "dialog")
     }
 
     fun confirmRemovePrinter(type: String) {
