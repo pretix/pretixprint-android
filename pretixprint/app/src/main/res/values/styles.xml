@@ -8,6 +8,8 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="actionBarTheme">@style/ThemeOverlay.App.ActionBar</item>
         <item name="preferenceTheme">@style/ThemeOverlay.App.Preference</item>
+        <!-- natively available on api level 21+ -->
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Body1</item>
     </style>
 
     <style name="ThemeOverlay.App.Preference" parent="PreferenceThemeOverlay">
