@@ -95,20 +95,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         for (type in types) {
-            val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
-
-            if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
-                val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
-                val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
-
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(
-                        R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName))
-                )
-            } else if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(R.string.pref_printer_current_short,
-                    getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
-            } else {
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = ""
+            val pref = findPreference<Preference>("hardware_${type}printer_find")
+            if (pref != null) {
+                if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
+                    pref.summary = printerSummary(type)
+               } else {
+                    pref.summary = ""
+                }
             }
         }
 
@@ -120,6 +113,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
             }
         }
+    }
+
+    private fun printerSummary(type: String): String {
+        val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
+        val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
+        val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
+        return getString(R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
     }
 
     private fun asset_dialog(@StringRes title: Int) {
