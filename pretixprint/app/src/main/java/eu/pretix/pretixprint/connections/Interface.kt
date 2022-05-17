@@ -2,7 +2,6 @@ package eu.pretix.pretixprint.connections
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import java8.util.concurrent.CompletableFuture
 import java.io.Closeable
 import java.io.File
 import java.io.InputStream
@@ -24,7 +23,7 @@ interface ConnectionType {
     fun isConfiguredFor(context: Context, type: String): Boolean {
         return !PreferenceManager.getDefaultSharedPreferences(context).getString("hardware_${type}printer_ip", "").isNullOrEmpty()
     }
-    fun connect(context: Context, type: String): CompletableFuture<StreamHolder>
+    suspend fun connectAsync(context: Context, type: String): StreamHolder
 }
 
 open class StreamHolder(val inputStream: InputStream, val outputStream: OutputStream) : Closeable {
@@ -34,9 +33,10 @@ open class StreamHolder(val inputStream: InputStream, val outputStream: OutputSt
     }
 }
 
-class SocketStreamHolder(inputStream: InputStream, outputStream: OutputStream, val socket: Closeable): StreamHolder(inputStream, outputStream) {
+class CloseableStreamHolder(inputStream: InputStream, outputStream: OutputStream, private val cs: Closeable):
+    StreamHolder(inputStream, outputStream) {
     override fun close() {
         super.close()
-        socket.close()
+        cs.close()
     }
 }

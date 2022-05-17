@@ -9,12 +9,14 @@ import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
-import java8.util.concurrent.CompletableFuture
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Socket
 import java.util.concurrent.TimeoutException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 
 class NetworkConnection : ConnectionType {
@@ -108,21 +110,21 @@ class NetworkConnection : ConnectionType {
         }
     }
 
-    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCancellableCoroutine { cont ->
         val conf = PreferenceManager.getDefaultSharedPreferences(context)
         val serverAddr = InetAddress.getByName(conf.getString("hardware_${type}printer_ip", "127.0.0.1"))
         val port = Integer.valueOf(conf.getString("hardware_${type}printer_port", "9100")!!)
 
-        return try {
-            CompletableFuture.supplyAsync {
-                val socket = Socket(serverAddr, port)
-                val ostream = socket.getOutputStream()
-                val istream = socket.getInputStream()
+        try {
+            val socket = Socket(serverAddr, port)
+            cont.invokeOnCancellation { socket.close() }
 
-                StreamHolder(istream, ostream)
-            }
+            val istream = socket.getInputStream()
+            val ostream = socket.getOutputStream()
+
+            cont.resume(CloseableStreamHolder(istream, ostream, socket))
         } catch (e: IOException) {
-            CompletableFuture.failedFuture(e)
+            cont.resumeWithException(e)
         }
     }
 }

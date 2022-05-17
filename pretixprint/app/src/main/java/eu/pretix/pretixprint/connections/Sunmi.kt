@@ -18,6 +18,8 @@ import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 class SunmiInternalConnection : ConnectionType {
@@ -147,5 +149,9 @@ class SunmiInternalConnection : ConnectionType {
 
     override fun isConfiguredFor(context: Context, type: String): Boolean {
         return true
+    }
+
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCoroutine { cont ->
+        cont.resumeWithException(NotImplementedError("raw connection is not available for Sunmi"))
     }
 }

@@ -17,7 +17,7 @@ import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.print.usbPermissionLock
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
-import java8.util.concurrent.CompletableFuture
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -25,6 +25,8 @@ import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.math.min
 
 /*
@@ -466,8 +468,7 @@ open class USBConnection : ConnectionType {
         Thread.sleep(1000)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCancellableCoroutine { cont ->
         val conf = PreferenceManager.getDefaultSharedPreferences(context)
         val serial = conf.getString("hardware_${type}printer_ip", "0")
         val compat = conf.getString("hardware_${type}printer_usbcompat", "false") == "true"
@@ -492,11 +493,9 @@ open class USBConnection : ConnectionType {
             }
         }
         if (devices.size != 1) {
-            val ex = PrintException(context.getString(R.string.err_printer_not_found, serial))
-            return CompletableFuture.failedFuture(ex)
+            cont.resumeWithException(PrintException(context.getString(R.string.err_printer_not_found, serial)))
         }
 
-        val future = CompletableFuture<StreamHolder>()
         val recv = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 context.unregisterReceiver(this)
@@ -507,19 +506,19 @@ open class USBConnection : ConnectionType {
                     val ostream = UsbOutputStream(manager, device, compat)
                     val istream = UsbInputStream(manager, device, compat)
 
-                    future.complete(StreamHolder(istream, ostream))
+                    cont.resume(StreamHolder(istream, ostream))
                 } else {
-                    future.completeExceptionally(PrintException(context.getString(R.string.err_usb_permission_denied)))
+                    cont.resumeWithException(PrintException(context.getString(R.string.err_usb_permission_denied)))
                 }
             }
         }
 
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         ContextCompat.registerReceiver(context, recv, filter, ContextCompat.RECEIVER_EXPORTED)
+        cont.invokeOnCancellation { context.unregisterReceiver(recv) }
         val intent = Intent(ACTION_USB_PERMISSION)
         intent.setPackage(context.packageName)
         val permissionIntent = PendingIntentCompat.getBroadcast(context, 0, intent, 0, true)
         manager.requestPermission(devices.values.first(), permissionIntent)
-        return future
     }
 }

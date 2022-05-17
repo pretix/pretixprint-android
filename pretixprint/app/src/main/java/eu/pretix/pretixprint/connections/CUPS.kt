@@ -6,11 +6,12 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.print.getPrinter
 import io.sentry.Sentry
-import java8.util.concurrent.CompletableFuture
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
 import java.io.File
 import java.io.IOException
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 class CUPSConnection : ConnectionType {
@@ -72,7 +73,7 @@ class CUPSConnection : ConnectionType {
         }
     }
 
-    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
-        return CompletableFuture.failedFuture(NotImplementedError("raw connection is not available for cups"))
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCoroutine { cont ->
+        cont.resumeWithException(NotImplementedError("raw connection is not available for cups"))
     }
 }
