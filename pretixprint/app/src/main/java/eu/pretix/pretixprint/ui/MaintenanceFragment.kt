@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.ui
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
@@ -119,12 +118,13 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
 
             responseListener = lifecycleScope.launch(Dispatchers.IO) {
                 val dis = DataInputStream(streamHolder!!.inputStream)
+                val hc = HexdumpCollection()
                 while (isActive) {
                     try {
                         val byte = dis.readByte()
+                        hc.pushByte(byte)
                         withContext(Dispatchers.Main) {
-                            @SuppressLint("SetTextI18n")
-                            binding.tvOutput.text = binding.tvOutput.text.toString() + "%02x ".format(byte)
+                            binding.tvOutput.text = hc.toString()
                         }
                     } catch (e: IOException) {
                         if (!isActive) break // got canceled
@@ -188,5 +188,59 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     putString(ARG_PRINTER_TYPE, printerType)
                 }
             }
+    }
+}
+
+class HexdumpByteArrayHolder {
+    companion object {
+        const val MAX_ITEMS = 16
+    }
+    private val bytes: ByteArray = ByteArray(MAX_ITEMS)
+    private var elements = 0
+
+    fun size(): Int {
+        return elements
+    }
+
+    fun push(b: Byte) {
+        if (elements >= MAX_ITEMS) throw IndexOutOfBoundsException("full")
+        bytes[elements++] = b
+    }
+
+    fun toHex(): String = buildString {
+        repeat(MAX_ITEMS) {
+            if (it >= elements) append("  ")
+            else append("%02x".format(bytes[it]))
+            if (it < MAX_ITEMS - 1) append(" ")
+        }
+    }
+
+    fun toAscii(): String = buildString {
+        repeat(MAX_ITEMS) {
+            if (it >= elements) append(" ")
+            else append(Char(bytes[it].toUShort()).toString().replace(Regex("\\p{C}"), "."))
+        }
+    }
+
+    override fun toString(): String {
+        return "${toHex()} | ${toAscii()}"
+    }
+}
+
+class HexdumpCollection {
+    private val collection = mutableListOf<HexdumpByteArrayHolder>()
+
+    fun pushByte(b: Byte, forceNew: Boolean = false) {
+        if (collection.isEmpty()) {
+            collection.add(HexdumpByteArrayHolder())
+        }
+        if (collection.last().size() == HexdumpByteArrayHolder.MAX_ITEMS || forceNew) {
+            collection.add(HexdumpByteArrayHolder())
+        }
+        collection.last().push(b)
+    }
+
+    override fun toString(): String {
+        return collection.joinToString("\n") { it.toString() }
     }
 }
