@@ -3,6 +3,7 @@
     <string name="app_name">pretixPRINT</string>
     <string name="title_activity_main">pretixPRINT</string>
     <string name="title_activity_fileviewer">Druckjob-Anzeige</string>
+    <string name="title_dialog_maintenance">Wartung: %s</string>
     <string name="action_label_settings">Einstellungen</string>
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticketdrucker</string>
@@ -49,6 +50,7 @@
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
     <string name="action_delete">Entfernen</string>
+    <string name="action_maintain">Wartung</string>
     <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s (%s)</string>
     <string name="pref_printer_current_short">Aktuell in Verwendung: %s</string>
     <string name="pref_delete_printer">%s entfernen?</string>
@@ -138,4 +140,8 @@
     <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
     <string name="pin_protection_description">Einstellungen mit einer selbstgewählten PIN sperren, die zum Ändern der Drucker-Konfiguration eingegeben werden muss</string>
     <string name="operation_pin_headline">PIN eingeben</string>
+    <string name="maintain_data_type">Typ</string>
+    <string name="maintain_data_to_send">Daten</string>
+    <string name="maintain_send">Senden</string>
+    <string name="maintain_heading_log">Log</string>
 </resources>
