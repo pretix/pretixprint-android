@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.databinding.FragmentMaintenanceBinding
-import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.*
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.DataInputStream
@@ -30,7 +29,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private var mode: InputModes = InputModes.HEX
     private lateinit var binding: FragmentMaintenanceBinding
     private lateinit var connection: ConnectionType
-    private lateinit var streamHolder: CompletableFuture<StreamHolder>
+    private var streamHolder: StreamHolder? = null
     private var responseListener: Job? = null
 
     // FIXME: can the dialog close itself when app receives another intent?
@@ -53,8 +52,6 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        // FIXME: make async, display some sort of connection indicator
-        streamHolder = connection.connect(requireContext(), printerType!!)
         binding = FragmentMaintenanceBinding.inflate(layoutInflater)
 
         val modes = InputModes.values().map { it.toString() }
@@ -93,43 +90,48 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 validateTilInput(binding.tilInput.editText!!.text)
             }
         }
-        binding.btnSend.setOnClickListener {
-            if (!binding.tilInput.error.isNullOrBlank()) {
-                return@setOnClickListener
+        binding.btnSend.apply {
+            setOnClickListener {
+                if (!binding.tilInput.error.isNullOrBlank()) {
+                    return@setOnClickListener
+                }
+                val data = binding.etInput.text.toString()
+                send(mode, data)
+                binding.etInput.text!!.clear()
             }
-            val data = binding.etInput.text.toString()
-            send(mode, data)
-            binding.etInput.text!!.clear()
+            isEnabled = false
         }
 
-
-        if (streamHolder.isCompletedExceptionally) {
-            var errorMsg = ""
-            // extract exception message from future
+        lifecycleScope.launch {
             try {
-                streamHolder.get()
+                withContext(Dispatchers.IO) {
+                    streamHolder = connection.connectAsync(requireContext(), printerType!!)
+                }
             } catch (e: Exception) {
-                errorMsg = e.message ?: ""
+                fail(e.message ?: "Connection for maintenance not possible")
+                return@launch
+            } catch (e: NotImplementedError) {
+                fail(e.message!!)
+                return@launch
             }
-            fail(errorMsg)
-        } else {
-            streamHolder.thenAccept() { streamHolder ->
-                responseListener = lifecycleScope.launch(Dispatchers.IO) {
-                    val dis = DataInputStream(streamHolder.inputStream)
-                    while (isActive) {
-                        try {
-                            val byte = dis.readByte()
-                            withContext(Dispatchers.Main) {
-                                @SuppressLint("SetTextI18n")
-                                binding.tvOutput.text = binding.tvOutput.text.toString() + "%02x ".format(byte)
-                            }
-                        } catch (e: IOException) {
-                            if (!isActive) break // got canceled
-                            withContext(Dispatchers.Main) {
-                                fail(e.message ?: "Connection lost")
-                            }
-                            break
+
+            binding.btnSend.isEnabled = true
+
+            responseListener = lifecycleScope.launch(Dispatchers.IO) {
+                val dis = DataInputStream(streamHolder!!.inputStream)
+                while (isActive) {
+                    try {
+                        val byte = dis.readByte()
+                        withContext(Dispatchers.Main) {
+                            @SuppressLint("SetTextI18n")
+                            binding.tvOutput.text = binding.tvOutput.text.toString() + "%02x ".format(byte)
                         }
+                    } catch (e: IOException) {
+                        if (!isActive) break // got canceled
+                        withContext(Dispatchers.Main) {
+                            fail(e.message ?: "Connection lost")
+                        }
+                        break
                     }
                 }
             }
@@ -144,7 +146,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     }
 
     fun send(mode: InputModes, data: String) {
-        if (streamHolder.isCompletedExceptionally) {
+        if (streamHolder == null) {
             return
         }
         val ba : ByteArray = if (mode == InputModes.HEX) {
@@ -159,7 +161,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         }
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                streamHolder.get().outputStream.write(ba)
+                streamHolder!!.outputStream.write(ba)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     fail(e.message ?: "Cannot send")
@@ -172,7 +174,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         try {
             responseListener?.cancel()
             lifecycleScope.launch(Dispatchers.IO) {
-                streamHolder.get().close()
+                streamHolder?.close()
             }
         } catch(e: Exception) { } // ignore
         super.onStop()
