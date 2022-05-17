@@ -3,21 +3,24 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/settings_label_ticketprinter">
-        <Preference
+        <eu.pretix.pretixprint.ui.PrinterPreference
             android:key="hardware_ticketprinter_find"
             android:title="@string/settings_label_find"
             />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_badgeprinter">
-        <Preference
+        <eu.pretix.pretixprint.ui.PrinterPreference
             android:key="hardware_badgeprinter_find"
             android:title="@string/settings_label_find"
             />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_receiptprinter">
-        <Preference android:key="hardware_receiptprinter_find" android:title="@string/settings_label_find"/>
+        <eu.pretix.pretixprint.ui.PrinterPreference
+            android:key="hardware_receiptprinter_find"
+            android:title="@string/settings_label_find"
+            />
         <eu.pretix.pretixprint.ui.ProtectedListPreference
             android:entries="@array/receipt_width"
             android:entryValues="@array/receipt_cpl"
