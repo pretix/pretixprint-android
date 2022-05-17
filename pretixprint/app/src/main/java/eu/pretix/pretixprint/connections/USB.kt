@@ -16,6 +16,7 @@ import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
+import java8.util.concurrent.CompletableFuture
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -393,7 +394,7 @@ class USBConnection : ConnectionType {
                                             proto.sendUSB(manager, device, futures, conf, type, context)
                                             Log.i("PrintService", "Finished proto.sendUSB()")
                                         }
-                                        
+
                                         is SunmiByteProtocol -> {
                                             throw PrintException("Unsupported combination")
                                         }
@@ -432,5 +433,60 @@ class USBConnection : ConnectionType {
             throw err!!
         }
         Thread.sleep(1000)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
+        val conf = PreferenceManager.getDefaultSharedPreferences(context)
+        val serial = conf.getString("hardware_${type}printer_ip", "0")
+        val compat = conf.getString("hardware_${type}printer_usbcompat", "false") == "true"
+
+        val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+        val devices = mutableMapOf<String, UsbDevice>()
+
+        manager.deviceList.forEach {
+            try {
+                if (it.value.serialNumber == serial) {
+                    devices[it.key] = it.value
+                } else if ("${Integer.toHexString(it.value.vendorId)}:${Integer.toHexString(it.value.productId)}" == serial) {
+                    devices[it.key] = it.value
+                } else if (it.value.deviceName == serial) {
+                    // No longer used, but keep for backwards compatibility
+                    devices[it.key] = it.value
+                }
+            } catch (e: SecurityException) {
+                // On Android 10, USBDevices that have not expressively been granted access to
+                // will raise an SecurityException upon accessing the Serial Number. We are just
+                // ignoring those devices.
+            }
+        }
+        if (devices.size != 1) {
+            val ex = PrintException(context.getString(R.string.err_printer_not_found, serial))
+            return CompletableFuture.failedFuture(ex)
+        }
+
+        val future = CompletableFuture<StreamHolder>()
+        val recv = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                context.unregisterReceiver(this)
+                if (ACTION_USB_PERMISSION != intent.action) { return }
+
+                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                    val ostream = UsbOutputStream(manager, device, compat)
+                    val istream = UsbInputStream(manager, device, compat)
+
+                    future.complete(StreamHolder(istream, ostream))
+                } else {
+                    future.completeExceptionally(PrintException(context.getString(R.string.err_usb_permission_denied)))
+                }
+            }
+        }
+
+        val filter = IntentFilter(ACTION_USB_PERMISSION)
+        context.registerReceiver(recv, filter)
+        val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION), 0)
+        manager.requestPermission(devices.values.first(), permissionIntent)
+        return future
     }
 }
