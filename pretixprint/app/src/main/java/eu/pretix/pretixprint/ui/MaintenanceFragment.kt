@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.ui
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
@@ -19,6 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.defaultSharedPreferences
+import java.io.DataInputStream
+import java.io.EOFException
 
 private const val ARG_PRINTER_TYPE = "printer_type"
 
@@ -44,6 +47,12 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         connection = getConnectionClass(con!!)!!
     }
 
+    fun fail(message: String) {
+        binding.tvError.text = message
+        binding.tvError.visibility = VISIBLE
+        binding.btnSend.isEnabled = false
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // FIXME: make async, display some sort of connection indicator
         streamHolder = connection.connect(requireContext(), printerType!!)
@@ -54,7 +63,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
 
         val validateTilInput = fun(text: Editable?) {
             if (mode == InputModes.HEX && text != null) {
-                if (text.contains(Regex("[^a-fA-F0-9Xx ]"))) {
+                if (text.replace(Regex("0[xX]"), "").contains(Regex("[^a-fA-F0-9 ]"))) {
                     binding.tilInput.error = "Only hex characters allowed" // FIXME: extract string
                     return
                 }
@@ -103,13 +112,26 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
             } catch (e: Exception) {
                 errorMsg = e.message ?: ""
             }
-            binding.tvError.text = errorMsg
-            binding.tvError.visibility = VISIBLE
-            binding.btnSend.isEnabled = false
+            fail(errorMsg)
         } else {
             streamHolder.thenAccept() { streamHolder ->
-                //streamHolder.inputStream.bufferedReader()
-                //binding.tvOutput
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val dis = DataInputStream(streamHolder.inputStream)
+                    while (true) {
+                        try {
+                            val byte = dis.readByte()
+                            withContext(Dispatchers.Main) {
+                                @SuppressLint("SetTextI18n")
+                                binding.tvOutput.text = binding.tvOutput.text.toString() + "%02x ".format(byte)
+                            }
+                        } catch (e: EOFException) {
+                            withContext(Dispatchers.Main) {
+                                fail(e.message ?: "Connection lost")
+                            }
+                            break
+                        }
+                    }
+                }
             }
         }
 
@@ -140,9 +162,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 streamHolder.get().outputStream.write(ba)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.tvError.text = e.message
-                    binding.tvError.visibility = VISIBLE
-                    binding.btnSend.isEnabled = false
+                    fail(e.message ?: "Cannot send")
                 }
             }
         }
