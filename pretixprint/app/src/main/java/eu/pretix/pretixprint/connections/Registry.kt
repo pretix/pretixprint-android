@@ -9,3 +9,7 @@ val connectionTypes = listOf<ConnectionType>(
         CUPSConnection(),
         SystemConnection(),
 )
+
+fun getConnectionClass(type: String): ConnectionType? {
+        return connectionTypes.find { it.identifier == type }
+}

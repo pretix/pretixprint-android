@@ -9,6 +9,7 @@ import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
+import java8.util.concurrent.CompletableFuture
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
@@ -104,6 +105,24 @@ class NetworkConnection : ConnectionType {
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+        }
+    }
+
+    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
+        val conf = PreferenceManager.getDefaultSharedPreferences(context)
+        val serverAddr = InetAddress.getByName(conf.getString("hardware_${type}printer_ip", "127.0.0.1"))
+        val port = Integer.valueOf(conf.getString("hardware_${type}printer_port", "9100")!!)
+
+        return try {
+            CompletableFuture.supplyAsync {
+                val socket = Socket(serverAddr, port)
+                val ostream = socket.getOutputStream()
+                val istream = socket.getInputStream()
+
+                StreamHolder(istream, ostream)
+            }
+        } catch (e: IOException) {
+            CompletableFuture.failedFuture(e)
         }
     }
 }

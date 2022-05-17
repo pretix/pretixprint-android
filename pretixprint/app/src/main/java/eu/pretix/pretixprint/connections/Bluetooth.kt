@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.connections
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.content.Context
@@ -15,6 +16,7 @@ import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
+import java8.util.concurrent.CompletableFuture
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -147,6 +149,29 @@ class BluetoothConnection : ConnectionType {
         } catch (e: Exception) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message))
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun connect(context: Context, type: String): CompletableFuture<StreamHolder> {
+        return CompletableFuture.supplyAsync {
+            val conf = PreferenceManager.getDefaultSharedPreferences(context)
+            val device = BluetoothAdapter.getDefaultAdapter()
+                .getRemoteDevice(conf.getString("hardware_${type}printer_ip", ""))
+
+            val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+            val clazz = socket.remoteDevice.javaClass
+            val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
+            val m = clazz.getMethod("createRfcommSocket", *paramTypes)
+            val fallbackSocket =
+                m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
+
+            fallbackSocket.connect() // could throw, is handled by CompletableFuture
+
+            val istream = fallbackSocket.inputStream
+            val ostream = fallbackSocket.outputStream
+
+            SocketStreamHolder(istream, ostream, socket)
         }
     }
 }
