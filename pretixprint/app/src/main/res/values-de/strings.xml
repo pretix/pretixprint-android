@@ -48,8 +48,10 @@
     <string name="err_field_required">Dieses Feld ist erforderlich.</string>
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
+    <string name="action_delete">Entfernen</string>
     <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s (%s)</string>
     <string name="pref_printer_current_short">Aktuell in Verwendung: %s</string>
+    <string name="pref_delete_printer">%s entfernen?</string>
     <string name="button_label_test">Testseite drucken</string>
     <string name="dismiss">Schließen</string>
     <string name="field_label_macaddress">MAC Addresse</string>
