@@ -11,11 +11,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.databinding.FragmentMaintenanceBinding
 import kotlinx.coroutines.*
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.DataInputStream
 import java.io.IOException
 
@@ -32,14 +32,13 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private var responseListener: Job? = null
 
     // FIXME: can the dialog close itself when app receives another intent?
-    // FIXME: can the dialog close itself when app loses focus? (bad for copying)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             printerType = it.getString(ARG_PRINTER_TYPE)
         }
-        val prefs = requireContext().defaultSharedPreferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val con = prefs.getString("hardware_${printerType}printer_connection", "network_printer")
         connection = getConnectionClass(con!!)!!
     }
