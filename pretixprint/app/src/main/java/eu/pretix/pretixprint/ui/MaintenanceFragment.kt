@@ -15,6 +15,7 @@ import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.databinding.FragmentMaintenanceBinding
+import eu.pretix.pretixprint.util.DirectedHexdumpCollection
 import kotlinx.coroutines.*
 import java.io.DataInputStream
 import java.io.IOException
@@ -30,6 +31,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private lateinit var connection: ConnectionType
     private var streamHolder: StreamHolder? = null
     private var responseListener: Job? = null
+    private var hc = DirectedHexdumpCollection()
 
     // FIXME: can the dialog close itself when app receives another intent?
 
@@ -117,12 +119,11 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
 
             responseListener = lifecycleScope.launch(Dispatchers.IO) {
                 val dis = DataInputStream(streamHolder!!.inputStream)
-                val hc = HexdumpCollection()
                 while (isActive) {
                     try {
                         val byte = dis.readByte()
-                        hc.pushByte(byte)
                         withContext(Dispatchers.Main) {
+                            hc.pushByte(DirectedHexdumpCollection.Direction.IN, byte)
                             binding.tvOutput.text = hc.toString()
                         }
                     } catch (e: IOException) {
@@ -167,6 +168,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 }
             }
         }
+        hc.pushBytes(DirectedHexdumpCollection.Direction.OUT, ba, true)
     }
 
     override fun onStop() {
@@ -187,59 +189,5 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     putString(ARG_PRINTER_TYPE, printerType)
                 }
             }
-    }
-}
-
-class HexdumpByteArrayHolder {
-    companion object {
-        const val MAX_ITEMS = 16
-    }
-    private val bytes: ByteArray = ByteArray(MAX_ITEMS)
-    private var elements = 0
-
-    fun size(): Int {
-        return elements
-    }
-
-    fun push(b: Byte) {
-        if (elements >= MAX_ITEMS) throw IndexOutOfBoundsException("full")
-        bytes[elements++] = b
-    }
-
-    fun toHex(): String = buildString {
-        repeat(MAX_ITEMS) {
-            if (it >= elements) append("  ")
-            else append("%02x".format(bytes[it]))
-            if (it < MAX_ITEMS - 1) append(" ")
-        }
-    }
-
-    fun toAscii(): String = buildString {
-        repeat(MAX_ITEMS) {
-            if (it >= elements) append(" ")
-            else append(Char(bytes[it].toUShort()).toString().replace(Regex("\\p{C}"), "."))
-        }
-    }
-
-    override fun toString(): String {
-        return "${toHex()} | ${toAscii()}"
-    }
-}
-
-class HexdumpCollection {
-    private val collection = mutableListOf<HexdumpByteArrayHolder>()
-
-    fun pushByte(b: Byte, forceNew: Boolean = false) {
-        if (collection.isEmpty()) {
-            collection.add(HexdumpByteArrayHolder())
-        }
-        if (collection.last().size() == HexdumpByteArrayHolder.MAX_ITEMS || forceNew) {
-            collection.add(HexdumpByteArrayHolder())
-        }
-        collection.last().push(b)
-    }
-
-    override fun toString(): String {
-        return collection.joinToString("\n") { it.toString() }
     }
 }
