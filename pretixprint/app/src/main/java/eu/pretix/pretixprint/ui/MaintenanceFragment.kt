@@ -31,7 +31,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private lateinit var connection: ConnectionType
     private var streamHolder: StreamHolder? = null
     private var responseListener: Job? = null
-    private var hc = DirectedHexdumpCollection()
+    private var hexdump = DirectedHexdumpCollection(8)
 
     // FIXME: can the dialog close itself when app receives another intent?
 
@@ -123,8 +123,8 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     try {
                         val byte = dis.readByte()
                         withContext(Dispatchers.Main) {
-                            hc.pushByte(DirectedHexdumpCollection.Direction.IN, byte)
-                            binding.tvOutput.text = hc.toString()
+                            hexdump.pushByte(DirectedHexdumpCollection.Direction.IN, byte)
+                            binding.tvOutput.text = hexdump.toString()
                         }
                     } catch (e: IOException) {
                         if (!isActive) break // got canceled
@@ -168,7 +168,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 }
             }
         }
-        hc.pushBytes(DirectedHexdumpCollection.Direction.OUT, ba, true)
+        hexdump.pushBytes(DirectedHexdumpCollection.Direction.OUT, ba, true)
     }
 
     override fun onStop() {
