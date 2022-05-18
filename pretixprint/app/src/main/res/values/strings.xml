@@ -176,4 +176,9 @@
     <string name="maintain_data_to_send">Data to send</string>
     <string name="maintain_send">Send</string>
     <string name="maintain_heading_log">Log</string>
+    <string name="maintain_error_hex_only">Only hex characters allowed</string>
+    <string name="maintain_error_hex_pairs">Hex should appear in pairs of two</string>
+    <string name="maintain_error_connection_fail">Connection for maintenance not possible</string>
+    <string name="maintain_error_connection_lost">Connection lost</string>
+    <string name="maintain_error_send_fail">Cannot send</string>
 </resources>

@@ -60,11 +60,11 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         val validateTilInput = fun(text: Editable?) {
             if (mode == InputModes.HEX && text != null) {
                 if (text.replace(Regex("0[xX]"), "").contains(Regex("[^a-fA-F0-9 ]"))) {
-                    binding.tilInput.error = "Only hex characters allowed" // FIXME: extract string
+                    binding.tilInput.error = getString(R.string.maintain_error_hex_only)
                     return
                 }
                 if (text.trim().replace(Regex("\\s+"), "").replace(Regex("0[xX]"), "").length % 2 != 0) {
-                    binding.tilInput.error = "Hex should appear in pairs of two" // FIXME: extract string
+                    binding.tilInput.error = getString(R.string.maintain_error_hex_pairs)
                     return
                 }
             }
@@ -108,7 +108,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     streamHolder = connection.connectAsync(requireContext(), printerType!!)
                 }
             } catch (e: Exception) {
-                fail(e.message ?: "Connection for maintenance not possible")
+                fail(e.message ?: getString(R.string.maintain_error_connection_fail))
                 return@launch
             } catch (e: NotImplementedError) {
                 fail(e.message!!)
@@ -129,7 +129,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     } catch (e: IOException) {
                         if (!isActive) break // got canceled
                         withContext(Dispatchers.Main) {
-                            fail(e.message ?: "Connection lost")
+                            fail(e.message ?: getString(R.string.maintain_error_connection_lost))
                         }
                         break
                     }
@@ -164,7 +164,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 streamHolder!!.outputStream.write(ba)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    fail(e.message ?: "Cannot send")
+                    fail(e.message ?: getString(R.string.maintain_error_send_fail))
                 }
             }
         }

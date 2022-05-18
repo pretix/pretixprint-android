@@ -168,4 +168,9 @@
     <string name="maintain_data_to_send">Daten</string>
     <string name="maintain_send">Senden</string>
     <string name="maintain_heading_log">Log</string>
+    <string name="maintain_error_hex_only">Nur Hexadezimalzeichen erlaubt</string>
+    <string name="maintain_error_hex_pairs">Hexadezimalzeichen nur als Paare</string>
+    <string name="maintain_error_connection_fail">Verbindung für Wartung nicht möglich</string>
+    <string name="maintain_error_connection_lost">Verbindung verloren</string>
+    <string name="maintain_error_send_fail">Senden fehlgeschlagen</string>
 </resources>
