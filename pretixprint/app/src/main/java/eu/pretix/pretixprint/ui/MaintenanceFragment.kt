@@ -59,11 +59,11 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
 
         val validateTilInput = fun(text: Editable?) {
             if (mode == InputModes.HEX && text != null) {
-                if (text.replace(Regex("0[xX]"), "").contains(Regex("[^a-fA-F0-9 ]"))) {
+                if (text.replace(Regex("0[xX]([a-fA-F0-9]{2})"), "$1").contains(Regex("[^a-fA-F0-9 ]"))) {
                     binding.tilInput.error = getString(R.string.maintain_error_hex_only)
                     return
                 }
-                if (text.trim().replace(Regex("\\s+"), "").replace(Regex("0[xX]"), "").length % 2 != 0) {
+                if (text.trim().replace(Regex("\\s+"), "").replace(Regex("0[xX]([a-fA-F0-9]{2})"), "$1").length % 2 != 0) {
                     binding.tilInput.error = getString(R.string.maintain_error_hex_pairs)
                     return
                 }
@@ -152,7 +152,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         val ba : ByteArray = if (mode == InputModes.HEX) {
             data.trim()
                 .replace(Regex("\\s+"), "")
-                .replace(Regex("0[xX]"), "")
+                .replace(Regex("0[xX]([a-fA-F0-9 ]{2})"), "$1")
                 .chunked(2)
                 .map { it.toInt(16).toByte() }
                 .toByteArray()
