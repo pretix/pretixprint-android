@@ -16,6 +16,7 @@ Printer Compatibility
 | Brother label printers (QL series) | ✔️ | ✔️ |  | Ticket printing, badge printing |
 | Zebra label printers | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
 | Zebra card printers (ZC, ZXP series) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| Evolis card printers (Zenius, Primacy series) | ✔️ |  |  | Ticket printing, badge printing |
 | Printers connected to a Linux CUPS service, some IPP printers | ✔️ |  |  | Ticket printing, badge printing |
 
 

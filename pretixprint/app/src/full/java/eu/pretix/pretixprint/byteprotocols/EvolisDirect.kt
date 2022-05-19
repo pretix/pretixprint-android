@@ -49,7 +49,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type is NetworkConnection || type is USBConnection
+        return type is NetworkConnection
     }
 
     override fun convertPageToBytes(
