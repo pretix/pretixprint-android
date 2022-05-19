@@ -85,12 +85,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     private fun print(intent: Intent, rr: ResultReceiver?) {
         val prefs = ctx.defaultSharedPreferences
         val type = getType(intent.action!!)
-        //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
-        val renderer = if (type == "receipt") {
-            "ESCPOS"
-        } else {
-            "WYSIWYG"
-        }
+
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
 
@@ -102,8 +97,16 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val jsonData = JSONObject(dataInputStream!!.bufferedReader().use { it.readText() })
         val positions = jsonData.getJSONArray("positions")
 
+        //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
+        val renderer = if (type == "receipt") {
+            mode
+        } else {
+            "WYSIWYG"
+        }
+
         when (renderer) {
-            "ESCPOS" -> {
+            "ESC/POS",
+            "ePOSPrintXML"-> {
                 tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id") + "_", ".escpos", this.cacheDir)
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
