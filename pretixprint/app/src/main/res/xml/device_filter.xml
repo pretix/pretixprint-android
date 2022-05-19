@@ -11,4 +11,5 @@
     <usb-device vendor-id="4931" /> <!-- CITIZEN -->
     <usb-device vendor-id="1305" /> <!-- Star Micronics -->
     <usb-device vendor-id="5455" /> <!-- SNBC -->
+    <usb-device vendor-id="3913" /> <!-- Evolis -->
 </usb>
