@@ -12,6 +12,10 @@ import java.io.File
 
 class SystemPrintActivity : AppCompatActivity() {
 
+    companion object {
+        const val INTENT_EXTRA_CALLER = "caller"
+    }
+
     private lateinit var binding: ActivitySystemPrintBinding
     var hadLaunchedPrint = false
 
@@ -37,7 +41,7 @@ class SystemPrintActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
 
         if (hasFocus && hadLaunchedPrint) {
-            val caller = intent.extras?.get("caller") as Class<*>
+            val caller = intent.extras?.get(INTENT_EXTRA_CALLER) as Class<*>
             val stopIntent = Intent(this, caller)
             stopIntent.action = AbstractPrintService.ACTION_STOP_SERVICE
             startService(stopIntent)
