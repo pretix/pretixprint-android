@@ -35,8 +35,11 @@ class SystemConnection : ConnectionType {
         val `in` = FileInputStream(tmpfile)
         val pdf = PdfReader(`in`)
         var mediaSize : MediaSize = MediaSize.UNKNOWN_PORTRAIT
+        val ps = pdf.getPageSize(1)
         val rot = pdf.getPageRotation(1)
         if (rot == 90 || rot == 180) {
+            mediaSize = MediaSize.UNKNOWN_LANDSCAPE
+        } else if (ps.width > ps.height) {
             mediaSize = MediaSize.UNKNOWN_LANDSCAPE
         }
         pdf.close()
