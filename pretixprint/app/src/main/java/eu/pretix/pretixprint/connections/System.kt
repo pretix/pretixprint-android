@@ -12,6 +12,7 @@ import eu.pretix.pretixprint.R
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import kotlin.math.roundToInt
 
 class SystemConnection : ConnectionType {
     override val identifier = "system"
@@ -37,13 +38,26 @@ class SystemConnection : ConnectionType {
         var mediaSize : MediaSize = MediaSize.UNKNOWN_PORTRAIT
         val ps = pdf.getPageSize(1)
         val rot = pdf.getPageRotation(1)
-        if (rot == 90 || rot == 180) {
-            mediaSize = MediaSize.UNKNOWN_LANDSCAPE
-        } else if (ps.width > ps.height) {
+        var isLandscape = false
+        if (rot == 90 || rot == 180 || ps.width > ps.height) {
+            isLandscape = true
             mediaSize = MediaSize.UNKNOWN_LANDSCAPE
         }
         pdf.close()
         `in`.close()
+
+        // try to match known paper sizes to the size of this pdf
+        getAllPredefinedSizes().find {
+            val mS = if (isLandscape) it.asLandscape() else it
+            val heightMils = (ps.height * 1000.0 / 72.0).roundToInt()
+            val widthMils = (ps.width * 1000.0 / 72.0).roundToInt()
+            val clearance = 20
+
+            mS.heightMils in (heightMils - clearance)..(heightMils + clearance) &&
+                mS.widthMils in (widthMils - clearance)..(widthMils + clearance)
+        }?.let {
+            mediaSize = if (isLandscape) it.asLandscape() else it
+        }
 
         val pa = Builder()
             .setMediaSize(mediaSize)
@@ -61,6 +75,99 @@ class SystemConnection : ConnectionType {
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, msg))
         }
     }
+
+    // MediaSize.getAllPredefinedSizes() is not accessible, so we have to mirror the result here :|
+    private fun getAllPredefinedSizes(): List<MediaSize> = arrayListOf(
+        // ISO sizes
+        MediaSize.ISO_A0,
+        MediaSize.ISO_A1,
+        MediaSize.ISO_A2,
+        MediaSize.ISO_A3,
+        MediaSize.ISO_A4,
+        MediaSize.ISO_A5,
+        MediaSize.ISO_A6,
+        MediaSize.ISO_A7,
+        MediaSize.ISO_A8,
+        MediaSize.ISO_A9,
+        MediaSize.ISO_A10,
+        MediaSize.ISO_B0,
+        MediaSize.ISO_B1,
+        MediaSize.ISO_B2,
+        MediaSize.ISO_B3,
+        MediaSize.ISO_B4,
+        MediaSize.ISO_B5,
+        MediaSize.ISO_B6,
+        MediaSize.ISO_B7,
+        MediaSize.ISO_B8,
+        MediaSize.ISO_B9,
+        MediaSize.ISO_B10,
+        MediaSize.ISO_C0,
+        MediaSize.ISO_C1,
+        MediaSize.ISO_C2,
+        MediaSize.ISO_C3,
+        MediaSize.ISO_C4,
+        MediaSize.ISO_C5,
+        MediaSize.ISO_C6,
+        MediaSize.ISO_C7,
+        MediaSize.ISO_C8,
+        MediaSize.ISO_C9,
+        MediaSize.ISO_C10,
+
+        // North America
+        MediaSize.NA_LETTER,
+        MediaSize.NA_GOVT_LETTER,
+        MediaSize.NA_LEGAL,
+        MediaSize.NA_JUNIOR_LEGAL,
+        MediaSize.NA_LEDGER,
+        MediaSize.NA_TABLOID,
+        MediaSize.NA_INDEX_3X5,
+        MediaSize.NA_INDEX_4X6,
+        MediaSize.NA_INDEX_5X8,
+        MediaSize.NA_MONARCH,
+        MediaSize.NA_QUARTO,
+        MediaSize.NA_FOOLSCAP,
+
+        // Chinese
+        MediaSize.ROC_8K,
+        MediaSize.ROC_16K,
+        MediaSize.PRC_1,
+        MediaSize.PRC_2,
+        MediaSize.PRC_3,
+        MediaSize.PRC_4,
+        MediaSize.PRC_5,
+        MediaSize.PRC_6,
+        MediaSize.PRC_7,
+        MediaSize.PRC_8,
+        MediaSize.PRC_9,
+        MediaSize.PRC_10,
+        MediaSize.PRC_16K,
+        MediaSize.OM_PA_KAI,
+        MediaSize.OM_DAI_PA_KAI,
+        MediaSize.OM_JUURO_KU_KAI,
+
+        // Japanese
+        MediaSize.JIS_B10,
+        MediaSize.JIS_B9,
+        MediaSize.JIS_B8,
+        MediaSize.JIS_B7,
+        MediaSize.JIS_B6,
+        MediaSize.JIS_B5,
+        MediaSize.JIS_B4,
+        MediaSize.JIS_B3,
+        MediaSize.JIS_B2,
+        MediaSize.JIS_B1,
+        MediaSize.JIS_B0,
+        MediaSize.JIS_EXEC,
+        MediaSize.JPN_CHOU4,
+        MediaSize.JPN_CHOU3,
+        MediaSize.JPN_CHOU2,
+        MediaSize.JPN_HAGAKI,
+        MediaSize.JPN_OUFUKU,
+        MediaSize.JPN_KAHU,
+        MediaSize.JPN_KAKU2,
+        MediaSize.JPN_YOU4,
+        // MediaSize.JPN_OE_PHOTO_L, // requires api 31
+    )
 
 }
 
