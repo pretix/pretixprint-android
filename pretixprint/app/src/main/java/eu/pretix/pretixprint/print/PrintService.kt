@@ -225,9 +225,9 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 val dialogIntent = Intent(this, SystemPrintActivity::class.java)
                 dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
-                dialogIntent.putExtra("tmpfile", tmpfile)
-                dialogIntent.putExtra("pagenum", pagenum)
-                dialogIntent.putExtra("type", type)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
                 val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
                     PendingIntent.FLAG_CANCEL_CURRENT)
 

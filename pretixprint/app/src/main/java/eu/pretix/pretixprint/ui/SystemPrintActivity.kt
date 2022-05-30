@@ -14,6 +14,9 @@ class SystemPrintActivity : AppCompatActivity() {
 
     companion object {
         const val INTENT_EXTRA_CALLER = "caller"
+        const val INTENT_EXTRA_FILE = "tmpfile"
+        const val INTENT_EXTRA_PAGENUM = "pagenum"
+        const val INTENT_EXTRA_TYPE = "type"
     }
 
     var hadLaunchedPrint = false
@@ -27,9 +30,9 @@ class SystemPrintActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_system_print)
 
-        val tmpfile = intent.extras?.get("tmpfile") as File
-        val pagenum = intent.extras?.get("pagenum") as Int
-        val type = intent.extras?.get("type") as String
+        val tmpfile = intent.extras?.get(INTENT_EXTRA_FILE) as File
+        val pagenum = intent.extras?.get(INTENT_EXTRA_PAGENUM) as Int
+        val type = intent.extras?.get(INTENT_EXTRA_TYPE) as String
 
         SystemConnection().print(tmpfile, pagenum, this, type, null)
         hadLaunchedPrint = true
