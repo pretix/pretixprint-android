@@ -1,15 +1,16 @@
 package eu.pretix.pretixprint.ui
 
-import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
+import android.view.LayoutInflater
+import android.view.View
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
@@ -22,7 +23,7 @@ import java.io.IOException
 
 private const val ARG_PRINTER_TYPE = "printer_type"
 
-class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
+class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
     enum class InputModes { HEX, ASCII }
 
     private var printerType: String? = null
@@ -50,9 +51,16 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         binding.btnSend.isEnabled = false
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentMaintenanceBinding.inflate(layoutInflater)
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val modes = InputModes.values().map { it.toString() }
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, modes)
 
@@ -142,13 +150,6 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 }
             }
         }
-
-        val typeRef = resources.getIdentifier("settings_label_${printerType}printer", "string", requireContext().packageName)
-        return AlertDialog.Builder(requireContext())
-            .setTitle(getString(R.string.title_dialog_maintenance, getString(typeRef)))
-            .setPositiveButton(getString(R.string.dismiss)) { _, _ -> }
-            .setView(binding.root)
-            .create()
     }
 
     fun send(mode: InputModes, data: String) {

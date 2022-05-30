@@ -3,7 +3,8 @@
     <string name="app_name">pretixPRINT</string>
     <string name="title_activity_main">pretixPRINT</string>
     <string name="title_activity_fileviewer">Druckjob-Anzeige</string>
-    <string name="title_dialog_maintenance">Wartung: %s</string>
+    <string name="title_activity_maintenance">Wartung</string>
+    <string name="title_activity_maintenance_type">Wartung: %s</string>
     <string name="action_label_settings">Einstellungen</string>
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticketdrucker</string>
