@@ -76,6 +76,16 @@ class SystemConnection : ConnectionType {
         }
     }
 
+    // Card sizes
+    /** CR79 media size: 52 mm x 84 mm (2.051" x 3.303")  */
+    val CR79 = MediaSize("CR79", "CR79", 2051, 3303)
+
+    /** CR80 media size: 54 mm x 86 mm (2.125" x 3.375")  */
+    val CR80 = MediaSize("CR80", "CR80", 2125, 3375)
+
+    /** CR100 media size: 67 mm x 99 mm (2.63" x 3.88")  */
+    val CR100 = MediaSize("CR100", "CR100", 2630, 3880)
+
     // MediaSize.getAllPredefinedSizes() is not accessible, so we have to mirror the result here :|
     private fun getAllPredefinedSizes(): List<MediaSize> = arrayListOf(
         // ISO sizes
@@ -167,6 +177,11 @@ class SystemConnection : ConnectionType {
         MediaSize.JPN_KAKU2,
         MediaSize.JPN_YOU4,
         // MediaSize.JPN_OE_PHOTO_L, // requires api 31
+
+        // Card sizes
+        CR79,
+        CR80,
+        CR100,
     )
 
 }
