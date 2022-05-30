@@ -167,6 +167,8 @@
     <string name="maintain_data_type">Typ</string>
     <string name="maintain_data_to_send">Daten</string>
     <string name="maintain_send">Senden</string>
+    <string name="maintain_newline">Zeilenumbruch anfügen</string>
+    <string name="maintain_newline_disabled">Keinen Zeilenumbruch anfügen</string>
     <string name="maintain_heading_log">Log</string>
     <string name="maintain_error_hex_only">Nur Hexadezimalzeichen erlaubt</string>
     <string name="maintain_error_hex_pairs">Hexadezimalzeichen nur als Paare</string>

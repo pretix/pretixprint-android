@@ -175,6 +175,8 @@
     <string name="maintain_data_type">Data type</string>
     <string name="maintain_data_to_send">Data to send</string>
     <string name="maintain_send">Send</string>
+    <string name="maintain_newline">Append newline</string>
+    <string name="maintain_newline_disabled">Don\'t append newline</string>
     <string name="maintain_heading_log">Log</string>
     <string name="maintain_error_hex_only">Only hex characters allowed</string>
     <string name="maintain_error_hex_pairs">Hex should appear in pairs of two</string>
