@@ -41,11 +41,15 @@
         android:logo="@drawable/ic_logo"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
         <meta-data
             android:name="android.content.APP_RESTRICTIONS"
             android:resource="@xml/app_restrictions" />
 
+        <activity
+            android:name=".ui.MaintenanceActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maintenance"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.SystemPrintActivity"
             android:exported="false"

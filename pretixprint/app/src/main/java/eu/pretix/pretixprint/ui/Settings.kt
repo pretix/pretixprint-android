@@ -409,7 +409,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     fun openMaintainPrinter(type: String) {
-        MaintenanceFragment.newInstance(type).show(childFragmentManager, "dialog")
+        val intent = Intent(requireContext(), MaintenanceActivity::class.java)
+        intent.putExtra(MaintenanceActivity.EXTRA_TYPE, type)
+        startWithPIN(intent)
     }
 
     fun confirmRemovePrinter(type: String) {
