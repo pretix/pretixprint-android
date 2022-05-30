@@ -32,8 +32,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
     private var streamHolder: StreamHolder? = null
     private var responseListener: Job? = null
     private var hexdump = DirectedHexdumpCollection(8)
-
-    // FIXME: can the dialog close itself when app receives another intent?
+    private var sendNewline = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +79,13 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                     }
                     else -> false
                 }
+            }
+        }
+        binding.tilInput.setEndIconOnClickListener {
+            sendNewline = !sendNewline
+            with(binding.tilInput) {
+                setEndIconDrawable(if (sendNewline) R.drawable.ic_keyboard_return_24dp else R.drawable.ic_keyboard_no_return_24dp)
+                endIconContentDescription = getString(if (sendNewline) R.string.maintain_newline else R.string.maintain_newline_disabled)
             }
         }
         (binding.tilType.editText as AutoCompleteTextView).apply {
@@ -149,7 +155,7 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
         if (streamHolder == null) {
             return
         }
-        val ba : ByteArray = if (mode == InputModes.HEX) {
+        var ba : ByteArray = if (mode == InputModes.HEX) {
             data.trim()
                 .replace(Regex("\\s+"), "")
                 .replace(Regex("0[xX]([a-fA-F0-9 ]{2})"), "$1")
@@ -158,6 +164,9 @@ class MaintenanceFragment : DialogFragment(R.layout.fragment_maintenance) {
                 .toByteArray()
         } else {
             data.encodeToByteArray()
+        }
+        if (sendNewline) {
+            ba += byteArrayOf('\n'.code.toByte())
         }
         lifecycleScope.launch(Dispatchers.IO) {
             try {
