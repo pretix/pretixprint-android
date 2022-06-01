@@ -67,15 +67,17 @@
                 android:inputType="text|textNoSuggestions"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSend"
-            style="@style/Widget.AppCompat.Button"
+            style="@style/Widget.App.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/maintain_send"
-            app:layout_constraintBaseline_toBaselineOf="@id/tilType"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:contentDescription="@string/maintain_send"
+            android:gravity="center_vertical"
+            app:icon="@drawable/ic_send_24dp"
+            app:iconTint="@color/white"
+            app:layout_constraintBaseline_toBaselineOf="@id/tilInput"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -84,7 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/maintain_heading_log"
-        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
     <ScrollView
         android:layout_width="wrap_content"
