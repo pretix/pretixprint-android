@@ -63,4 +63,9 @@
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
     </style>
+
+    <style name="Widget.App.IconButton" parent="Widget.Material3.Button.IconButton">
+        <item name="backgroundTint">@color/pretix_brand_light</item>
+        <item name="iconTint">@color/white</item>
+    </style>
 </resources>
