@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.connections
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.os.Build
@@ -68,8 +68,8 @@ class BluetoothConnection : ConnectionType {
         }
 
         Log.i("PrintService", "[$type] Starting Bluetooth printing")
-        val adapter = BluetoothAdapter.getDefaultAdapter()
-        val device = adapter.getRemoteDevice(address)
+        val bme = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val device = bme.adapter.getRemoteDevice(address)
 
         try {
             Log.i("PrintService", "[$type] Starting renderPages")
@@ -99,8 +99,8 @@ class BluetoothConnection : ConnectionType {
                         for (i in 0..5) {
                             try {
                                 connFailure = null
-                                Log.i("PrintService", "[$type] Start connection to $address, try $i")
-                                adapter.cancelDiscovery()
+                                Log.i("PrintService", "Start connection to $address, try $i")
+                                bme.adapter.cancelDiscovery()
                                 fallbackSocket.connect()
                                 break
                             } catch (e: Exception) {
@@ -160,7 +160,8 @@ class BluetoothConnection : ConnectionType {
         val addr = conf.getString("hardware_${type}printer_ip", "")
         val fallbackSocket: BluetoothSocket
         try {
-            val adapter = BluetoothAdapter.getDefaultAdapter()
+            val bme = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val adapter = bme.adapter
             if (adapter == null || !adapter.isEnabled) {
                 cont.resumeWithException(IllegalStateException("Bluetooth not enabled"))
                 return@suspendCancellableCoroutine
