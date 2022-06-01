@@ -27,7 +27,6 @@ import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_FILTER_TYP
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_NEED_AUTH
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.FILTER_TYPE_ALL
 
-
 class BluetoothSettingsFragment : SetupFragment() {
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -37,7 +36,7 @@ class BluetoothSettingsFragment : SetupFragment() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_bluetooth_settings, container, false)
 
-        val deviceManager = BluetoothDeviceManager(this.requireContext())
+        val deviceManager = BluetoothDeviceManager(requireContext())
 
         val teMAC = view.findViewById<TextInputEditText>(R.id.teMAC)
 
