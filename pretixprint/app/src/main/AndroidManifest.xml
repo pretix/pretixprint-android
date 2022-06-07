@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="eu.pretix.pretixprint">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -12,6 +13,7 @@
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="false" />
+    <uses-sdk tools:overrideLibrary="com.evolis.libevolis" />
 
     <application
         android:name=".PretixPrint"
@@ -99,6 +101,14 @@
                 <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
             </intent-filter>
         </service>
+
+        <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_DSN}" />
+        <meta-data android:name="io.sentry.auto-session-tracking.enable" android:value="false" />
+        <meta-data android:name="io.sentry.breadcrumbs.activity-lifecycle" android:value="false" />
+        <meta-data android:name="io.sentry.breadcrumbs.app-lifecycle" android:value="false" />
+        <meta-data android:name="io.sentry.breadcrumbs.system-events" android:value="false" />
+        <meta-data android:name="io.sentry.breadcrumbs.app-components" android:value="false" />
+        <meta-data android:name="io.sentry.breadcrumbs.user-interaction" android:value="false" />
     </application>
 
 </manifest>

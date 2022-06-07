@@ -42,7 +42,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     }
 
     private fun interpolate(str: String): String {
-        return str.replace(Regex("\\{([a-zA-Z0-9_]+)\\}")) { match ->
+        return str.replace(Regex("\\{([a-zA-Z0-9:_]+)\\}")) { match ->
             getTextContent(match.groups[1]!!.value, null, null)
         }
     }
@@ -64,7 +64,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     }
 
     override fun getBarcodeContent(content: String?, text: String?, textI18n: JSONObject?): String {
-        return when(content) {
+        return when (content) {
             "secret" -> op.getString("secret")  // the one in textcontent might be shortened
             "pseudonymization_id" -> op.getString("pseudonymization_id")  // required for backwards compatibility
             else -> getTextContent(content, text, textI18n)
@@ -103,9 +103,12 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Montserrat", "fonts/montserrat-%s-webfont.ttf")
             registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
             registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
+            registerFontFamily(ctx, "Titillium Upright", "fonts/titillium-%s-webfont.ttf", "RegularUpright", "BoldUpright", "BoldUpright", "RegularUpright")
+            registerFontFamily(ctx, "Titillium Semibold Upright", "fonts/titillium-%s-webfont.ttf", "SemiboldUpright", "BoldUpright", "BoldUpright", "SemiboldUpright")
             registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
             registerFontFamily(ctx, "DejaVu Sans", "fonts/DejaVuSans-%s-webfont.ttf")
             registerFontFamily(ctx, "Poppins", "fonts/Poppins-%s-webfont.ttf")
+            registerFontFamily(ctx, "Space Mono", "fonts/Space-Mono-%s.ttf")
         }
 
         fun storeFont(ctx: Context, path: String): String {
@@ -127,23 +130,23 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             return file.absolutePath
         }
 
-        fun registerFontFamily(ctx: Context, name: String, pattern: String) {
+        fun registerFontFamily(ctx: Context, name: String, pattern: String, regularName: String = "Regular", boldName: String = "Bold", boldItalicName: String = "BoldItalic", italicName: String = "Italic") {
             FontRegistry.getInstance().add(
                     name,
                     FontSpecification.Style.REGULAR,
-                    storeFont(ctx, String.format(pattern, "Regular")))
+                    storeFont(ctx, String.format(pattern, regularName)))
             FontRegistry.getInstance().add(
                     name,
                     FontSpecification.Style.BOLDITALIC,
-                    storeFont(ctx, String.format(pattern, "BoldItalic")))
+                    storeFont(ctx, String.format(pattern, boldItalicName)))
             FontRegistry.getInstance().add(
                     name,
                     FontSpecification.Style.BOLD,
-                    storeFont(ctx, String.format(pattern, "Bold")))
+                    storeFont(ctx, String.format(pattern, boldName)))
             FontRegistry.getInstance().add(
                     name,
                     FontSpecification.Style.ITALIC,
-                    storeFont(ctx, String.format(pattern, "Italic")))
+                    storeFont(ctx, String.format(pattern, italicName)))
         }
     }
 }

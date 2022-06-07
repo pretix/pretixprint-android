@@ -60,6 +60,7 @@ class FinishSettingsFragment : SetupFragment() {
                         alert(R.string.test_success).show()
                     }
                 } catch (e: PrintException) {
+                    Sentry.captureException(e)
                     uiThread {
                         if (this@FinishSettingsFragment.activity == null)
                             return@uiThread
@@ -67,7 +68,7 @@ class FinishSettingsFragment : SetupFragment() {
                     }
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
-                    Sentry.capture(e)
+                    Sentry.captureException(e)
                     uiThread {
                         if (this@FinishSettingsFragment.activity == null)
                             return@uiThread
@@ -103,6 +104,10 @@ class FinishSettingsFragment : SetupFragment() {
         val proto = getProtoClass(activity.proto())
 
         val file = writeDemoPage(proto.demopage)
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.test", "true")
+        }
 
         when (activity.mode()) {
             NetworkConnection().identifier -> {

@@ -46,6 +46,7 @@
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
     <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
+    <string name="field_label_eposprintxml_deviceid">Device ID (Default: local_printer)</string>
     <string name="field_label_queue">Printer name</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>
@@ -103,8 +104,10 @@
     <string name="protocol_slcs">SLCS label printer (e.g. Bixolon, Metapace, …)</string>
     <string name="protocol_brother">Brother label printer (QL series)</string>
     <string name="protocol_escpos">ESC/POS receipt printer (e.g. Epson, Bixolon, …)</string>
+    <string name="protocol_evolisdirect">Evolis card printer (Primacy and Zenius series)</string>
     <string name="protocol_linkoscard">Zebra card printer (ZMotif and ZXP protocol card printers; e.g. ZC- and ZXP-series)</string>
     <string name="protocol_linkos">Zebra thermal printer (CPCL and ZPL protocol)</string>
+    <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
