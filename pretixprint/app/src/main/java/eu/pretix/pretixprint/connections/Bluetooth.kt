@@ -9,6 +9,7 @@ import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.renderers.renderPages
+import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
@@ -37,10 +38,20 @@ class BluetoothConnection : ConnectionType {
 
         val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
         val proto = getProtoClass(mode)
-        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(conf.get("hardware_${type}printer_ip") ?: "")
+        val address = conf.get("hardware_${type}printer_ip") ?: ""
+        val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.mode", mode)
+            scope.setTag("printer.type", type)
+            scope.setContexts("printer.ip", address)
+            scope.setContexts("printer.dpi", dpi)
+        }
+
+        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address)
 
         try {
-            val futures = renderPages(proto, tmpfile, Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat(), numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
 
             when (proto) {
                 is StreamByteProtocol<*> -> {

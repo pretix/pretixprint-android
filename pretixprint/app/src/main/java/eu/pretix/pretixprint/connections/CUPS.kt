@@ -4,6 +4,7 @@ import android.content.Context
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.print.getPrinter
+import io.sentry.Sentry
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
 import org.jetbrains.anko.defaultSharedPreferences
@@ -29,6 +30,14 @@ class CUPSConnection : ConnectionType {
         val serverAddr = getSetting("hardware_${type}printer_ip", "127.0.0.1")
         val port = getSetting("hardware_${type}printer_port", "631")
         val name = getSetting("hardware_${type}printer_printername", "Test")
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.type", type)
+            scope.setContexts("printer.ip", serverAddr)
+            scope.setContexts("printer.port", port)
+            scope.setContexts("printer.printername", name)
+        }
+
         var cp: CupsPrinter? = null
         try {
             cp = getPrinter(

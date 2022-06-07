@@ -77,7 +77,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             pw.flush()
             fw.close()
         } catch (ee: Throwable) {
-            Sentry.capture(ee)
+            Sentry.captureException(ee)
             ee.printStackTrace()
         }
     }
@@ -88,6 +88,13 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
+
+        Sentry.configureScope { scope ->
+            scope.setTag("type", type)
+            scope.setTag("renderer", renderer)
+            scope.setTag("connection", connection!!)
+            scope.setTag("printer.mode", mode!!)
+        }
 
         val pages = emptyList<CompletableFuture<File?>>().toMutableList()
         var tmpfile: File?
