@@ -87,10 +87,15 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         val mode = prefs.getString("hardware_${type}printer_mode", "")
+        val renderer = if (type == "receipt") {
+            mode
+        } else {
+            "WYSIWYG"
+        }
 
         Sentry.configureScope { scope ->
             scope.setTag("type", type)
-            scope.setTag("renderer", renderer)
+            scope.setTag("renderer", renderer!!)
             scope.setTag("connection", connection!!)
             scope.setTag("printer.mode", mode!!)
         }
@@ -102,13 +107,6 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData!!.getItemAt(0).uri)
         val jsonData = JSONObject(dataInputStream!!.bufferedReader().use { it.readText() })
         val positions = jsonData.getJSONArray("positions")
-
-        //val renderer = prefs.getString("hardware_${type}printer_mode", if (type == "receipt") { "ESCPOS" } else { "WYSIWYG"})
-        val renderer = if (type == "receipt") {
-            mode
-        } else {
-            "WYSIWYG"
-        }
 
         when (renderer) {
             "ESC/POS",
