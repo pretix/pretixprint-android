@@ -1,12 +1,17 @@
 package eu.pretix.pretixprint.print
 
-import android.app.*
+import android.app.IntentService
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.lowagie.text.Document
 import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
@@ -17,6 +22,7 @@ import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
+import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.ctx
@@ -32,6 +38,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     companion object {
         val CHANNEL_ID = "pretixprint_print_channel"
         val ONGOING_NOTIFICATION_ID = 42
+        val ACTION_STOP_SERVICE = "action_stop_service"
     }
 
     private fun createNotificationChannel() {
@@ -52,19 +59,11 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         createNotificationChannel()
         val notificationIntent = Intent(this, SettingsActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
-        val notification = if (SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle(getText(R.string.print_notification))
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.drawable.ic_stat_print)
                     .build()
-        } else {
-            Notification.Builder(this)
-                    .setContentTitle(getText(R.string.print_notification))
-                    .setContentIntent(pendingIntent)
-                    .setSmallIcon(R.drawable.ic_stat_print)
-                    .build()
-        }
         startForeground(ONGOING_NOTIFICATION_ID, notification)
     }
 
@@ -225,6 +224,32 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     throw PrintException("USB not supported on this Android version.")
                 }
             }
+            "system" -> {
+                // printManager.print is only allowed to be called by activities
+                // so lets move the call into it's own activity and try to get the user
+                // to open a notification to launch it
+
+                val notificationManagerCompat = NotificationManagerCompat.from(this)
+                notificationManagerCompat.cancel(ONGOING_NOTIFICATION_ID)
+
+                val dialogIntent = Intent(this, SystemPrintActivity::class.java)
+                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
+                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
+                val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT)
+
+                val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setContentTitle(getText(R.string.print_now_notification))
+                        .setSmallIcon(R.drawable.ic_stat_print)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setFullScreenIntent(pendingIntent, true)
+                        .build()
+
+                startForeground(ONGOING_NOTIFICATION_ID, notification)
+            }
         }
 
         cleanupOldFiles()
@@ -255,11 +280,16 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
     }
 
-
     override fun onHandleIntent(intent: Intent?) {
         var rr: ResultReceiver? = null
         if (intent!!.hasExtra("resultreceiver")) {
             rr = intent.getParcelableExtra<ResultReceiver>("resultreceiver")!! as ResultReceiver
+        }
+
+        if (intent.action == ACTION_STOP_SERVICE) {
+            stopForeground(true)
+            stopSelf()
+            return
         }
 
         startForegroundNotification()
@@ -285,7 +315,20 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 rr.send(1, b)
             }
         }
-        stopForeground(true)
+
+        val prefs = ctx.defaultSharedPreferences
+        val type = getType(intent.action!!)
+        val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
+        if (connection == "system") {
+            // stop the foreground service, but keep the notification
+            if (SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_DETACH)
+            } else {
+                stopForeground(false)
+            }
+        } else {
+            stopForeground(true)
+        }
     }
 }
 

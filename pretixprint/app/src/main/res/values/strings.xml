@@ -20,6 +20,7 @@
     <string name="dismiss">Close</string>
     <string name="notification_channel_print">Print jobs</string>
     <string name="notification_channel_print_description">Shows a notification during a print job</string>
+    <string name="print_now_notification">Print prepared. Touch to open print dialog</string>
     <string name="print_notification">Printing…</string>
     <string name="err_printer_not_found">Printer %s not found</string>
     <string name="err_no_printer_found">No printer not found</string>
@@ -56,10 +57,12 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="pref_printer_current">Currently using printer %s @ %s (%s)</string>
+    <string name="pref_printer_current_short">Currently using printer %s</string>
     <string name="button_label_test">Print test page</string>
     <string name="bluetooth_printer">Bluetooth Printer</string>
     <string name="network_printer">Network Printer</string>
     <string name="cups">CUPS/IPP</string>
+    <string name="system">Android Print Service</string>
     <string name="usb">USB</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
     <string name="err_usb_permission_denied">USB permission has been denied</string>
@@ -92,6 +95,7 @@
     <string name="connection_type_bluetooth">Bluetooth</string>
     <string name="connection_type_usb">USB (exprimental, works on some devices)</string>
     <string name="connection_type_cups">CUPS (Linux server)</string>
+    <string name="connection_type_system">Android Print Service</string>
     <string name="error_no_choice">Please choose an option</string>
     <string name="btn_next">NEXT</string>
     <string name="setup_network_settings">Where is your printer on the network?</string>
