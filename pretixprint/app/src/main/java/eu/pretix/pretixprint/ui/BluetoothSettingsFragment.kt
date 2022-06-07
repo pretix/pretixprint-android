@@ -1,10 +1,14 @@
 package eu.pretix.pretixprint.ui
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -12,6 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.ui.BluetoothDeviceManager.BluetoothDevicePickResultHandler
@@ -61,6 +67,22 @@ class BluetoothSettingsFragment : SetupFragment() {
                         mac)
                 (activity as PrinterSetupActivity).startProtocolChoice()
             }
+        }
+
+        val requestPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (!isGranted) {
+                    back()
+                }
+            }
+
+        val perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Manifest.permission.BLUETOOTH_CONNECT
+            } else {
+                Manifest.permission.BLUETOOTH_ADMIN
+            }
+        if (ContextCompat.checkSelfPermission(requireContext(), perm) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(perm)
         }
 
         return view
