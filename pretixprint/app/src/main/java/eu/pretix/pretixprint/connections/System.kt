@@ -39,7 +39,7 @@ class SystemConnection : ConnectionType {
         val ps = pdf.getPageSize(1)
         val rot = pdf.getPageRotation(1)
         var isLandscape = false
-        if (rot == 90 || rot == 180 || ps.width > ps.height) {
+        if ((ps.width > ps.height && (rot == 0 || rot == 180)) || (ps.height > ps.width && (rot == 90 || rot == 270))) {
             isLandscape = true
             mediaSize = MediaSize.UNKNOWN_LANDSCAPE
         }
