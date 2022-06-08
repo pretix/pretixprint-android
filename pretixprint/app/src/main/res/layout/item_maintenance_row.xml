@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/tvDirection"
+        android:layout_width="16dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:typeface="monospace"
+        tools:text="->" />
+
+    <TextView
+        android:id="@+id/tvHex"
+        android:ems="48"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:typeface="monospace"
+        tools:text="00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f"/>
+
+    <LinearLayout
+        android:id="@+id/divider"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:gravity="start|center_vertical"
+        android:paddingHorizontal="3dp"
+        android:orientation="horizontal">
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="?android:attr/listDivider" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvAscii"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="16"
+        android:layout_weight="2"
+        android:typeface="monospace"
+        tools:text="................" />
+</LinearLayout>
