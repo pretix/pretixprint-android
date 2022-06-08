@@ -64,6 +64,7 @@
                 android:hint="@string/maintain_data_to_send"
                 android:maxLines="1"
                 android:imeOptions="actionSend"
+                android:nextFocusForward="@+id/btnSend"
                 android:inputType="text|textNoSuggestions"/>
         </com.google.android.material.textfield.TextInputLayout>
 
