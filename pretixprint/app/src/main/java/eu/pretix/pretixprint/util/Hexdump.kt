@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.util
 
 
-class HexdumpByteArrayHolder(val maxSize: Int = 16) {
+open class HexdumpByteArrayHolder(private val maxSize: Int = 16) {
     private val bytes: ByteArray = ByteArray(maxSize)
     private var elements = 0
 
@@ -11,6 +11,10 @@ class HexdumpByteArrayHolder(val maxSize: Int = 16) {
 
     fun isFull(): Boolean {
         return elements == maxSize
+    }
+
+    fun same(other: HexdumpByteArrayHolder?): Boolean {
+        return other != null && elements == other.elements && bytes.contentEquals(other.bytes)
     }
 
     fun push(b: Byte) {
@@ -38,33 +42,9 @@ class HexdumpByteArrayHolder(val maxSize: Int = 16) {
     }
 }
 
-class HexdumpCollection(val maxSize: Int = 16) {
-    private val collection = mutableListOf<HexdumpByteArrayHolder>()
+class DirectedHexdumpByteArrayHolder(val direction: Direction, _maxSize: Int = 16):
+    HexdumpByteArrayHolder(_maxSize) {
 
-    fun pushBytes(ba: ByteArray, forceNew: Boolean = false) {
-        var fN = forceNew
-        ba.forEach {
-            pushByte(it, fN)
-            fN = false
-        }
-    }
-
-    fun pushByte(b: Byte, forceNew: Boolean = false) {
-        if (collection.isEmpty() || forceNew) {
-            collection.add(HexdumpByteArrayHolder(maxSize))
-        }
-        if (collection.last().isFull()) {
-            collection.add(HexdumpByteArrayHolder(maxSize))
-        }
-        collection.last().push(b)
-    }
-
-    override fun toString(): String {
-        return collection.joinToString("\n") { it.toString() }
-    }
-}
-
-class DirectedHexdumpCollection(val maxSize: Int = 16) {
     enum class Direction {
         IN, OUT;
         override fun toString(): String = when(this) {
@@ -72,9 +52,20 @@ class DirectedHexdumpCollection(val maxSize: Int = 16) {
             OUT -> "→"
         }
     }
-    private val collection = mutableListOf<Pair<Direction, HexdumpCollection>>()
 
-    fun pushBytes(dir: Direction, ba: ByteArray, forceNew: Boolean = false) {
+    fun same(other: DirectedHexdumpByteArrayHolder?): Boolean {
+        return other != null && direction == other.direction && super.same(other)
+    }
+
+    override fun toString(): String {
+        return "${direction} ${toHex()} | ${toAscii()}"
+    }
+}
+
+open class DirectedHexdumpCollection(val maxSize: Int = 16) {
+    protected val collection = mutableListOf<DirectedHexdumpByteArrayHolder>()
+
+    fun pushBytes(dir: DirectedHexdumpByteArrayHolder.Direction, ba: ByteArray, forceNew: Boolean = false) {
         var fN = forceNew
         ba.forEach {
             pushByte(dir, it, fN)
@@ -82,19 +73,24 @@ class DirectedHexdumpCollection(val maxSize: Int = 16) {
         }
     }
 
-    fun pushByte(dir: Direction, b: Byte, forceNew: Boolean = false) {
+    open fun pushByte(dir: DirectedHexdumpByteArrayHolder.Direction, b: Byte, forceNew: Boolean = false) {
         if (collection.isEmpty() || forceNew) {
-            collection.add(Pair(dir, HexdumpCollection(maxSize)))
+            collection.add(DirectedHexdumpByteArrayHolder(dir, maxSize))
         }
-        if (collection.last().first != dir) {
-            collection.add(Pair(dir, HexdumpCollection(maxSize)))
+        if (collection.last().direction != dir) {
+            collection.add(DirectedHexdumpByteArrayHolder(dir, maxSize))
         }
-        collection.last().second.pushByte(b)
+        if (collection.last().isFull()) {
+            collection.add(DirectedHexdumpByteArrayHolder(dir, maxSize))
+        }
+        collection.last().push(b)
     }
 
     override fun toString(): String {
-        return collection.joinToString("\n") {
-            "${it.first} ${it.second.toString().replace("\n", "\n  ")}"
-        }
+        return collection.joinToString("\n")
+    }
+
+    fun toList(): List<DirectedHexdumpByteArrayHolder> {
+        return collection.toList()
     }
 }

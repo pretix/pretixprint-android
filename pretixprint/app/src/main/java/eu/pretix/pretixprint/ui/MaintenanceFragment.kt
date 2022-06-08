@@ -16,7 +16,7 @@ import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.databinding.FragmentMaintenanceBinding
-import eu.pretix.pretixprint.util.DirectedHexdumpCollection
+import eu.pretix.pretixprint.util.DirectedHexdumpByteArrayHolder
 import kotlinx.coroutines.*
 import java.io.DataInputStream
 import java.io.IOException
@@ -32,7 +32,8 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
     private lateinit var connection: ConnectionType
     private var streamHolder: StreamHolder? = null
     private var responseListener: Job? = null
-    private var hexdump = DirectedHexdumpCollection(8)
+    private val hexdumpAdapter = HexdumpAdapter()
+    private var hexdump = AdapterBoundDirectedHexdumpCollection(16, hexdumpAdapter)
     private var sendNewline = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,6 +117,8 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
             isEnabled = false
         }
 
+        binding.rvOutput.adapter = hexdumpAdapter
+
         lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -137,8 +140,7 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
                     try {
                         val byte = dis.readByte()
                         withContext(Dispatchers.Main) {
-                            hexdump.pushByte(DirectedHexdumpCollection.Direction.IN, byte)
-                            binding.tvOutput.text = hexdump.toString()
+                            hexdump.pushByteAndNotify(DirectedHexdumpByteArrayHolder.Direction.IN, byte)
                         }
                     } catch (e: IOException) {
                         if (!isActive) break // got canceled
@@ -178,7 +180,7 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
                 }
             }
         }
-        hexdump.pushBytes(DirectedHexdumpCollection.Direction.OUT, ba, true)
+        hexdump.pushBytesAndNotify(DirectedHexdumpByteArrayHolder.Direction.OUT, ba, true)
     }
 
     override fun onStop() {

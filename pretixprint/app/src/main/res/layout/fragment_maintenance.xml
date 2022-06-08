@@ -86,25 +86,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/maintain_heading_log"
-        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+         />
 
-    <ScrollView
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOutput"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="200dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvOutput"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minEms="68"
-                android:minLines="10"
-                android:typeface="monospace" />
-        </LinearLayout>
-    </ScrollView>
+        android:paddingBottom="16dp"
+        app:layoutManager="LinearLayoutManager"
+        app:stackFromEnd="true" />
 </LinearLayout>
