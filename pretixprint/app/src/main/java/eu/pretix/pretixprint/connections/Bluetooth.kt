@@ -63,9 +63,12 @@ class BluetoothConnection : ConnectionType {
                     val fallbackSocket = m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
                     try {
                         fallbackSocket.connect()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        throw PrintException(context.applicationContext.getString(R.string.err_files_generic, e.message));
+                        throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message));
                     }
 
                     val ostream = fallbackSocket.outputStream
@@ -89,10 +92,10 @@ class BluetoothConnection : ConnectionType {
             throw PrintException("Rendering timeout, thread may have crashed")
         } catch (e: IOException) {
             e.printStackTrace()
-            throw PrintException(context.applicationContext.getString(R.string.err_files_io, e.message))
+            throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
         } catch (e: Exception) {
             e.printStackTrace()
-            throw PrintException(context.applicationContext.getString(R.string.err_files_generic, e.message))
+            throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message))
         }
     }
 }
