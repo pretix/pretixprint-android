@@ -2,6 +2,7 @@ package eu.pretix.pretixprint.ui
 
 import android.os.Bundle
 import android.text.Editable
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.VISIBLE
@@ -80,7 +81,11 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
         }
         binding.tilInput.editText!!.apply {
             addTextChangedListener(afterTextChanged = validateTilInput)
-            setOnEditorActionListener { _, actionId, _ ->
+            setOnEditorActionListener { _, actionId, event ->
+                if (event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                    binding.btnSend.performClick()
+                    return@setOnEditorActionListener true
+                }
                 return@setOnEditorActionListener when (actionId) {
                     EditorInfo.IME_ACTION_SEND -> {
                         binding.btnSend.performClick()
