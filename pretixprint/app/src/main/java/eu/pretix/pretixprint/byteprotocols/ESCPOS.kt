@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.byteprotocols
 
+import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.ESCPOSSettingsFragment
@@ -30,9 +31,12 @@ class ESCPOS : StreamByteProtocol<ByteArray> {
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
-            ostream.write(f.get(60, TimeUnit.SECONDS))
+            Log.i("PrintService", "Waiting for page to be converted")
+            val page = f.get(60, TimeUnit.SECONDS)
+            Log.i("PrintService", "Page ready, sending page")
+            ostream.write(page)
             ostream.flush()
-
+            Log.i("PrintService", "Page sent, sleep after page")
             val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100")
             Thread.sleep(wap.toLong())
         }

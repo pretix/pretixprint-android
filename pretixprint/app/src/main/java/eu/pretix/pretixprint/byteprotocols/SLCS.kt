@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
@@ -10,6 +11,7 @@ import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 
@@ -66,9 +68,14 @@ class SLCS : StreamByteProtocol<Bitmap> {
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
-            ostream.write(f.get())
+            Log.i("PrintService", "Waiting for page to be converted")
+            val page = f.get(60, TimeUnit.SECONDS)
+            Log.i("PrintService", "Page ready, sending page")
+            ostream.write(page)
             ostream.flush()
+            Log.i("PrintService", "Page sent")
         }
+        Log.i("PrintService", "Job done, sleep")
         Thread.sleep(2000)
     }
 

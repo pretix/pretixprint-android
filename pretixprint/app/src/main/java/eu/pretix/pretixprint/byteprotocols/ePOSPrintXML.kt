@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.byteprotocols
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
@@ -53,7 +54,9 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
                 setRequestProperty("SOAPAction", "\"\"")
 
                 val wr = OutputStreamWriter(outputStream)
+                Log.i("PrintService", "Waiting for page to be converted")
                 val escposdata = f.get(60, TimeUnit.SECONDS).toHex()
+                Log.i("PrintService", "Page ready, sending page")
                 wr.write("""
                     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
                         <s:Body>
@@ -67,6 +70,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
                 """.trimIndent())
                 wr.flush()
                 wr.close()
+                Log.i("PrintService", "Page sent")
 
                 responseCode
             }

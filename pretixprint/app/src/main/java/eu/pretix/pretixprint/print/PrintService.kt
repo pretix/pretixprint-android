@@ -92,6 +92,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         } else {
             "WYSIWYG"
         }
+        Log.i("PrintService", "Starting print job mode=$mode connection=$connection renderer=$renderer")
 
         Sentry.configureScope { scope ->
             scope.setTag("type", type)
@@ -159,7 +160,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                                     // pass
                                 }
                             }
-                            Log.i("PrintService", "Page $i: Completing future")
+                            Log.i("PrintService", "Page $i: Completing rendering future")
                             _tmpfile
                         }
                         pages.add(future)
@@ -184,6 +185,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         pf.deleteOnExit()
                         pagedoc.close()
                     }
+                    Log.i("PrintService", "Built combined PDF file")
                     doc?.close()
                 } catch (e: TimeoutException) {
                     e.printStackTrace()
@@ -201,6 +203,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
+        Log.i("PrintService", "Starting connection adapter")
         when (connection) {
             "network_printer" -> {
                 if (mode == "CUPS/IPP") {
@@ -250,7 +253,9 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
+        Log.i("PrintService", "Cleaning up old files")
         cleanupOldFiles()
+        Log.i("PrintService", "Job done")
     }
 
     fun cleanupOldFiles() {

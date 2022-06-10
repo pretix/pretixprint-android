@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.*
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -332,6 +333,7 @@ class USBConnection : ConnectionType {
             scope.setContexts("printer.dpi", dpi)
         }
 
+        Log.i("PrintService", "Discovering USB device $serial compat=$compat")
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         val devices = mutableMapOf<String, UsbDevice>()
 
@@ -365,7 +367,9 @@ class USBConnection : ConnectionType {
                     if (ACTION_USB_PERMISSION == intent.action) {
                         val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            Log.i("PrintService", "Found USB device")
                             try {
+                                Log.i("PrintService", "Starting renderPages")
                                 val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
                                 when (proto) {
                                     is StreamByteProtocol<*> -> {
@@ -373,7 +377,9 @@ class USBConnection : ConnectionType {
                                         val istream = UsbInputStream(manager, device, compat)
 
                                         try {
+                                            Log.i("PrintService", "Start proto.send()")
                                             proto.send(futures, istream, ostream, conf, type)
+                                            Log.i("PrintService", "Finished proto.send()")
                                         } finally {
                                             istream.close()
                                             ostream.close()
@@ -381,7 +387,9 @@ class USBConnection : ConnectionType {
                                     }
 
                                     is CustomByteProtocol<*> -> {
+                                        Log.i("PrintService", "Start proto.sendUSB()")
                                         proto.sendUSB(manager, device, futures, conf, type, context)
+                                        Log.i("PrintService", "Finished proto.sendUSB()")
                                     }
                                 }
                             } catch (e: TimeoutException) {

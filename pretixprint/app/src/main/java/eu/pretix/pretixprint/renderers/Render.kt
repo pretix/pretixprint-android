@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer
 import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
@@ -56,7 +57,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
         if (previousBmpFuture != null) {
             previousBmpFuture.thenApplyAsync {
                 try {
+                    Log.i("PrintService", "renderPages: Start rendering page $i to an image")
                     renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                    Log.i("PrintService", "renderPages: Completed rendering page $i to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -64,7 +67,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             }
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
                 try {
+                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $i")
                     byteFuture.complete(protocol.convertPageToBytes(bmp1, i == numPages - 1, bmp2, conf, type))
+                    Log.i("PrintService", "renderPages: Completed convertPageToBytes for page $i")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -73,7 +78,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
         } else {
             threadPool.submit {
                 try {
+                    Log.i("PrintService", "renderPages: Start rendering page $i to an image")
                     renderFileTo<T>(file, i, d, bmpFuture, protocol.inputClass())
+                    Log.i("PrintService", "renderPages: Completed rendering page $i to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -81,7 +88,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             }
             bmpFuture.thenApplyAsync {
                 try {
+                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $i")
                     byteFuture.complete(protocol.convertPageToBytes(it, i == numPages - 1, null, conf, type))
+                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $i")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)

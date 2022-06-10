@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
@@ -87,8 +88,12 @@ class FGL : StreamByteProtocol<Bitmap> {
             istream.read()
         }
         for (f in pages) {
-            ostream.write(f.get(60, TimeUnit.SECONDS))
+            Log.i("PrintService", "Waiting for page to be converted")
+            val page = f.get(60, TimeUnit.SECONDS)
+            Log.i("PrintService", "Page ready, sending page")
+            ostream.write(page)
             ostream.flush()
+            Log.i("PrintService", "Page sent, waiting for printer to complete")
             val loopStarted = System.currentTimeMillis()
             wait@ while (true) {
                 val r = istream.read()
@@ -132,6 +137,7 @@ class FGL : StreamByteProtocol<Bitmap> {
                 }
             }
         }
+        Log.i("PrintService", "Job done, sleep")
         Thread.sleep(2000)
     }
 
