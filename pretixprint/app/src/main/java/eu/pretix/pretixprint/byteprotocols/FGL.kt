@@ -52,14 +52,15 @@ class FGL : StreamByteProtocol<Bitmap> {
                     var col = 0
                     for (j in 0..7) {
                         val px = pixels[min(x + w * (yoffset + j), pixels.size - 1)]
+                        val pxIsBlack = (px shr 24) and 0xff > 128 && ((px shr 16) and 0xff < 128 || (px shr 8) and 0xff < 128 || px and 0xff < 128) // A > 128 && (R < 128 || G < 128 || B < 128)
                         if (!anyChanged) {
                             val previousPx = previousPixels[min(x + w * (yoffset + j), pixels.size - 1)]
-                            if (px != previousPx) {
+                            val previousPxIsBlack = (previousPx shr 24) and 0xff > 128 && ((previousPx shr 16) and 0xff < 128 || (previousPx shr 8) and 0xff < 128 || previousPx and 0xff < 128) // A > 128 && (R < 128 || G < 128 || B < 128)
+                            if (pxIsBlack != previousPxIsBlack) {
                                 anyChanged = true
                             }
                         }
-                        if ((px shr 24) and 0xff > 128 && ((px shr 16) and 0xff < 128 || (px shr 8) and 0xff < 128 || px and 0xff < 128)) {
-                            // A > 128 && (R < 128 || G < 128 || B < 128)
+                        if (pxIsBlack) {
                             col = col or (1 shl (7 - j))
                         }
                     }
