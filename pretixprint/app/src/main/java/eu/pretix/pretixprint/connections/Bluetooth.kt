@@ -9,6 +9,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
+import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
@@ -56,43 +57,45 @@ class BluetoothConnection : ConnectionType {
             Log.i("PrintService", "Starting renderPages")
             val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
 
-            when (proto) {
-                is StreamByteProtocol<*> -> {
-                    // Yes, unfortunately this is necessary when using Services/IntentServices to connect to BT devices.
-                    val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
-                    val clazz = socket.remoteDevice.javaClass
-                    val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
-                    val m = clazz.getMethod("createRfcommSocket", *paramTypes)
-                    val fallbackSocket = m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
-                    try {
-                        Log.i("PrintService", "Start connection to $address")
-                        fallbackSocket.connect()
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                        throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message));
+            lockManager.withLock("$identifier:$address") {
+                when (proto) {
+                    is StreamByteProtocol<*> -> {
+                        // Yes, unfortunately this is necessary when using Services/IntentServices to connect to BT devices.
+                        val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+                        val clazz = socket.remoteDevice.javaClass
+                        val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
+                        val m = clazz.getMethod("createRfcommSocket", *paramTypes)
+                        val fallbackSocket = m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
+                        try {
+                            Log.i("PrintService", "Start connection to $address")
+                            fallbackSocket.connect()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                            throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message));
+                        }
+
+                        val ostream = fallbackSocket.outputStream
+                        val istream = fallbackSocket.inputStream
+
+                        try {
+                            Log.i("PrintService", "Start proto.send()")
+                            proto.send(futures, istream, ostream, conf, type)
+                            Log.i("PrintService", "Finished proto.send()")
+                        } finally {
+                            istream.close()
+                            ostream.close()
+                            socket.close()
+                        }
                     }
 
-                    val ostream = fallbackSocket.outputStream
-                    val istream = fallbackSocket.inputStream
-
-                    try {
-                        Log.i("PrintService", "Start proto.send()")
-                        proto.send(futures, istream, ostream, conf, type)
-                        Log.i("PrintService", "Finished proto.send()")
-                    } finally {
-                        istream.close()
-                        ostream.close()
-                        socket.close()
+                    is CustomByteProtocol<*> -> {
+                        Log.i("PrintService", "Start proto.sendBluetooth()")
+                        proto.sendBluetooth(device.address, futures, conf, type, context)
+                        Log.i("PrintService", "Finished proto.sendBluetooth()")
                     }
-                }
-
-                is CustomByteProtocol<*> -> {
-                    Log.i("PrintService", "Start proto.sendBluetooth()")
-                    proto.sendBluetooth(device.address, futures, conf, type, context)
-                    Log.i("PrintService", "Finished proto.sendBluetooth()")
                 }
             }
         } catch (e: TimeoutException) {

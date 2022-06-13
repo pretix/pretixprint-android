@@ -15,6 +15,7 @@ import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
 import eu.pretix.pretixprint.byteprotocols.PrintError
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
+import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
@@ -168,7 +169,7 @@ class UsbOutputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: 
                         throw IOException("Error queueing USB request.")
                     }
                 } else {
-                    buffer.array().asIterable().chunked(MAX_USBFS_BUFFER_SIZE/2).forEach {
+                    buffer.array().asIterable().chunked(MAX_USBFS_BUFFER_SIZE / 2).forEach {
                         if (!usbRequest.queue(ByteBuffer.wrap(it.toByteArray()), it.size)) {
                             throw IOException("Error queueing USB request.")
                         }
@@ -262,7 +263,7 @@ class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: B
                 }
             }
         }
-        if (bufferArray.isEmpty())  {
+        if (bufferArray.isEmpty()) {
             return -1
         }
         val r = bufferArray[bufferOffset].toInt()
@@ -323,7 +324,8 @@ class USBConnection : ConnectionType {
         val serial = conf.get("hardware_${type}printer_ip") ?: "0"
         val compat = (conf.get("hardware_${type}printer_usbcompat") ?: "false") == "true"
         val proto = getProtoClass(mode)
-        val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+        val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi")
+                ?: proto.defaultDPI.toString()).toFloat()
 
         Sentry.configureScope { scope ->
             scope.setTag("printer.mode", mode)
@@ -371,25 +373,27 @@ class USBConnection : ConnectionType {
                             try {
                                 Log.i("PrintService", "Starting renderPages")
                                 val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
-                                when (proto) {
-                                    is StreamByteProtocol<*> -> {
-                                        val ostream = UsbOutputStream(manager, device, compat)
-                                        val istream = UsbInputStream(manager, device, compat)
+                                lockManager.withLock("$identifier:$serial") {
+                                    when (proto) {
+                                        is StreamByteProtocol<*> -> {
+                                            val ostream = UsbOutputStream(manager, device, compat)
+                                            val istream = UsbInputStream(manager, device, compat)
 
-                                        try {
-                                            Log.i("PrintService", "Start proto.send()")
-                                            proto.send(futures, istream, ostream, conf, type)
-                                            Log.i("PrintService", "Finished proto.send()")
-                                        } finally {
-                                            istream.close()
-                                            ostream.close()
+                                            try {
+                                                Log.i("PrintService", "Start proto.send()")
+                                                proto.send(futures, istream, ostream, conf, type)
+                                                Log.i("PrintService", "Finished proto.send()")
+                                            } finally {
+                                                istream.close()
+                                                ostream.close()
+                                            }
                                         }
-                                    }
 
-                                    is CustomByteProtocol<*> -> {
-                                        Log.i("PrintService", "Start proto.sendUSB()")
-                                        proto.sendUSB(manager, device, futures, conf, type, context)
-                                        Log.i("PrintService", "Finished proto.sendUSB()")
+                                        is CustomByteProtocol<*> -> {
+                                            Log.i("PrintService", "Start proto.sendUSB()")
+                                            proto.sendUSB(manager, device, futures, conf, type, context)
+                                            Log.i("PrintService", "Finished proto.sendUSB()")
+                                        }
                                     }
                                 }
                             } catch (e: TimeoutException) {

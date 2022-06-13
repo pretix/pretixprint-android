@@ -10,7 +10,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-interface ByteProtocolInterface<T> {
+sealed interface ByteProtocolInterface<T> {
     val identifier: String
     val nameResource: Int
     val defaultDPI: Int
