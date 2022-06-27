@@ -50,7 +50,7 @@ class CUPSConnection : ConnectionType {
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
         }
         if (cp == null) {
-            throw PrintException(context.applicationContext.getString(R.string.err_printer_not_found))
+            throw PrintException(context.applicationContext.getString(R.string.err_printer_not_found, name))
         } else {
             try {
                 val pj = PrintJob.Builder(tmpfile.readBytes()).build()
