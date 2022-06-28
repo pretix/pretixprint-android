@@ -289,13 +289,14 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             rr = intent.getParcelableExtra<ResultReceiver>("resultreceiver")!! as ResultReceiver
         }
 
+        startForegroundNotification()
+
         if (intent.action == ACTION_STOP_SERVICE) {
             stopForeground(true)
             stopSelf()
             return
         }
 
-        startForegroundNotification()
         try {
             print(intent, rr)
             if (rr != null) {
