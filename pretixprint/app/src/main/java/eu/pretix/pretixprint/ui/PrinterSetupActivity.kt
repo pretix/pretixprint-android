@@ -42,9 +42,19 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    fun startConnectionSettings() {
+    fun startConnectionSettings(is_back: Boolean = false) {
+        if (is_back) {
+            when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
+                SunmiInternalConnection().identifier -> return startConnectionChoice()
+            }
+        }
         val fragmentTransaction = fragmentManager.beginTransaction()
         val connection = settingsStagingArea.get("hardware_${useCase}printer_connection") as String
+        if (connection == SunmiInternalConnection().identifier) {
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "")
+            settingsStagingArea.put("hardware_${useCase}printer_printername", "")
+            return startProtocolChoice()
+        }
         if (connection == SystemConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")

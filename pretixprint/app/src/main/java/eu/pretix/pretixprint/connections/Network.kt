@@ -34,7 +34,6 @@ class NetworkConnection : ConnectionType {
         }
 
         val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
-
         val proto = getProtoClass(mode)
 
         val ip = conf.get("hardware_${type}printer_ip") ?: "127.0.0.1"

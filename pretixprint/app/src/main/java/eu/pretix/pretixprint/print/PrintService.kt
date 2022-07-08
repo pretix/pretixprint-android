@@ -17,11 +17,7 @@ import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.connections.BluetoothConnection
-import eu.pretix.pretixprint.connections.CUPSConnection
-import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.USBConnection
-import eu.pretix.pretixprint.connections.SystemConnection
+import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.ui.SettingsActivity
 import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
@@ -116,6 +112,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 } else {
                     throw PrintException("USB print is not supported on this Android version.")
                 }
+            "sunmi" -> SunmiInternalConnection()
             "system" -> SystemConnection()
             else -> null
         }

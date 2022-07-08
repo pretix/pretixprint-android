@@ -92,7 +92,6 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         }
     }
 
-
     fun render(): ByteArray {
         out.clear()
         init()
@@ -633,5 +632,24 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         out.add(drawer.toByte())
         out.add(durationOn.toByte())
         out.add(durationOff.toByte())
+    }
+
+    fun renderTestPage(): ByteArray {
+        out.clear()
+        init()
+        //characterCodeTable(0)
+        //internationalCharacterSet(InternationalCharacterSet.Germany.country)
+        mode(doubleheight = true, doublewidth = true, emph = true, underline = true)
+        text("TEST PAGE", align = CENTER)
+        newline()
+        mode()
+        qr("TEST COMPLETED", 6)
+        newline()
+        text("German: äöüÄÖÜß Euro sign: €", align = LEFT)
+        newline(4)
+        cut()
+        opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
+        opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
+        return out.toByteArray()
     }
 }

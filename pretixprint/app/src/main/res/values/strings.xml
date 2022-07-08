@@ -64,6 +64,7 @@
     <string name="cups">CUPS/IPP</string>
     <string name="system">Android Print Service</string>
     <string name="usb">USB</string>
+    <string name="sunmi">Sunmi</string>
     <string name="err_bluetooth_not_available">Bluetooth is not available</string>
     <string name="err_usb_permission_denied">USB permission has been denied</string>
     <string name="err_usb_connection">USB connection failed</string>
@@ -96,6 +97,7 @@
     <string name="connection_type_usb">USB (exprimental, works on some devices)</string>
     <string name="connection_type_cups">CUPS (Linux server)</string>
     <string name="connection_type_system">Android Print Service</string>
+    <string name="connection_type_sunmi">Built-in printer</string>
     <string name="error_no_choice">Please choose an option</string>
     <string name="btn_next">NEXT</string>
     <string name="setup_network_settings">Where is your printer on the network?</string>

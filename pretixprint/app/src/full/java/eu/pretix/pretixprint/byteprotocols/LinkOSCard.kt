@@ -6,10 +6,8 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import com.zebra.sdk.comm.BluetoothConnectionInsecure
-import com.zebra.sdk.comm.Connection
-import com.zebra.sdk.comm.TcpConnection
-import com.zebra.sdk.comm.UsbConnection
+import androidx.fragment.app.Fragment
+import com.zebra.sdk.comm.*
 import com.zebra.sdk.common.card.containers.GraphicsInfo
 import com.zebra.sdk.common.card.enumerations.*
 import com.zebra.sdk.common.card.graphics.ZebraCardGraphics
@@ -22,11 +20,15 @@ import com.zebra.sdk.common.card.printer.ZebraCardPrinterFactory
 import com.zebra.sdk.common.card.settings.ZebraCardSettingNames
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
@@ -43,7 +45,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return true
+        return type is USBConnection || type is NetworkConnection || type is BluetoothConnection
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
