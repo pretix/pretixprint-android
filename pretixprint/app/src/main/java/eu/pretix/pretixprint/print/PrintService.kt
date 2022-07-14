@@ -21,6 +21,7 @@ import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
+import eu.pretix.pretixprint.connections.SystemConnection
 import eu.pretix.pretixprint.ui.SettingsActivity
 import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
@@ -99,6 +100,27 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             scope.setTag("renderer", renderer!!)
             scope.setTag("connection", connection!!)
             scope.setTag("printer.mode", mode!!)
+        }
+
+        val conn = when (connection) {
+            "network_printer" -> if (mode == "CUPS/IPP") {
+                    // Backwards compatibility
+                    CUPSConnection()
+                } else {
+                    NetworkConnection()
+                }
+            "cups" -> CUPSConnection()
+            "bluetooth_printer" -> BluetoothConnection()
+            "usb" -> if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    USBConnection()
+                } else {
+                    throw PrintException("USB print is not supported on this Android version.")
+                }
+            "system" -> SystemConnection()
+            else -> null
+        }
+        if (conn == null || !conn.isConfiguredFor(this, type)) {
+            throw PrintException("Printer is not configured for type $type")
         }
 
         val pages = emptyList<CompletableFuture<File?>>().toMutableList()
@@ -204,53 +226,33 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
 
         Log.i("PrintService", "Starting connection adapter")
-        when (connection) {
-            "network_printer" -> {
-                if (mode == "CUPS/IPP") {
-                    // Backwards compatibility
-                    CUPSConnection().print(tmpfile, pagenum, this, type, null)
-                }
-                NetworkConnection().print(tmpfile, pagenum, this, type, null)
-            }
-            "cups" -> {
-                CUPSConnection().print(tmpfile, pagenum, this, type, null)
-            }
-            "bluetooth_printer" -> {
-                BluetoothConnection().print(tmpfile, pagenum, this, type, null)
-            }
-            "usb" -> {
-                if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    USBConnection().print(tmpfile, pagenum, this, type, null)
-                } else {
-                    throw PrintException("USB not supported on this Android version.")
-                }
-            }
-            "system" -> {
-                // printManager.print is only allowed to be called by activities
-                // so lets move the call into it's own activity and try to get the user
-                // to open a notification to launch it
+        if (connection == "system") {
+            // printManager.print is only allowed to be called by activities
+            // so lets move the call into it's own activity and try to get the user
+            // to open a notification to launch it
 
-                val notificationManagerCompat = NotificationManagerCompat.from(this)
-                notificationManagerCompat.cancel(ONGOING_NOTIFICATION_ID)
+            val notificationManagerCompat = NotificationManagerCompat.from(this)
+            notificationManagerCompat.cancel(ONGOING_NOTIFICATION_ID)
 
-                val dialogIntent = Intent(this, SystemPrintActivity::class.java)
-                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
-                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
-                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
-                dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
-                val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
-                    PendingIntent.FLAG_CANCEL_CURRENT)
+            val dialogIntent = Intent(this, SystemPrintActivity::class.java)
+            dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
+            dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
+            dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
+            dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
+            val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT)
 
-                val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                        .setContentTitle(getText(R.string.print_now_notification))
-                        .setSmallIcon(R.drawable.ic_stat_print)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setFullScreenIntent(pendingIntent, true)
-                        .build()
+            val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle(getText(R.string.print_now_notification))
+                    .setSmallIcon(R.drawable.ic_stat_print)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setFullScreenIntent(pendingIntent, true)
+                    .build()
 
-                startForeground(ONGOING_NOTIFICATION_ID, notification)
-            }
+            startForeground(ONGOING_NOTIFICATION_ID, notification)
+        } else {
+            conn.print(tmpfile, pagenum, this, type, null)
         }
 
         Log.i("PrintService", "Cleaning up old files")

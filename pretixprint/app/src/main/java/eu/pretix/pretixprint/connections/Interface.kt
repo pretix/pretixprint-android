@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.connections
 
 import android.content.Context
-import android.text.InputType
+import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 
 interface ConnectionType {
@@ -16,4 +16,8 @@ interface ConnectionType {
 
     fun allowedForUsecase(type: String): Boolean
     fun print(tmpfile: File, numPages: Int, context: Context, useCase: String, settings: Map<String, String>? = null)
+
+    fun isConfiguredFor(context: Context, type: String): Boolean {
+        return !context.defaultSharedPreferences.getString("hardware_${type}printer_ip", "").isNullOrEmpty()
+    }
 }

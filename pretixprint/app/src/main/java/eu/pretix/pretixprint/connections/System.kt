@@ -23,6 +23,10 @@ class SystemConnection : ConnectionType {
         return type != "receipt"
     }
 
+    override fun isConfiguredFor(context: Context, type: String): Boolean {
+        return true
+    }
+
     override fun print(
         tmpfile: File,
         numPages: Int,
