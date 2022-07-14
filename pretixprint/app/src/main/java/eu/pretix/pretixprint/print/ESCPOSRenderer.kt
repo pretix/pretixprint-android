@@ -279,7 +279,11 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
                         text("-".repeat(charsPerLine), CENTER); newline()
                     }
                     "izettle" -> {
-                        val payment_data = receipt.getJSONObject("payment_data")
+                        var payment_data = receipt.getJSONObject("payment_data")
+                        if (payment_data.has("reversal_of")) {
+                            reverseSale = true
+                            payment_data = payment_data.getJSONObject("reversal_of")
+                        }
                         text("-".repeat(charsPerLine), CENTER)
                         newline(2)
                         emphasize(true)
