@@ -33,8 +33,8 @@ class NetworkSettingsFragment : SetupFragment() {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
-            val ip = view.findViewById<TextInputEditText>(R.id.teIP).text.toString()
-            val port = view.findViewById<TextInputEditText>(R.id.tePort).text.toString()
+            val ip = view.findViewById<TextInputEditText>(R.id.teIP).text.toString().trim()
+            val port = view.findViewById<TextInputEditText>(R.id.tePort).text.toString().trim()
             if (TextUtils.isEmpty(ip)) {
                 view.findViewById<TextInputEditText>(R.id.teIP).error = getString(R.string.err_field_required)
             } else if (TextUtils.isEmpty(port)) {
