@@ -10,11 +10,6 @@ import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.GraphicePOSPrintXMLSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
-import org.jetbrains.anko.defaultSharedPreferences
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.concurrent.TimeUnit
 
 
 class GraphicePOSPrintXML : CustomByteProtocol<Bitmap> {

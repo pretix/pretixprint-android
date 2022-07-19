@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.byteprotocols
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import com.sunmi.peripheral.printer.SunmiPrinterService
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -31,6 +32,10 @@ interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
     fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
     fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
     fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
+}
+
+interface SunmiByteProtocol<T> : ByteProtocolInterface<T> {
+    fun sendSunmi(printerService: SunmiPrinterService, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String)
 }
 
 fun getProtoClass(proto: String): ByteProtocolInterface<Any> {

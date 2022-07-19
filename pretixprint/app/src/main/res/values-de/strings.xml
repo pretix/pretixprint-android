@@ -107,6 +107,7 @@
     <string name="protocol_slcs">SLCS-Etikettendrucker (z.B. Bixolon, Metapace, …)</string>
     <string name="protocol_brother">Brother-Etikettendrucker (QL-Serie)</string>
     <string name="protocol_escpos">ESC/POS-Bondrucker (z.B. Epson, Bixolon, …)</string>
+    <string name="protocol_png">Bilddatei-Druck</string>
     <string name="protocol_evolisdirect">Evolis-Kartendrucker (Primacy- und Zenius-Serie)</string>
     <string name="protocol_linkoscard">Zebra-Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
