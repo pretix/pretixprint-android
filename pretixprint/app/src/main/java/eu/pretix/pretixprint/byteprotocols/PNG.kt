@@ -1,18 +1,28 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.R.attr.bitmap
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.util.Log
+import com.github.anastaciocintra.escpos.EscPos
+import com.github.anastaciocintra.escpos.EscPosConst
+import com.github.anastaciocintra.escpos.image.BitonalThreshold
+import com.github.anastaciocintra.escpos.image.CoffeeImage
+import com.github.anastaciocintra.escpos.image.EscPosImage
+import com.github.anastaciocintra.escpos.image.GraphicsImageWrapper
 import com.sunmi.peripheral.printer.InnerResultCallback
 import com.sunmi.peripheral.printer.SunmiPrinterService
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.ui.GraphicESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.PNGSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
-import java.nio.ByteBuffer
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 
 
@@ -31,10 +41,11 @@ class PNG : SunmiByteProtocol<Bitmap> {
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
-        val size: Int = img.rowBytes * img.height
-        val byteBuffer: ByteBuffer = ByteBuffer.allocate(size)
-        img.copyPixelsToBuffer(byteBuffer)
-        return byteBuffer.array()
+        val stream = ByteArrayOutputStream()
+        img.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+        img.recycle()
+        return byteArray
     }
 
     override fun sendSunmi(printerService: SunmiPrinterService, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String) {
@@ -44,7 +55,6 @@ class PNG : SunmiByteProtocol<Bitmap> {
             Log.i("PrintService", "Page ready, sending page")
             val future = CompletableFuture<Void>()
             val bmp = BitmapFactory.decodeByteArray(page, 0, page.size)
-
             printerService.enterPrinterBuffer(true)
             printerService.printBitmap(bmp, null)
             printerService.lineWrap(3, null)
