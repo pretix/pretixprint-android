@@ -43,7 +43,13 @@ class FinishSettingsFragment : SetupFragment() {
             // For ESC/POS, in addition to our static test page explaining printer width, we also
             // print a dynamically generated test page testing features such as text formatting and
             // QR code printing
-            val testpage = ESCPOSRenderer(JSONObject(), 32, requireContext()).renderTestPage()
+
+            val activity = activity as PrinterSetupActivity
+            val dialect = ESCPOSRenderer.Companion.Dialect.values().find {
+                it.name == activity.settingsStagingArea.get("hardware_${activity.useCase}printer_dialect")
+            } ?: ESCPOSRenderer.Companion.Dialect.EpsonDefault
+
+            val testpage = ESCPOSRenderer(dialect, JSONObject(), 32, requireContext()).renderTestPage()
             output.write(testpage)
         }
 

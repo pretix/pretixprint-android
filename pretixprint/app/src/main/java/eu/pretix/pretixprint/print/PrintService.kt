@@ -18,6 +18,7 @@ import com.lowagie.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
+import eu.pretix.pretixprint.ui.PrinterSetupActivity
 import eu.pretix.pretixprint.ui.SettingsActivity
 import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
@@ -133,9 +134,13 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             "ePOSPrintXML"-> {
                 tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id") + "_", ".escpos", this.cacheDir)
 
+                val dialect = ESCPOSRenderer.Companion.Dialect.values().find {
+                    it.name == prefs.getString("hardware_${type}printer_dialect", "")
+                } ?: ESCPOSRenderer.Companion.Dialect.EpsonDefault
+
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
-                tmpfile.writeBytes(ESCPOSRenderer(jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
+                tmpfile.writeBytes(ESCPOSRenderer(dialect, jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
                 pagenum = 1
             }
             else -> {
