@@ -120,6 +120,7 @@
     <string name="field_label_card_source">Karteneingabe</string>
     <string name="field_label_card_destination">Kartenausgabe</string>
     <string name="field_label_label">Papiergröße</string>
+    <string name="field_label_ticketpath_fgl">Ticketpfad (nur Lemur-2)</string>
     <string name="field_label_quality">Druckqualität erhöhen (etwas langsamer)</string>
     <string name="label_two_color">rot/schwarz</string>
     <string name="label_continuous">endlos</string>
