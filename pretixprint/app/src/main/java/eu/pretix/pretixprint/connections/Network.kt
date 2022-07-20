@@ -5,6 +5,7 @@ import android.util.Log
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
@@ -53,28 +54,30 @@ class NetworkConnection : ConnectionType {
         try {
             Log.i("PrintService", "Starting renderPages")
             val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
-            when (proto) {
-                is StreamByteProtocol<*> -> {
-                    Log.i("PrintService", "Start connection to ${serverAddr.hostAddress}:$port")
-                    val socket = Socket(serverAddr, port)
-                    val ostream = socket.getOutputStream()
-                    val istream = socket.getInputStream()
+            lockManager.withLock("$identifier:${serverAddr.hostAddress}:$port") {
+                when (proto) {
+                    is StreamByteProtocol<*> -> {
+                        Log.i("PrintService", "Start connection to ${serverAddr.hostAddress}:$port")
+                        val socket = Socket(serverAddr, port)
+                        val ostream = socket.getOutputStream()
+                        val istream = socket.getInputStream()
 
-                    try {
-                        Log.i("PrintService", "Start proto.send()")
-                        proto.send(futures, istream, ostream, conf, type)
-                        Log.i("PrintService", "Finished proto.send()")
-                    } finally {
-                        istream.close()
-                        ostream.close()
-                        socket.close()
+                        try {
+                            Log.i("PrintService", "Start proto.send()")
+                            proto.send(futures, istream, ostream, conf, type)
+                            Log.i("PrintService", "Finished proto.send()")
+                        } finally {
+                            istream.close()
+                            ostream.close()
+                            socket.close()
+                        }
                     }
-                }
 
-                is CustomByteProtocol<*> -> {
-                    Log.i("PrintService", "Start proto.sendNetwork()")
-                    proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
-                    Log.i("PrintService", "Finished proto.sendNetwork()")
+                    is CustomByteProtocol<*> -> {
+                        Log.i("PrintService", "Start proto.sendNetwork()")
+                        proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
+                        Log.i("PrintService", "Finished proto.sendNetwork()")
+                    }
                 }
             }
         } catch (e: TimeoutException) {
