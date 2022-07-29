@@ -28,6 +28,11 @@ class FGL : StreamByteProtocol<Bitmap> {
         return true
     }
 
+    enum class Ticketpath(val id: Int) {
+        Path1(1),
+        Path2(2)
+    }
+
     // With diffRendering=true, in a multi-page file we'd only send the pixels that changed compared
     // to the last page. Could be faster,  but just causes more problems with most printers.
     val diffRendering = false
@@ -43,6 +48,9 @@ class FGL : StreamByteProtocol<Bitmap> {
         if (previousPage != null && diffRendering) {
             previousPage.getPixels(previousPixels, 0, w, 0, 0, w, h)
         }
+
+        val path = conf.get("hardware_${type}printer_path") ?: "1"
+        ostream.write("<P$path>".toByteArray())
 
         for (yoffset in 0 until h step 8) {
             for (xoffset in 0 until w step stepsize) {
@@ -142,7 +150,7 @@ class FGL : StreamByteProtocol<Bitmap> {
         Thread.sleep(2000)
     }
 
-    override fun createSettingsFragment(): SetupFragment? {
+    override fun createSettingsFragment(): SetupFragment {
         return FGLSettingsFragment()
     }
 
