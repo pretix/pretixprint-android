@@ -103,7 +103,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         out.clear()
         init()
         if (dialect == Dialect.EpsonDefault) {
-            characterCodeTable(CharacterCodeTable.UserDefined2.codeTable)
+            characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
             internationalCharacterSet(InternationalCharacterSet.Germany.country)
         } else if (dialect == Dialect.Sunmi) {
             selectKanjiCharacterMode()
@@ -681,7 +681,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         }
         qr("TEST COMPLETED", 6)
         newline()
-        text("German: äöüÄÖÜß Euro sign: €", align = LEFT)
+        text("German: äöüÄÖÜß", align = LEFT)
         newline()
         mode(doubleheight = true, doublewidth = true, emph = true, underline = true)
         text("TEST COMPLETED", align = CENTER)
