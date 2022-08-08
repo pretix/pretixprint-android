@@ -77,6 +77,9 @@ class NetworkConnection : ConnectionType {
                         proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
                         Log.i("PrintService", "Finished proto.sendNetwork()")
                     }
+                    is SunmiByteProtocol -> {
+                        throw PrintException("Unsupported combination")
+                    }
                 }
             }
         } catch (e: TimeoutException) {

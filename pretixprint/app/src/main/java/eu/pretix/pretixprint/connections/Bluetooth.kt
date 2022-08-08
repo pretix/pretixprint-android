@@ -8,6 +8,7 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
 import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
+import eu.pretix.pretixprint.byteprotocols.SunmiByteProtocol
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
@@ -95,6 +96,9 @@ class BluetoothConnection : ConnectionType {
                         Log.i("PrintService", "Start proto.sendBluetooth()")
                         proto.sendBluetooth(device.address, futures, conf, type, context)
                         Log.i("PrintService", "Finished proto.sendBluetooth()")
+                    }
+                    is SunmiByteProtocol -> {
+                        throw PrintException("Unsupported combination")
                     }
                 }
             }
