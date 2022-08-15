@@ -1,0 +1,37 @@
+default:
+  image: 
+    name: runmymind/docker-android-sdk
+    entrypoint: [""]
+stages:
+  - test
+  - release
+test:
+  stage: test
+  script:
+    - cd pretixprint
+    - git submodule init
+    - git submodule update
+    - GRADLE_USER_HOME=/cache ANDROID_HOME=/android-sdk-linux ./gradlew --no-daemon -Dmaven.repo.local=$(pwd)/repo lintDebug assembleFossDebug --stacktrace
+release:
+  stage: release
+  script:
+    - ln -s /keys/release.keystore release.keystore
+    - cp /keys/ZSDK_ANDROID_API.jar pretixprint/ZSDK/
+    - cp /keys/ZSDK_CARD_ANDROID_API.jar pretixprint/ZSDK/
+    - cp /keys/snmp6_1z.jar pretixprint/ZSDK/
+    - cp /keys/libevolis-release.aar pretixprint/EvolisSDK/
+    - cd pretixprint
+    - cat /keys/local.properties > local.properties
+    - git submodule init
+    - git submodule update
+    - GRADLE_USER_HOME=/cache ANDROID_HOME=/android-sdk-linux ./gradlew --no-daemon -Dmaven.repo.local=$(pwd)/repo assembleFullRelease --stacktrace
+  artifacts:
+    paths:
+      - pretixprint/app/build/outputs/apk/full/release/app-full-release.apk
+    expire_in: '6 weeks'
+  only:
+    - '/^.*\..*$/'
+  tags:
+    - release
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
