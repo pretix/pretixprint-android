@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import com.zebra.sdk.comm.BluetoothConnectionInsecure
 import com.zebra.sdk.comm.Connection
 import com.zebra.sdk.comm.TcpConnection
@@ -20,6 +19,7 @@ import com.zebra.sdk.common.card.graphics.enumerations.RotationType
 import com.zebra.sdk.common.card.jobSettings.ZebraCardJobSettingNames
 import com.zebra.sdk.common.card.printer.ZebraCardPrinter
 import com.zebra.sdk.common.card.printer.ZebraCardPrinterFactory
+import com.zebra.sdk.common.card.settings.ZebraCardSettingNames
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
@@ -27,7 +27,6 @@ import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
@@ -133,20 +132,33 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
         try {
             graphics = ZebraCardGraphics(zebraCardPrinter)
 
+            val COLOR_OPTION = "ymc"
+            val MONO_RIBBON_OPTIONS = listOf("k", "mono", "black", "white", "red", "blue", "silver", "gold")
+            val OVERLAY_RIBBON_OPTIONS = listOf("ymcko", "kro", "kdo")
+
+            val installedRibbon = zebraCardPrinter.getSettingValue(ZebraCardSettingNames.RIBBON_DESCRIPTION)
+
+            // This is grossly simplifying - in reality there are more options than just Color or MonoK - GrayDye for example
+            val printType = if (installedRibbon.contains(COLOR_OPTION)) { PrintType.Color } else { PrintType.MonoK }
+
             // Front Side
-            val zebraCardImage = drawImage(graphics, PrintType.Color, imageData, 0, 0, 0, 0, context)
-            graphicsData.add(addImage(CardSide.Front, PrintType.Color, 0, 0, -1, zebraCardImage))
+            val zebraCardImage = drawImage(graphics, printType, imageData, 0, 0, 0, 0, context)
+            graphicsData.add(addImage(CardSide.Front, printType, 0, 0, -1, zebraCardImage))
 
             // Front Side Overlay
-            graphicsData.add(addImage(CardSide.Front, PrintType.Overlay, 0, 0, 1, null));
+            if (isPrintTypeSupported(installedRibbon, OVERLAY_RIBBON_OPTIONS)) {
+                graphicsData.add(addImage(CardSide.Front, PrintType.Overlay, 0, 0, 1, null))
+            }
 
             if (doubleSided) {
                 // Back Side
                 // If we are introducing native double-sided cards, we would load a new page here
-                graphicsData.add(addImage(CardSide.Back, PrintType.Color, 0, 0, -1, zebraCardImage))
+                graphicsData.add(addImage(CardSide.Back, printType, 0, 0, -1, zebraCardImage))
 
                 // Back Side Overlay
-                graphicsData.add(addImage(CardSide.Back, PrintType.Overlay, 0, 0, 1, null));
+                if (isPrintTypeSupported(installedRibbon, OVERLAY_RIBBON_OPTIONS)) {
+                    graphicsData.add(addImage(CardSide.Back, PrintType.Overlay, 0, 0, 1, null))
+                }
             }
             // If we are introducing native double-sided cards, this needs to be placed after the front side
             graphics.clear()
@@ -176,6 +188,20 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
         graphicsInfo.yOffset = yOffset
         return graphicsInfo
     }
+
+    private fun isPrintTypeSupported(installedRibbon: String, ribbonTypeOptions: List<String>): Boolean {
+        var isSupported = true
+        for (option in ribbonTypeOptions) {
+            if (!installedRibbon.contains(option)) {
+                isSupported = false
+            } else {
+                isSupported = true
+                break
+            }
+        }
+        return isSupported
+    }
+
 
     override fun createSettingsFragment(): SetupFragment? {
         return LinkOSCardSettingsFragment()
