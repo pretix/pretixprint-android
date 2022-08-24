@@ -53,6 +53,9 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
         } else if (content == "other_i18n") {
             return if (textI18n != null) interpolate(i18nToString(textI18n) ?: "") else ""
         } else if (op.has("pdf_data") && op.getJSONObject("pdf_data").has(content)) {
+            if (op.getJSONObject("pdf_data").isNull(content)) {
+                return ""
+            }
             return op.getJSONObject("pdf_data").getString(content)
         } else {
             return "???"
