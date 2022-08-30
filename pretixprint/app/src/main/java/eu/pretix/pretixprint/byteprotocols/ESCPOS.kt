@@ -11,7 +11,7 @@ import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 
 
-class ESCPOS : StreamByteProtocol<ByteArray> {
+open class ESCPOS : StreamByteProtocol<ByteArray> {
     override val identifier = "ESC/POS"
     override val nameResource = R.string.protocol_escpos
     override val defaultDPI = 200

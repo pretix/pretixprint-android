@@ -20,6 +20,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         const val ESC: Byte = 0x1B
         const val FS: Byte = 0x1C
         const val GS: Byte = 0x1D
+        const val RS: Byte = 0x1E
+        const val BEL: Byte = 0x07
+        const val SUB: Byte = 0x1A
         const val FONTA: String = "a"
         const val FONTB: String = "b"
         const val LEFT: String = "left"
@@ -96,13 +99,14 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         enum class Dialect(val description: String) {
             EpsonDefault("Epson, Bixolon, Metapace, SNBC"),
             Sunmi("Sunmi"),
+            StarPRNT("StarPRNT")
         }
     }
 
     fun render(): ByteArray {
         out.clear()
         init()
-        if (dialect == Dialect.EpsonDefault) {
+        if (dialect == Dialect.EpsonDefault || dialect == Dialect.StarPRNT) {
             characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
             internationalCharacterSet(InternationalCharacterSet.Germany.country)
         } else if (dialect == Dialect.Sunmi) {
@@ -516,6 +520,31 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
     }
 
     private fun mode(font: String = "a", emph: Boolean = false, doubleheight: Boolean = false, doublewidth: Boolean = false, underline: Boolean = false) {
+        if (dialect == Dialect.StarPRNT) {
+            // font
+            out.add(ESC)
+            out.add(RS)
+            out.add('F'.toByte())
+            when(font) {
+                "a" -> out.add(0)
+                "b" -> out.add(1)
+                "c" -> out.add(2)
+            }
+            // emph
+            out.add(ESC)
+            out.add((if (emph) 'E' else 'F').toByte())
+            // double
+            out.add(ESC)
+            out.add('i'.toByte())
+            out.add(if (doubleheight) 1 else 0)
+            out.add(if (doublewidth) 1 else 0)
+            // underline
+            out.add(ESC)
+            out.add('-'.toByte())
+            out.add(if (underline) 1 else 0)
+            return
+        }
+
         var modes = 0
 
         if (font == FONTB) {
@@ -549,44 +578,67 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun newline(lines: Int) {
         out.add(ESC)
-        out.add('d'.toByte())
+        if (dialect == Dialect.StarPRNT) {
+            out.add('a'.toByte())
+        } else {
+            out.add('d'.toByte())
+        }
         out.add(lines.toByte())
     }
 
     private fun qr(text: String, blockSize: Int) {
         val data = text.toByteArray()
-        val payloadLen = data.size + 3
+        val payloadLen = data.size + (if (dialect == Dialect.StarPRNT) 0 else 3)
         val payloadPL = (payloadLen % 256)
-        val paloadPH = (payloadLen / 256)
+        val payloadPH = (payloadLen / 256)
 
-        // QR Code: Select the model
-        //              Hex     1D      28      6B      04      00      31      41      n1(x32)     n2(x00) - size of model
-        // set n1 [49 x31, model 1] [50 x32, model 2] [51 x33, micro qr code]
-        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=140
-        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00).map { it.toByte() })
-        // QR Code: Set the size of module
-        // Hex      1D      28      6B      03      00      31      43      n
-        // n depends on the printer
-        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=141
-        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, blockSize).map { it.toByte() })
-        //          Hex     1D      28      6B      03      00      31      45      n
-        // Set n for error correction [48 x30 -> 7%] [49 x31-> 15%] [50 x32 -> 25%] [51 x33 -> 30%]
-        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=142
-        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x31).map { it.toByte() })
-        // QR Code: Store the data in the symbol storage area
-        // Hex      1D      28      6B      pL      pH      31      50      30      d1...dk
-        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=143
-        //                        1D          28          6B         pL          pH  cn(49->x31) fn(80->x50) m(48->x30) d1…dk
-        out.addAll(listOf(0x1d, 0x28, 0x6b, payloadPL, paloadPH, 0x31, 0x50, 0x30).map { it.toByte() })
-        out.addAll(data.toList())
-        // QR Code: Print the symbol data in the symbol storage area
-        // Hex      1D      28      6B      03      00      31      51      m
-        // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=144
-        out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30).map { it.toByte() })
+        if (dialect == Dialect.StarPRNT) {
+            // https://www.starmicronics.com/support/Mannualfolder/escpos_cm_en.pdf
+            // QR Code: Select the model
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x30, 0x01).map { it.toByte() })
+            // Set n for error correction [x00 -> 7%] [x01-> 15%] [x02 -> 25%] [x03 -> 30%]
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x31, 0x01).map { it.toByte() })
+            // QR Code: Set the size of module
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x32, blockSize).map { it.toByte() })
+            // QR Code: Store the data in the symbol storage area
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x44, 0x31, 0x00, payloadPL, payloadPH).map { it.toByte() })
+            out.addAll(data.toList())
+            // QR Code: print
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x50).map { it.toByte() })
+        } else {
+            // QR Code: Select the model
+            //              Hex     1D      28      6B      04      00      31      41      n1(x32)     n2(x00) - size of model
+            // set n1 [49 x31, model 1] [50 x32, model 2] [51 x33, micro qr code]
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=140
+            out.addAll(listOf(0x1d, 0x28, 0x6b, 0x04, 0x00, 0x31, 0x41, 0x32, 0x00).map { it.toByte() })
+            // QR Code: Set the size of module
+            // Hex      1D      28      6B      03      00      31      43      n
+            // n depends on the printer
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=141
+            out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x43, blockSize).map { it.toByte() })
+            // QR Code: Set error correction
+            //          Hex     1D      28      6B      03      00      31      45      n
+            // Set n for error correction [48 x30 -> 7%] [49 x31-> 15%] [50 x32 -> 25%] [51 x33 -> 30%]
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=142
+            out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x45, 0x31).map { it.toByte() })
+            // QR Code: Store the data in the symbol storage area
+            // Hex      1D      28      6B      pL      pH      31      50      30      d1...dk
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=143
+            //                        1D          28          6B         pL          pH  cn(49->x31) fn(80->x50) m(48->x30) d1…dk
+            out.addAll(listOf(0x1d, 0x28, 0x6b, payloadPL, payloadPH, 0x31, 0x50, 0x30).map { it.toByte() })
+            out.addAll(data.toList())
+            // QR Code: Print the symbol data in the symbol storage area
+            // Hex      1D      28      6B      03      00      31      51      m
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=144
+            out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30).map { it.toByte() })
+        }
     }
 
     private fun align(align: String = LEFT) {
         out.add(ESC)
+        if (dialect == Dialect.StarPRNT) {
+            out.add(GS)
+        }
         out.add('a'.toByte())
 
         if (align == CENTER) {
@@ -600,7 +652,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun text(text: String, align: String = LEFT) {
         align(align)
-        var printText = text.replace("–", "-")
+        val printText = text.replace("–", "-")
 
         if (dialect == Dialect.Sunmi) {
             out.addAll(printText.toByteArray(Charset.forName("UTF-8")).toTypedArray())
@@ -613,6 +665,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun characterCodeTable(table: Int = 0) {
         out.add(ESC)
+        if (dialect == Dialect.StarPRNT) {
+            out.add(GS)
+        }
         out.add('t'.toByte())
         out.add(table.toByte())
     }
@@ -640,9 +695,13 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
     }
 
     private fun cut(partial: Boolean = false) {
-        out.add(GS)
-        out.add('V'.toByte())
-
+        if (dialect == Dialect.StarPRNT) {
+            out.add(ESC)
+            out.add('d'.toByte())
+        } else {
+            out.add(GS)
+            out.add('V'.toByte())
+        }
         if (partial) {
             out.add(1)
         } else {
@@ -652,16 +711,40 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun emphasize(on: Boolean) {
         out.add(ESC)
-        out.add('E'.toByte())
 
-        if (on) {
-            out.add(1)
+        if (dialect == Dialect.StarPRNT) {
+            if (on) {
+                out.add('E'.toByte())
+            } else {
+                out.add('F'.toByte())
+            }
         } else {
-            out.add(0)
+            if (on) {
+                out.add('E'.toByte())
+                out.add(1)
+            } else {
+                out.add('E'.toByte())
+                out.add(0)
+            }
         }
     }
 
     private fun opencashdrawer(drawer: Int, durationOn: Int, durationOff: Int) {
+        if (dialect == Dialect.StarPRNT) {
+            if (drawer == Cashdrawer.Drawer1.number) {
+                // config
+                out.add(ESC)
+                out.add(BEL)
+                out.add(durationOn.toByte())
+                out.add(durationOff.toByte())
+                // open
+                out.add(BEL)
+            } else if (drawer == Cashdrawer.Drawer2.number) {
+                // drawer 2 is using durations from the printer firmware, cannot override
+                out.add(SUB)
+            }
+            return
+        }
         out.add(ESC)
         out.add('p'.toByte())
         out.add(drawer.toByte())
@@ -672,7 +755,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
     fun renderTestPage(): ByteArray {
         out.clear()
         init()
-        if (dialect == Dialect.EpsonDefault) {
+        if (dialect == Dialect.EpsonDefault || dialect == Dialect.StarPRNT) {
             characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
             internationalCharacterSet(InternationalCharacterSet.Germany.country)
         } else if (dialect == Dialect.Sunmi) {
@@ -680,9 +763,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             selectKanjiCharacterCodeSystem(-1)
         }
         qr("TEST COMPLETED", 6)
-        newline()
+        newline(3)
         text("German: äöüÄÖÜß", align = LEFT)
-        newline()
+        newline(3)
         mode(doubleheight = true, doublewidth = true, emph = true, underline = true)
         text("TEST COMPLETED", align = CENTER)
         newline()

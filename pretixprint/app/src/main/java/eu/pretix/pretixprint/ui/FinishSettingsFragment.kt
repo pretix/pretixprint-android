@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ESCPOS
+import eu.pretix.pretixprint.byteprotocols.StarPRNT
+import eu.pretix.pretixprint.byteprotocols.ePOSPrintXML
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
@@ -39,15 +42,19 @@ class FinishSettingsFragment : SetupFragment() {
         }
         asset.close()
 
-        if (proto == "ESC/POS") {
+        if (proto == ESCPOS().identifier || proto == ePOSPrintXML().identifier || proto == StarPRNT().identifier) {
             // For ESC/POS, in addition to our static test page explaining printer width, we also
             // print a dynamically generated test page testing features such as text formatting and
             // QR code printing
 
             val activity = activity as PrinterSetupActivity
-            val dialect = ESCPOSRenderer.Companion.Dialect.values().find {
+            var dialect = ESCPOSRenderer.Companion.Dialect.values().find {
                 it.name == activity.settingsStagingArea.get("hardware_${activity.useCase}printer_dialect")
             } ?: ESCPOSRenderer.Companion.Dialect.EpsonDefault
+
+            if (proto == StarPRNT().identifier) {
+                dialect = ESCPOSRenderer.Companion.Dialect.StarPRNT
+            }
 
             val testpage = ESCPOSRenderer(dialect, JSONObject(), 32, requireContext()).renderTestPage()
             output.write(testpage)
