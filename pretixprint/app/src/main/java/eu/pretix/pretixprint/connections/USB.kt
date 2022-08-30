@@ -11,10 +11,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
-import eu.pretix.pretixprint.byteprotocols.PrintError
-import eu.pretix.pretixprint.byteprotocols.StreamByteProtocol
-import eu.pretix.pretixprint.byteprotocols.getProtoClass
+import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
@@ -393,6 +390,10 @@ class USBConnection : ConnectionType {
                                             Log.i("PrintService", "Start proto.sendUSB()")
                                             proto.sendUSB(manager, device, futures, conf, type, context)
                                             Log.i("PrintService", "Finished proto.sendUSB()")
+                                        }
+                                        
+                                        is SunmiByteProtocol -> {
+                                            throw PrintException("Unsupported combination")
                                         }
                                     }
                                 }

@@ -60,6 +60,7 @@
     <string name="field_helper_dpi">Die Auflösung des Druckers, normalerweise zwischen 150 und 300, im Datenblatt des Druckers beschrieben. Ein falscher Wert kann zu übergroßem oder zu kleinem Druckbild führen.</string>
     <string name="field_label_maxwidth">Maximale Druckbreite (in mm)</string>
     <string name="field_label_waitafterpage">Wartezeit nach Seite (in Millisekunden)</string>
+    <string name="field_label_dialect">Dialekt</string>
     <string name="field_label_eposprintxml_deviceid">Device ID (Standardmäßig: local_printer)</string>
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
@@ -97,6 +98,7 @@
     <string name="connection_type_usb">USB (experimentell, funktioniert nicht auf allen Geräten)</string>
     <string name="connection_type_cups">CUPS (Linux-Server)</string>
     <string name="connection_type_system">Android Druckdienst</string>
+    <string name="connection_type_sunmi">Eingebauter Drucker</string>
     <string name="error_no_choice">Bitte wählen Sie eine Option</string>
     <string name="btn_next">WEITER</string>
     <string name="setup_network_settings">Wie ist Ihr Drucker im Netzwerk erreichbar?</string>
@@ -105,6 +107,7 @@
     <string name="protocol_slcs">SLCS-Etikettendrucker (z.B. Bixolon, Metapace, …)</string>
     <string name="protocol_brother">Brother-Etikettendrucker (QL-Serie)</string>
     <string name="protocol_escpos">ESC/POS-Bondrucker (z.B. Epson, Bixolon, …)</string>
+    <string name="protocol_png">Bilddatei-Druck</string>
     <string name="protocol_evolisdirect">Evolis-Kartendrucker (Primacy- und Zenius-Serie)</string>
     <string name="protocol_linkoscard">Zebra-Kartendrucker (Zebra ZMotif und ZXP Protokoll Kartendrucker; bspw. ZC- und ZXP-Serie)</string>
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>

@@ -34,7 +34,6 @@ class NetworkConnection : ConnectionType {
         }
 
         val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
-
         val proto = getProtoClass(mode)
 
         val ip = conf.get("hardware_${type}printer_ip") ?: "127.0.0.1"
@@ -77,6 +76,9 @@ class NetworkConnection : ConnectionType {
                         Log.i("PrintService", "Start proto.sendNetwork()")
                         proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
                         Log.i("PrintService", "Finished proto.sendNetwork()")
+                    }
+                    is SunmiByteProtocol -> {
+                        throw PrintException("Unsupported combination")
                     }
                 }
             }

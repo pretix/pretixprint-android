@@ -10,24 +10,27 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.connections.*
+import eu.pretix.pretixprint.print.ESCPOSRenderer
 import io.sentry.Sentry
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.indeterminateProgressDialog
 import org.jetbrains.anko.uiThread
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 
 class FinishSettingsFragment : SetupFragment() {
 
-    fun writeDemoPage(filename: String): File {
+    fun writeDemoPage(proto: String, filename: String): File {
         val file = File(ctx.cacheDir, filename)
         if (file.exists()) {
             file.delete()
         }
         val asset = ctx.assets.open(filename)
         val output = FileOutputStream(file)
+
         val buffer = ByteArray(1024)
         var size = asset.read(buffer)
         while (size != -1) {
@@ -35,6 +38,21 @@ class FinishSettingsFragment : SetupFragment() {
             size = asset.read(buffer)
         }
         asset.close()
+
+        if (proto == "ESC/POS") {
+            // For ESC/POS, in addition to our static test page explaining printer width, we also
+            // print a dynamically generated test page testing features such as text formatting and
+            // QR code printing
+
+            val activity = activity as PrinterSetupActivity
+            val dialect = ESCPOSRenderer.Companion.Dialect.values().find {
+                it.name == activity.settingsStagingArea.get("hardware_${activity.useCase}printer_dialect")
+            } ?: ESCPOSRenderer.Companion.Dialect.EpsonDefault
+
+            val testpage = ESCPOSRenderer(dialect, JSONObject(), 32, requireContext()).renderTestPage()
+            output.write(testpage)
+        }
+
         output.close()
         return file
     }
@@ -103,7 +121,7 @@ class FinishSettingsFragment : SetupFragment() {
         val activity = activity as PrinterSetupActivity
         val proto = getProtoClass(activity.proto())
 
-        val file = writeDemoPage(proto.demopage)
+        val file = writeDemoPage(proto.identifier, proto.demopage)
 
         Sentry.configureScope { scope ->
             scope.setTag("printer.test", "true")
@@ -118,6 +136,9 @@ class FinishSettingsFragment : SetupFragment() {
             }
             CUPSConnection().identifier -> {
                 CUPSConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
+            }
+            SunmiInternalConnection().identifier -> {
+                SunmiInternalConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
             }
             USBConnection().identifier -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

@@ -132,6 +132,6 @@ class ChooseByteProtocolFragment : SetupFragment() {
     }
 
     override fun back() {
-        (activity as PrinterSetupActivity).startConnectionSettings()
+        (activity as PrinterSetupActivity).startConnectionSettings(true)
     }
 }

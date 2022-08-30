@@ -5,11 +5,12 @@ import eu.pretix.pretixprint.R
 import org.joda.time.format.ISODateTimeFormat
 import org.json.JSONException
 import org.json.JSONObject
+import java.nio.charset.Charset
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.*
 
-class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: Int, private val ctx: Context) {
+class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObject, private val charsPerLine: Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
     var taxrates = mutableListOf<String>()
     var taxvalues = mutableListOf<Double>()
@@ -17,6 +18,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
 
     companion object {
         const val ESC: Byte = 0x1B
+        const val FS: Byte = 0x1C
         const val GS: Byte = 0x1D
         const val FONTA: String = "a"
         const val FONTB: String = "b"
@@ -90,18 +92,27 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
             Drawer1(0),
             Drawer2(1)
         }
-    }
 
+        enum class Dialect(val description: String) {
+            EpsonDefault("Epson, Bixolon, Metapace, SNBC"),
+            Sunmi("Sunmi"),
+        }
+    }
 
     fun render(): ByteArray {
         out.clear()
         init()
-        characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
-        internationalCharacterSet(InternationalCharacterSet.Germany.country)
+        if (dialect == Dialect.EpsonDefault) {
+            characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
+            internationalCharacterSet(InternationalCharacterSet.Germany.country)
+        } else if (dialect == Dialect.Sunmi) {
+            selectKanjiCharacterMode()
+            selectKanjiCharacterCodeSystem(-1)
+        }
 
         val layout = receipt.getJSONArray("__layout")
 
-        for (i in 0..(layout.length() - 1)) {
+        for (i in 0 until layout.length()) {
             val layoutLine = layout.getJSONObject(i)
             renderline(layoutLine)
         }
@@ -574,7 +585,7 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         out.addAll(listOf(0x1d, 0x28, 0x6b, 0x03, 0x00, 0x31, 0x51, 0x30).map { it.toByte() })
     }
 
-    private fun text(text: String, align: String = LEFT) {
+    private fun align(align: String = LEFT) {
         out.add(ESC)
         out.add('a'.toByte())
 
@@ -585,11 +596,18 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         } else {
             out.add(0)
         }
+    }
 
+    private fun text(text: String, align: String = LEFT) {
+        align(align)
         var printText = text.replace("–", "-")
 
-        for (char in printText) {
-            out.add(char.toByte())
+        if (dialect == Dialect.Sunmi) {
+            out.addAll(printText.toByteArray(Charset.forName("UTF-8")).toTypedArray())
+        } else {
+            for (char in printText) {
+                out.add(char.toByte())
+            }
         }
     }
 
@@ -603,6 +621,22 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         out.add(ESC)
         out.add('R'.toByte())
         out.add(country.toByte())
+    }
+
+    private fun selectKanjiCharacterMode() {
+        out.add(FS)
+        out.add('&'.toByte())
+    }
+
+    private fun cancelKanjiCharacterMode() {
+        out.add(FS)
+        out.add('.'.toByte())
+    }
+
+    private fun selectKanjiCharacterCodeSystem(system: Int = 0) {
+        out.add(FS)
+        out.add('C'.toByte())
+        out.add(system.toByte())
     }
 
     private fun cut(partial: Boolean = false) {
@@ -633,5 +667,31 @@ class ESCPOSRenderer(private val receipt: JSONObject, private val charsPerLine: 
         out.add(drawer.toByte())
         out.add(durationOn.toByte())
         out.add(durationOff.toByte())
+    }
+
+    fun renderTestPage(): ByteArray {
+        out.clear()
+        init()
+        if (dialect == Dialect.EpsonDefault) {
+            characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
+            internationalCharacterSet(InternationalCharacterSet.Germany.country)
+        } else if (dialect == Dialect.Sunmi) {
+            selectKanjiCharacterMode()
+            selectKanjiCharacterCodeSystem(-1)
+        }
+        qr("TEST COMPLETED", 6)
+        newline()
+        text("German: äöüÄÖÜß", align = LEFT)
+        newline()
+        mode(doubleheight = true, doublewidth = true, emph = true, underline = true)
+        text("TEST COMPLETED", align = CENTER)
+        newline()
+        newline(4)
+        mode()
+        align()
+        cut()
+        opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
+        opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
+        return out.toByteArray()
     }
 }

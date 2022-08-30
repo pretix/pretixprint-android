@@ -9,6 +9,7 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         GraphicePOSPrintXML(),
         BrotherRaster(),
         EvolisDirect(),
+        PNG(),
         LinkOSCard(),
         LinkOS()
 )

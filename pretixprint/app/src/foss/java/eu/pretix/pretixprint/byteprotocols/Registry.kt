@@ -7,5 +7,6 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         ePOSPrintXML(),
         GraphicESCPOS(),
         GraphicePOSPrintXML(),
-        BrotherRaster()
+        BrotherRaster(),
+        PNG()
 )

@@ -7,15 +7,15 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import com.zebra.sdk.comm.BluetoothConnectionInsecure
-import com.zebra.sdk.comm.Connection
-import com.zebra.sdk.comm.TcpConnection
-import com.zebra.sdk.comm.UsbConnection
+import com.zebra.sdk.comm.*
 import com.zebra.sdk.graphics.ZebraImageFactory
 import com.zebra.sdk.printer.ZebraPrinter
 import com.zebra.sdk.printer.ZebraPrinterFactory
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -38,7 +38,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return true
+        return type is USBConnection || type is NetworkConnection || type is BluetoothConnection
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
