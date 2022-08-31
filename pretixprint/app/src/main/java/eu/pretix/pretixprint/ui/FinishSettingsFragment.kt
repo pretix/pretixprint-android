@@ -42,7 +42,7 @@ class FinishSettingsFragment : SetupFragment() {
         }
         asset.close()
 
-        if (proto == ESCPOS().identifier || proto == ePOSPrintXML().identifier || proto == StarPRNT().identifier) {
+        if (proto in listOf(ESCPOS().identifier, ePOSPrintXML().identifier, StarPRNT().identifier)) {
             // For ESC/POS, in addition to our static test page explaining printer width, we also
             // print a dynamically generated test page testing features such as text formatting and
             // QR code printing

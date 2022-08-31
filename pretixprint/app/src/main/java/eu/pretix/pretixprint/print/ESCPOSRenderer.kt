@@ -25,6 +25,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         const val SUB: Byte = 0x1A
         const val FONTA: String = "a"
         const val FONTB: String = "b"
+        const val FONTC: String = "c" // only for Dialect.StarPRNT
         const val LEFT: String = "left"
         const val CENTER: String = "center"
         const val RIGHT: String = "right"
@@ -151,7 +152,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                 if (!t.isNullOrBlank()) {
                     if (modekeys.filter { layoutLine.has(it) }.isNotEmpty()) {
                         mode(
-                                font = layoutLine.optString("font", "a"),
+                                font = layoutLine.optString("font", FONTA),
                                 emph = layoutLine.optBoolean("emph", false),
                                 doubleheight = layoutLine.optBoolean("doubleheight", false),
                                 doublewidth = layoutLine.optBoolean("doublewidth", false),
@@ -527,16 +528,16 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         out.add('@'.toByte())
     }
 
-    private fun mode(font: String = "a", emph: Boolean = false, doubleheight: Boolean = false, doublewidth: Boolean = false, underline: Boolean = false) {
+    private fun mode(font: String = FONTA, emph: Boolean = false, doubleheight: Boolean = false, doublewidth: Boolean = false, underline: Boolean = false) {
         if (dialect == Dialect.StarPRNT) {
             // font
             out.add(ESC)
             out.add(RS)
             out.add('F'.toByte())
             when(font) {
-                "a" -> out.add(0)
-                "b" -> out.add(1)
-                "c" -> out.add(2)
+                FONTA -> out.add(0)
+                FONTB -> out.add(1)
+                FONTC -> out.add(2)
             }
             // emph
             out.add(ESC)
@@ -586,10 +587,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun newline(lines: Int) {
         out.add(ESC)
-        if (dialect == Dialect.StarPRNT) {
-            out.add('a'.toByte())
-        } else {
-            out.add('d'.toByte())
+        when(dialect) {
+            Dialect.StarPRNT -> out.add('a'.toByte())
+            else -> out.add('d'.toByte())
         }
         out.add(lines.toByte())
     }
@@ -719,20 +719,13 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
     private fun emphasize(on: Boolean) {
         out.add(ESC)
-
-        if (dialect == Dialect.StarPRNT) {
-            if (on) {
-                out.add('E'.toByte())
-            } else {
-                out.add('F'.toByte())
+        when(dialect) {
+            Dialect.StarPRNT -> {
+                out.add(if (on) 'E'.toByte() else 'F'.toByte())
             }
-        } else {
-            if (on) {
+            else -> {
                 out.add('E'.toByte())
-                out.add(1)
-            } else {
-                out.add('E'.toByte())
-                out.add(0)
+                out.add(if (on) 1 else 0)
             }
         }
     }
