@@ -54,6 +54,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             Thai16(24),
             Thai17(25),
             Thai18(26),
+            StarCp1252(32),
             UserDefined1(254),
             UserDefined2(255)
         }
@@ -106,12 +107,19 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
     fun render(): ByteArray {
         out.clear()
         init()
-        if (dialect == Dialect.EpsonDefault || dialect == Dialect.StarPRNT) {
-            characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
-            internationalCharacterSet(InternationalCharacterSet.Germany.country)
-        } else if (dialect == Dialect.Sunmi) {
-            selectKanjiCharacterMode()
-            selectKanjiCharacterCodeSystem(-1)
+        when(dialect) {
+            Dialect.EpsonDefault -> {
+                characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
+                internationalCharacterSet(InternationalCharacterSet.Germany.country)
+            }
+            Dialect.StarPRNT -> {
+                characterCodeTable(CharacterCodeTable.StarCp1252.codeTable)
+                internationalCharacterSet(InternationalCharacterSet.Germany.country)
+            }
+            Dialect.Sunmi -> {
+                selectKanjiCharacterMode()
+                selectKanjiCharacterCodeSystem(-1)
+            }
         }
 
         val layout = receipt.getJSONArray("__layout")
@@ -755,17 +763,24 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
     fun renderTestPage(): ByteArray {
         out.clear()
         init()
-        if (dialect == Dialect.EpsonDefault || dialect == Dialect.StarPRNT) {
-            characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
-            internationalCharacterSet(InternationalCharacterSet.Germany.country)
-        } else if (dialect == Dialect.Sunmi) {
-            selectKanjiCharacterMode()
-            selectKanjiCharacterCodeSystem(-1)
+        when(dialect) {
+            Dialect.EpsonDefault -> {
+                characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
+                internationalCharacterSet(InternationalCharacterSet.Germany.country)
+            }
+            Dialect.StarPRNT -> {
+                characterCodeTable(CharacterCodeTable.StarCp1252.codeTable)
+                internationalCharacterSet(InternationalCharacterSet.Germany.country)
+            }
+            Dialect.Sunmi -> {
+                selectKanjiCharacterMode()
+                selectKanjiCharacterCodeSystem(-1)
+            }
         }
         qr("TEST COMPLETED", 6)
-        newline(3)
+        newline()
         text("German: äöüÄÖÜß", align = LEFT)
-        newline(3)
+        newline()
         mode(doubleheight = true, doublewidth = true, emph = true, underline = true)
         text("TEST COMPLETED", align = CENTER)
         newline()
