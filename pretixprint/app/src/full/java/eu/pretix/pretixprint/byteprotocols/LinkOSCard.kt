@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import com.zebra.sdk.comm.*
 import com.zebra.sdk.common.card.containers.GraphicsInfo
 import com.zebra.sdk.common.card.enumerations.*
@@ -21,14 +20,12 @@ import com.zebra.sdk.common.card.settings.ZebraCardSettingNames
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
@@ -106,10 +103,20 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
                 for (f in pages) {
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
+                    zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.DELETE_AFTER, "yes")
 
                     val graphicsData = drawGraphics(zebraCardPrinter, f.get(60, TimeUnit.SECONDS), doubleSided, context)
 
-                    zebraCardPrinter.print(1, graphicsData)
+                    val jobId = zebraCardPrinter.print(1, graphicsData)
+
+                    while (true) {
+                        val jobStatusInfo = zebraCardPrinter.getJobStatus(jobId)
+                        if (jobStatusInfo.readyForNextJob) {
+                            break
+                        } else {
+                            Thread.sleep(2000)
+                        }
+                    }
                 }
                 Thread.sleep(2000)
             } finally {
@@ -141,8 +148,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
             val installedRibbon = zebraCardPrinter.getSettingValue(ZebraCardSettingNames.RIBBON_DESCRIPTION)
 
             // This is grossly simplifying - in reality there are more options than just Color or MonoK - GrayDye for example
-            val printType = if (installedRibbon.contains(COLOR_OPTION)) { PrintType.Color } else { PrintType.MonoK }
-
+            val printType = if (installedRibbon.contains(COLOR_OPTION, true)) { PrintType.Color } else { PrintType.MonoK }
             // Front Side
             val zebraCardImage = drawImage(graphics, printType, imageData, 0, 0, 0, 0, context)
             graphicsData.add(addImage(CardSide.Front, printType, 0, 0, -1, zebraCardImage))
@@ -194,7 +200,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     private fun isPrintTypeSupported(installedRibbon: String, ribbonTypeOptions: List<String>): Boolean {
         var isSupported = true
         for (option in ribbonTypeOptions) {
-            if (!installedRibbon.contains(option)) {
+            if (!installedRibbon.contains(option, true)) {
                 isSupported = false
             } else {
                 isSupported = true
