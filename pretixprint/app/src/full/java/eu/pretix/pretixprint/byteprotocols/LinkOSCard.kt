@@ -106,7 +106,16 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
                     val graphicsData = drawGraphics(zebraCardPrinter, f.get(60, TimeUnit.SECONDS), doubleSided, context)
 
-                    zebraCardPrinter.print(1, graphicsData)
+                    val jobId = zebraCardPrinter.print(1, graphicsData)
+
+                    while (true) {
+                        val jobStatusInfo = zebraCardPrinter.getJobStatus(jobId)
+                        if (jobStatusInfo.readyForNextJob) {
+                            break
+                        } else {
+                            Thread.sleep(2000)
+                        }
+                    }
                 }
                 Thread.sleep(2000)
             } finally {
