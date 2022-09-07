@@ -103,6 +103,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
                 for (f in pages) {
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
                     zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
+                    zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.DELETE_AFTER, "yes")
 
                     val graphicsData = drawGraphics(zebraCardPrinter, f.get(60, TimeUnit.SECONDS), doubleSided, context)
 
