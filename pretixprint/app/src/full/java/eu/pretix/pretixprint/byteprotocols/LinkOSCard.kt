@@ -138,8 +138,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
             val installedRibbon = zebraCardPrinter.getSettingValue(ZebraCardSettingNames.RIBBON_DESCRIPTION)
 
             // This is grossly simplifying - in reality there are more options than just Color or MonoK - GrayDye for example
-            val printType = if (installedRibbon.contains(COLOR_OPTION)) { PrintType.Color } else { PrintType.MonoK }
-
+            val printType = if (installedRibbon.contains(COLOR_OPTION, true)) { PrintType.Color } else { PrintType.MonoK }
             // Front Side
             val zebraCardImage = drawImage(graphics, printType, imageData, 0, 0, 0, 0, context)
             graphicsData.add(addImage(CardSide.Front, printType, 0, 0, -1, zebraCardImage))
@@ -191,7 +190,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     private fun isPrintTypeSupported(installedRibbon: String, ribbonTypeOptions: List<String>): Boolean {
         var isSupported = true
         for (option in ribbonTypeOptions) {
-            if (!installedRibbon.contains(option)) {
+            if (!installedRibbon.contains(option, true)) {
                 isSupported = false
             } else {
                 isSupported = true
