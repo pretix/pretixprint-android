@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
-import androidx.fragment.app.Fragment
 import com.zebra.sdk.comm.*
 import com.zebra.sdk.common.card.containers.GraphicsInfo
 import com.zebra.sdk.common.card.enumerations.*
@@ -21,14 +20,12 @@ import com.zebra.sdk.common.card.settings.ZebraCardSettingNames
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 
