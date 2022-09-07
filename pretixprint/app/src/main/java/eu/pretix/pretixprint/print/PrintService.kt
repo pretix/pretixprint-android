@@ -131,12 +131,17 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         when (renderer) {
             "ESC/POS",
-            "ePOSPrintXML"-> {
+            "ePOSPrintXML",
+            "StarPRNT" -> {
                 tmpfile = File.createTempFile("print_" + jsonData.getString("receipt_id") + "_", ".escpos", this.cacheDir)
 
-                val dialect = ESCPOSRenderer.Companion.Dialect.values().find {
+                var dialect = ESCPOSRenderer.Companion.Dialect.values().find {
                     it.name == prefs.getString("hardware_${type}printer_dialect", "")
                 } ?: ESCPOSRenderer.Companion.Dialect.EpsonDefault
+
+                if (renderer == "StarPRNT") {
+                    dialect = ESCPOSRenderer.Companion.Dialect.StarPRNT
+                }
 
                 // prefs.getInt can't parse preference-Strings to Int - so we have to work around this
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
