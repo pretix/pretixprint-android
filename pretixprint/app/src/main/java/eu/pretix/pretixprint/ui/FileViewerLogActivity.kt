@@ -2,8 +2,7 @@ package eu.pretix.pretixprint.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import eu.pretix.pretixprint.R
-import kotlinx.android.synthetic.main.activity_file_viewer_escpos.*
+import eu.pretix.pretixprint.databinding.ActivityFileViewerLogBinding
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -13,9 +12,15 @@ class FileViewerLogActivity : AppCompatActivity() {
     companion object {
         val EXTRA_PATH = "path"
     }
+
+    private lateinit var binding: ActivityFileViewerLogBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_file_viewer_log)
+        binding = ActivityFileViewerLogBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
         val file = File(intent.getStringExtra(EXTRA_PATH))
 
         val reader = BufferedReader(InputStreamReader(file.inputStream(), Charset.forName("cp1252")))
@@ -27,6 +32,6 @@ class FileViewerLogActivity : AppCompatActivity() {
         reader.close()
         val data = sb.toString()
 
-        tvEscposLog.text = data
+        binding.tvEscposLog.text = data
     }
 }

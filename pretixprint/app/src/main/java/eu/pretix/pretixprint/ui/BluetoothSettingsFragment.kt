@@ -20,7 +20,6 @@ import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.ACTION_LAUNCH
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_FILTER_TYPE
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_NEED_AUTH
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.FILTER_TYPE_ALL
-import kotlinx.android.synthetic.main.fragment_bluetooth_settings.*
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 
@@ -32,7 +31,9 @@ class BluetoothSettingsFragment : SetupFragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_bluetooth_settings, container, false)
 
-        val deviceManager = BluetoothDeviceManager(this.context!!)
+        val deviceManager = BluetoothDeviceManager(this.requireContext())
+
+        val teMAC = view.findViewById<TextInputEditText>(R.id.teMAC)
 
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
             deviceManager.pickDevice(object : BluetoothDevicePickResultHandler {
@@ -45,17 +46,17 @@ class BluetoothSettingsFragment : SetupFragment() {
         val currentIP = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
         ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
-        view.findViewById<TextInputEditText>(R.id.teMAC).setText(currentIP)
+        teMAC.setText(currentIP)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
-            val mac = view.findViewById<TextInputEditText>(R.id.teMAC).text.toString()
+            val mac = teMAC.text.toString()
             if (TextUtils.isEmpty(mac)) {
-                view.findViewById<TextInputEditText>(R.id.teMAC).error = getString(R.string.err_field_required)
+                teMAC.error = getString(R.string.err_field_required)
             } else {
-                view.findViewById<TextInputEditText>(R.id.teMAC).error = null
+                teMAC.error = null
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
                         mac)
                 (activity as PrinterSetupActivity).startProtocolChoice()

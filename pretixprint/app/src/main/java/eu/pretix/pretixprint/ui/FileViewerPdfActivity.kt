@@ -10,8 +10,7 @@ import android.os.ParcelFileDescriptor
 import androidx.appcompat.app.AppCompatActivity
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer
-import eu.pretix.pretixprint.R
-import kotlinx.android.synthetic.main.activity_file_viewer_pdf.*
+import eu.pretix.pretixprint.databinding.ActivityFileViewerPdfBinding
 import org.jetbrains.anko.doAsync
 import java.io.File
 import kotlin.math.pow
@@ -22,6 +21,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
         val EXTRA_PATH = "path"
     }
 
+    private lateinit var binding: ActivityFileViewerPdfBinding
     var numPages = 1
     var pageIndex = 0
 
@@ -33,7 +33,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
     fun load(page: Int) {
         val renderDpi = 300f  // 600 will crash on A4 paper size on most devices
 
-        tvPdfInfo.text = "Loading…"
+        binding.tvPdfInfo.text = "Loading…"
         pageIndex = page
         val file = File(intent.getStringExtra(EXTRA_PATH))
         doAsync {
@@ -48,7 +48,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
 
                 val pageCount = renderer.pageCount
                 runOnUiThread {
-                    tvPdfInfo.text = "page ${page.index + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
+                    binding.tvPdfInfo.text = "page ${page.index + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
                 }
                 numPages = renderer.pageCount
 
@@ -62,7 +62,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 val img = renderer.renderImageWithDPI(page, renderDpi)
                 img.eraseColor(Color.WHITE)
                 runOnUiThread {
-                    tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
+                    binding.tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
                 }
                 numPages = doc.numberOfPages
                 draw(img)
@@ -73,21 +73,23 @@ class FileViewerPdfActivity : AppCompatActivity() {
     fun draw(img: Bitmap) {
         runOnUiThread {
             img.setHasAlpha(false)
-            imageView.setImageDrawable(BitmapDrawable(resources, img))
+            binding.imageView.setImageDrawable(BitmapDrawable(resources, img))
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_file_viewer_pdf)
+        binding = ActivityFileViewerPdfBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         load(0)
 
-        btnNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             pageIndex = (pageIndex + 1) % numPages
             load(pageIndex)
         }
-        btnPrev.setOnClickListener {
+        binding.btnPrev.setOnClickListener {
             if (pageIndex != 0) {
                 pageIndex = (pageIndex - 1) % numPages
                 load(pageIndex)
