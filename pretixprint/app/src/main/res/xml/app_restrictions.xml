@@ -4,5 +4,6 @@
         android:defaultValue=""
         android:key="pref_pin"
         android:restrictionType="string"
-        android:title="@string/pin_protection_pin" />
+        android:title="@string/pin_protection_pin"
+        android:description="@string/pin_protection_description" />
 </restrictions>

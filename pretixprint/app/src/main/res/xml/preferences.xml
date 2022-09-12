@@ -37,7 +37,8 @@
         <eu.pretix.pretixprint.ui.ProtectedEditTextPreference
             android:inputType="number"
             android:key="pref_pin"
-            android:title="@string/pin_protection_pin" />
+            android:title="@string/pin_protection_pin"
+            android:summary="@string/pin_protection_description" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_about">
