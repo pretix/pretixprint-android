@@ -9,6 +9,10 @@ import android.view.LayoutInflater
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import com.andrognito.pinlockview.IndicatorDots
+import com.andrognito.pinlockview.PinLockListener
+import com.andrognito.pinlockview.PinLockView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
@@ -33,7 +37,7 @@ class SettingsFragment : PreferenceFragment() {
             findPreference("hardware_${type}printer_find").setOnPreferenceClickListener {
                 val intent = Intent(activity, PrinterSetupActivity::class.java)
                 intent.putExtra(PrinterSetupActivity.EXTRA_USECASE, type)
-                activity.startActivity(intent)
+                startWithPIN(intent)
                 return@setOnPreferenceClickListener true
             }
         }
@@ -52,6 +56,29 @@ class SettingsFragment : PreferenceFragment() {
         findPreference("licenses").setOnPreferenceClickListener {
             asset_dialog(R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
+        }
+
+        (findPreference("hardware_receiptprinter_cpl") as ProtectedListPreference).setEarlyPreferenceClickListener { pref ->
+            if (!hasPin()) {
+                // false: handle normally
+                return@setEarlyPreferenceClickListener false
+            }
+            pinProtect {
+                (pref as ProtectedListPreference).showDialog()
+            }
+            // true: we've handled it, skip
+            return@setEarlyPreferenceClickListener true
+        }
+
+        (findPreference("pref_pin") as ProtectedEditTextPreference).setEarlyPreferenceClickListener { pref ->
+            if (!hasPin()) {
+                // false: handle normally
+                return@setEarlyPreferenceClickListener false
+            }
+            pinProtect {
+                (pref as ProtectedEditTextPreference).showDialog()
+            }
+            return@setEarlyPreferenceClickListener true
         }
 
         findPreference("version").summary = BuildConfig.VERSION_NAME
@@ -137,6 +164,58 @@ class SettingsFragment : PreferenceFragment() {
                 else -> throw RuntimeException("Unknown file type for file $file")
             }
 
+        }
+    }
+
+    fun hasPin(): Boolean {
+        return !defaultSharedPreferences.getString("pref_pin", "").isNullOrBlank()
+    }
+
+    fun pinProtect(valid: ((pin: String) -> Unit)) {
+        if (!hasPin()) {
+            valid("")
+            return
+        }
+        val pinLength = defaultSharedPreferences.getString("pref_pin", "")!!.length
+        val view = activity.layoutInflater.inflate(R.layout.dialog_pin, null)
+        val dialog = MaterialAlertDialogBuilder(activity)
+            .setView(view)
+            .create()
+        dialog.setOnShowListener {
+            val mPinLockListener: PinLockListener = object : PinLockListener {
+                override fun onComplete(pin: String) {
+                    this.onPinChange(pin.length, pin)
+                }
+
+                override fun onEmpty() {
+                }
+
+                override fun onPinChange(pinLength: Int, intermediatePin: String) {
+                    if (defaultSharedPreferences.getString("pref_pin", "") == intermediatePin) {
+                        dialog.dismiss()
+                        valid(intermediatePin)
+                    }
+                }
+            }
+
+            val lockView = view.findViewById(R.id.pin_lock_view) as PinLockView
+            lockView.pinLength = pinLength
+            lockView.setPinLockListener(mPinLockListener)
+            val idots = view.findViewById(R.id.indicator_dots) as IndicatorDots
+            idots.pinLength = pinLength
+            lockView.attachIndicatorDots(idots);
+        }
+        dialog.show()
+    }
+
+    fun startWithPIN(intent: Intent, resultCode: Int? = null, bundle: Bundle? = null) {
+        pinProtect { pin ->
+            intent.putExtra("pin", pin)
+            if (resultCode != null) {
+                startActivityForResult(intent, resultCode, bundle)
+            } else {
+                startActivity(intent)
+            }
         }
     }
 }

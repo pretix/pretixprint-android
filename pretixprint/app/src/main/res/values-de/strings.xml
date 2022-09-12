@@ -17,6 +17,7 @@
     <string name="settings_label_port">Port</string>
     <string name="settings_label_printername">Druckername</string>
     <string name="settings_label_driver">Drucker</string>
+    <string name="settings_label_security">Sicherheit</string>
     <string name="notification_channel_print">Druckjobs</string>
     <string name="notification_channel_print_description">Zeigt eine Benachrichtigung, während gedruckt wird.</string>
     <string name="print_notification">Drucke…</string>
@@ -129,4 +130,5 @@
     <string name="label_two_color">rot/schwarz</string>
     <string name="label_continuous">endlos</string>
     <string name="print_now_notification">Druck bereit. Antippen um Druckdialog zu öffnen.</string>
+    <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
 </resources>

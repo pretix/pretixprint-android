@@ -30,6 +30,15 @@ class PrinterSetupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)
+
+        if (!defaultSharedPreferences.getString("pref_pin", "").isNullOrBlank() &&
+            (!intent.hasExtra("pin") ||
+                defaultSharedPreferences.getString("pref_pin", "") != intent.getStringExtra("pin")!!)) {
+            // Protect against external calls
+            finish();
+            return
+        }
+
         useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         startConnectionChoice()
     }
