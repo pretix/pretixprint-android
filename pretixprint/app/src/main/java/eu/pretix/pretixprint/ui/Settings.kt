@@ -1,6 +1,10 @@
 package eu.pretix.pretixprint.ui
 
+import android.annotation.TargetApi
+import android.content.Context
 import android.content.Intent
+import android.content.RestrictionsManager
+import android.os.Build
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.PreferenceFragment
@@ -224,7 +228,7 @@ class SettingsActivity : AppCompatPreferenceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        applyRestrictions(this)
         if (!defaultSharedPreferences.contains("first_start")) {
             defaultSharedPreferences.edit().putBoolean("first_start", true).apply();
             val intent = Intent(this, WelcomeActivity::class.java)
@@ -237,5 +241,18 @@ class SettingsActivity : AppCompatPreferenceActivity() {
         fragmentManager.beginTransaction()
                 .replace(android.R.id.content, SettingsFragment())
                 .commit()
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    fun applyRestrictions(ctx: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return
+        }
+        val restrictionsMgr = ctx.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager?
+            ?: return
+        val restrictions = restrictionsMgr.applicationRestrictions
+        if (restrictions.containsKey("pref_pin")) {
+            defaultSharedPreferences.edit().putString("pref_pin", restrictions.getString("pref_pin")).apply()
+        }
     }
 }
