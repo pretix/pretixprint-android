@@ -109,6 +109,20 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
                     val jobId = zebraCardPrinter.print(1, graphicsData)
 
+                    // Zebra Card printers only have a limited Job Buffer - in the case of the ZC-Series, it's
+                    // 4 print jobs.
+                    // This infinite loop is on purpose, as having a page-local timeout could lead to lost
+                    // pages on giant print jobs and a global timeout could lead to prematurely aborted
+                    // print jobs missing pages at the end.
+                    // However: We are polling for with a jobId and are checking if the printer is
+                    // readyForNextJob, which offers two ways out of a stuck print job and by extension,
+                    // an infinite loop:
+                    // - Either the blocking condition (empty ribbon, no more cards, stuck cards...) is
+                    //   resolved and the printer reverts to being readyForNextJob and the job is completed
+                    //   as intended, breaking the loop.
+                    // - Or the printer is power-cycled, leading to requesting the jobStatus with a
+                    //   specific jobId to throw an exception. In this case the loop is still broken and
+                    //   the print job spooling prematurely ended.
                     while (true) {
                         val jobStatusInfo = zebraCardPrinter.getJobStatus(jobId)
                         if (jobStatusInfo.readyForNextJob) {
