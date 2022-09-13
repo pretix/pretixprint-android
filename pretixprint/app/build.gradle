@@ -10,8 +10,8 @@ android {
         applicationId "eu.pretix.pretixprint"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 45
-        versionName "2.9.1"
+        versionCode 46
+        versionName "2.10.0"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
     }
