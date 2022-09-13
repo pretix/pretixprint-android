@@ -19,7 +19,7 @@
 
     <PreferenceCategory android:title="@string/settings_label_receiptprinter">
         <Preference android:key="hardware_receiptprinter_find" android:title="@string/settings_label_find"/>
-        <ListPreference
+        <eu.pretix.pretixprint.ui.ProtectedListPreference
             android:entries="@array/receipt_width"
             android:entryValues="@array/receipt_cpl"
             android:key="hardware_receiptprinter_cpl"
@@ -31,6 +31,14 @@
             android:key="last_prints"
             android:title="@string/settings_label_last_prints"
             />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/settings_label_security">
+        <eu.pretix.pretixprint.ui.ProtectedEditTextPreference
+            android:inputType="number"
+            android:key="pref_pin"
+            android:title="@string/pin_protection_pin"
+            android:summary="@string/pin_protection_description" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_about">
