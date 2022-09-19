@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import com.zebra.sdk.comm.BluetoothConnection
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
