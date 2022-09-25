@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "eu.pretix.pretixprint"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 46
         versionName "2.10.0"
@@ -138,6 +138,10 @@ dependencies {
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
     fullImplementation(project(':ZSDK')) {
+        transitive = false
+    }
+    // Brother Print SDK for Android
+    fullImplementation(project(':BrotherSDK')) {
         transitive = false
     }
     fullImplementation 'org.bouncycastle:bcprov-jdk15on:1.65.01' // 1.48

@@ -15,7 +15,7 @@ Printer Compatibility
 | ESC/POS receipt printers (Epson, Bixolon, SNBC, Metapace, …) | ✔️ | ✔️ | ✔️ (some) | Ticket printing, badge printing, receipt printing |
 | StarPRNT receipt printers | ✔️ | ✔️ | ✔️ (some) | Receipt printing |
 | Sunmi built-in printers |  | ✔️ (internal) | | Ticket printing, badge printing, receipt printing |
-| Brother label printers (QL series) | ✔️ | ✔️ |  | Ticket printing, badge printing |
+| Brother label printers (QL series) | ✔️ | ✔️ | ✔️ | Ticket printing, badge printing |
 | Zebra label printers | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
 | Zebra card printers (ZC, ZXP series) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
 | Evolis card printers (Zenius, Primacy series) | ✔️ |  |  | Ticket printing, badge printing |
@@ -43,6 +43,8 @@ If you want to perform a full build, you need to do get a few libraries first:
 
 * Download the [Evolis SDK](https://myplace.evolis.com/s/sdk?language=en_US), and extract the file ``platforms/android/library/direct_to_device/libevolis-release.aar``
   into the ``EvolisSDK/`` folder.
+
+* Download the [Brother Print SDK for Android](https://support.brother.com/g/s/es/dev/en/mobilesdk/download/index.html?c=eu_ot&lang=en&navi=offall&comple=on&redirect=on#android), and extract the file ``BrotherPrintLibrary.aar`` into the ``BrotherSDK/`` folder.
 
 Then, execute:
 

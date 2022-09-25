@@ -114,6 +114,7 @@
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent-Bondrucker (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT-Bondrucker (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
+    <string name="protocol_brothersdk">Brother Print SDK für Etikettendrucker der QL-Serie</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>
@@ -125,6 +126,9 @@
     <string name="field_label_card_source">Karteneingabe</string>
     <string name="field_label_card_destination">Kartenausgabe</string>
     <string name="field_label_label">Papiergröße</string>
+    <string name="field_label_model">Druckermodell</string>
+    <string name="field_label_resolution">Auflösung</string>
+    <string name="field_label_autocut">Automatischer Schnitt</string>
     <string name="field_label_ticketpath_fgl">Ticketpfad (nur Lemur-2)</string>
     <string name="field_label_quality">Druckqualität erhöhen (etwas langsamer)</string>
     <string name="label_two_color">rot/schwarz</string>
