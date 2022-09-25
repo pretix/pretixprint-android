@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.BrotherRaster
@@ -71,7 +70,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
             val quality = view.findViewById<SwitchMaterial>(R.id.swQuality).isChecked
             val rotate90 = view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked
             if (TextUtils.isEmpty(label)) {
-                view.findViewById<TextInputEditText>(R.id.tilLabel).error = getString(R.string.err_field_required)
+                view.findViewById<TextInputLayout>(R.id.tilLabel).error = getString(R.string.err_field_required)
             } else {
                 val mappedLabel = BrotherRaster.Label.values().find { translatedLabelName(it) == label }!!.name
 
