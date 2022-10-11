@@ -83,7 +83,7 @@ class SLCS : StreamByteProtocol<Bitmap> {
                     imagedata.write(byte.toInt())
                     count = 0
                 } else {
-                    if (count >= 127 || i + 1 >= row.size || row[i + 1] != byte) {
+                    if (count >= 253 || i + 1 >= row.size || row[i + 1] != byte) {
                         imagedata.write(byte.toInt())
                         imagedata.write(count + 1)
                         count = 0
