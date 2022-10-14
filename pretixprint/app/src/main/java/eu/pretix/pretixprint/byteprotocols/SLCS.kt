@@ -12,6 +12,7 @@ import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
@@ -35,19 +36,28 @@ class SLCS : StreamByteProtocol<Bitmap> {
         val pixels = IntArray(img.width * img.height)
         img.getPixels(pixels, 0, img.width, 0, 0, img.width, img.height)
 
-        // http://www.bixolon.com/upload/download/manual_slp-d42xx_slcs_english_rev_1_03.pdf
+        // Spec: https://bixolon.com/_upload/manual/Manual_LabelPrinter_SLCS_english_V2[8].pdf
 
+        // Clean initialization
         ostream.write("CB\n".toByteArray())  // clear buffer
         ostream.write("SW${img.width}\n".toByteArray())  // set label width to input width
         ostream.write("SM0,0\n".toByteArray())  // clear margins
-        ostream.write("LD".toByteArray())  // send iamge
+
+        // Image printing
+        ostream.write("LC".toByteArray())  // send compressed image
+        ostream.write("R".toByteArray())  // compression type
+        ostream.write(byteArrayOf(0))  // color
         ostream.write(byteArrayOf(0, 0, 0, 0))  // x and y offset
         val bytewidth = img.width / 8
         ostream.write(byteArrayOf((bytewidth and 0xFF).toByte(), ((bytewidth shr 8) and 0xFF).toByte()))
         ostream.write(byteArrayOf((img.height and 0xFF).toByte(), ((img.height shr 8) and 0xFF).toByte()))
-        val data = ByteArray(bytewidth * img.height)
 
+        val imagedata = ByteArrayOutputStream()
+        val row = ByteArray(bytewidth)
         for (y in 0 until img.height) {
+            /*
+            Build a row of bytes for each row, each byte represents 8 pixels
+             */
             for (xoffset in 0 until bytewidth) {
                 var col = 0
                 for (j in 0..7) {
@@ -57,11 +67,36 @@ class SLCS : StreamByteProtocol<Bitmap> {
                         col = col or (1 shl (7 - j))
                     }
                 }
-                data[y * bytewidth + xoffset] = col.toByte()
+                row[xoffset] = col.toByte()
+            }
+
+            /*
+            Compress with run-length encoding, but only for 0xFF and 0x00, as per bixolon spec:
+            "This is the algorithm to compress the continuous data.
+            The compression is applied to 0x00 & 0xff data but not the others.
+            0xff 0x04 data is created if 0xff is repeated four times like 0x00 0x00 0x00 0x00.
+            In the same way, 0x00 0x04 is created by four times repeats of 0x00 such as 0x00 0x00 0x00 0x00."
+             */
+            var count = 0
+            for ((i, byte) in row.withIndex()) {
+                if (byte != 0x00.toByte() && byte != 0xFF.toByte()) {
+                    imagedata.write(byte.toInt())
+                    count = 0
+                } else {
+                    if (count >= 253 || i + 1 >= row.size || row[i + 1] != byte) {
+                        imagedata.write(byte.toInt())
+                        imagedata.write(count + 1)
+                        count = 0
+                    } else {
+                        count += 1
+                    }
+                }
             }
         }
-        ostream.write(data)
+        ostream.write(imagedata.toByteArray())
         ostream.write("\n".toByteArray())
+
+        // Print one label
         ostream.write("P1\n".toByteArray())
         ostream.flush()
         return ostream.toByteArray()
