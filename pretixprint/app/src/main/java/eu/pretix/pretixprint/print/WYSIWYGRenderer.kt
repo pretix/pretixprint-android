@@ -69,6 +69,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     override fun getBarcodeContent(content: String?, text: String?, textI18n: JSONObject?): String {
         return when (content) {
             "secret" -> op.getString("secret")  // the one in textcontent might be shortened
+            "" -> op.getString("secret")  // required for backwards compatibility
             "pseudonymization_id" -> op.getString("pseudonymization_id")  // required for backwards compatibility
             else -> getTextContent(content, text, textI18n)
         }
