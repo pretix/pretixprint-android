@@ -183,43 +183,76 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             }
             "orderlines" -> {
                 val positions = receipt.getJSONArray("positions")
+                processTaxes()
 
+                val receiptLines = mutableListOf<ReceiptLine>()
                 for (i in 0..(positions.length() - 1)) {
                     val position = positions.getJSONObject(i)
+                    receiptLines.add(ReceiptLine(
+                            type = position.optString("type", ""),
+                            sale_text = position.getString("sale_text"),
+                            subevent_text = position.optString("subevent_text", ""),
+                            price = position.getDouble("price"),
+                            tax_rate = position.getString("tax_rate"),
+                            canceled = position.getBoolean("canceled"),
+                            item = position.optLong("item", 0),
+                            variation = position.optLong("variation", 0),
+                            tax_rule = position.optLong("tax_rule", 0),
+                            subevent = position.optLong("subevent", 0),
+                            voucher_code = position.optString("voucher_code", ""),
+                    ))
+                }
 
-                    processTaxes()
+                for ((line, cnt) in receiptLines.mergeConsecutive()) {
+                    val taxindex = taxrates.indexOf(line.tax_rate)
 
-                    val taxindex = taxrates.indexOf(position.getString("tax_rate"))
-
-                    if (position.optString("type", "") == "PRODUCT_RETURN") {
+                    if (line.type == "PRODUCT_RETURN") {
                         reverseSale = true
                         emphasize(true)
                         text(ctx.getString(R.string.receiptline_return)); newline()
                         emphasize(false)
                     }
                     splitline(
-                            position.getString("sale_text"),
-                            DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
+                            line.sale_text,
+                            DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar()
                     )
                     newline()
-                    if (position.has("subevent_text") && !position.optString("subevent_text").isNullOrBlank() && position.optString("subevent_text") != "null") {
+                    val singlePrice = DecimalFormat("0.00").format(line.price)
+                    if (cnt > 1) {
                         splitline(
-                                position.getString("subevent_text"),
+                                "$cnt x ${receipt.getString("currency")} $singlePrice",
                                 "        ",
                                 indentation=2
                         )
+                        newline()
+                    }
+                    if (!line.subevent_text.isNullOrBlank() && line.subevent_text != "null") {
+                        splitline(
+                                line.subevent_text,
+                                "        ",
+                                indentation=2
+                        )
+                        newline()
                     }
 
-                    if (position.getBoolean("canceled")) {
+                    if (line.canceled) {
                         emphasize(true)
                         text(ctx.getString(R.string.receiptline_cancellation)); newline()
                         emphasize(false)
 
                         splitline(
-                                position.getString("sale_text"),
-                                "- " + DecimalFormat("0.00").format(position.getDouble("price")) + " " + (taxindex + 65).toChar()
+                                line.sale_text,
+                                "- " + DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar()
                         )
                         newline()
+                        if (cnt > 1) {
+                            splitline(
+                                    "-$cnt x ${receipt.getString("currency")} $singlePrice",
+                                    "        ",
+                                    indentation=2
+                            )
+                            newline()
+                        }
                     }
                 }
             }
@@ -784,5 +817,28 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
         opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
         return out.toByteArray()
+    }
+
+    data class ReceiptLine(
+            val type: String,
+            val tax_rate: String,
+            val price: Double,
+            val sale_text: String,
+            val subevent_text: String?,
+            val canceled: Boolean,
+            val item: Long?,
+            val variation: Long?,
+            val tax_rule: Long?,
+            val voucher_code: String?,
+            val subevent: Long?,
+    )
+
+    private fun <E> List<E>.mergeConsecutive(): List<Pair<E, Int>>
+            = fold(listOf()) { acc, e ->
+        if (acc.isNotEmpty() && acc.last().first == e) {
+            val currentTotal = acc.last().second
+            acc.dropLast(1) + (e to currentTotal + 1)
+        } else
+            acc + (e to 1)
     }
 }
