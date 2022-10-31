@@ -1,7 +1,12 @@
 package eu.pretix.pretixprint.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.protocols
@@ -17,6 +22,7 @@ class PrinterSetupActivity : AppCompatActivity() {
     var settingsStagingArea = mutableMapOf<String, String>()
     val fragmentManager = supportFragmentManager
     lateinit var fragment: SetupFragment
+    lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     lateinit var useCase: String
 
     fun mode(): String {
@@ -35,9 +41,16 @@ class PrinterSetupActivity : AppCompatActivity() {
             (!intent.hasExtra("pin") ||
                 defaultSharedPreferences.getString("pref_pin", "") != intent.getStringExtra("pin")!!)) {
             // Protect against external calls
-            finish();
+            finish()
             return
         }
+
+        requestPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
+                    startConnectionSettings()
+                }
+            }
 
         useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         startConnectionChoice()
@@ -68,6 +81,11 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
+            if (ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
             return startFinalPage()
         }
         fragment = when (connection) {
