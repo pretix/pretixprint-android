@@ -113,6 +113,7 @@
     <string name="protocol_linkos">Zebra thermal printer (CPCL and ZPL protocol)</string>
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT receipt printer (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
+    <string name="protocol_brothersdk">Brother Print SDK for QL series label printers</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
@@ -124,6 +125,9 @@
     <string name="field_label_card_source">Card Source</string>
     <string name="field_label_card_destination">Card Destination</string>
     <string name="field_label_label">Label size</string>
+    <string name="field_label_model">Printer model</string>
+    <string name="field_label_resolution">Resolution</string>
+    <string name="field_label_autocut">Auto-cut</string>
     <string name="field_label_ticketpath_fgl">Ticket path (Lemur-2 only)</string>
     <string name="field_label_dialect">Dialect</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>

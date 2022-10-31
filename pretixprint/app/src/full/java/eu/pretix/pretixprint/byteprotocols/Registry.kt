@@ -8,6 +8,7 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         StarPRNT(),
         GraphicESCPOS(),
         GraphicePOSPrintXML(),
+        BrotherSDK(),
         BrotherRaster(),
         EvolisDirect(),
         PNG(),

@@ -1,2 +1,2 @@
-include ':app', ':libpretixprint', ':cups4j', ':ZSDK', ':EvolisSDK'
+include ':app', ':libpretixprint', ':cups4j', ':ZSDK', ':EvolisSDK', ':BrotherSDK'
 project(':libpretixprint').projectDir = new File('libpretixprint-repo/libpretixprint')
