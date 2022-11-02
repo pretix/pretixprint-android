@@ -420,7 +420,7 @@ class USBConnection : ConnectionType {
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         context.registerReceiver(recv, filter)
         val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION),
-                if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
+                if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
         manager.requestPermission(devices.values.first(), permissionIntent)
         while (!done && err == null && System.currentTimeMillis() - start < 30000) {
             // Wait for callback to be called

@@ -89,7 +89,7 @@ class USBSettingsFragment : SetupFragment() {
             val deviceList = manager.deviceList.values.toList()
             selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName} (${String.format("%04x", it.vendorId)}:${String.format("%04x", it.productId)})" }) { dialogInterface, i ->
                 val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION),
-                        if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
+                        if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
                 manager.requestPermission(deviceList[i], permissionIntent)
             }
         }
