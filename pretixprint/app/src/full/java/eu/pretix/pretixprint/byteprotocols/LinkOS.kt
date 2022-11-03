@@ -14,7 +14,7 @@ import com.zebra.sdk.printer.ZebraPrinterFactory
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
