@@ -21,6 +21,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.USBConnection
+import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
