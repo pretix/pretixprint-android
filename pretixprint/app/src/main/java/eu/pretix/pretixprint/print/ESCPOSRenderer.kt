@@ -185,8 +185,18 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                 val positions = receipt.getJSONArray("positions")
                 processTaxes()
 
+                // We group duplicate consecutive lines based on all attributes that are relevant
+                // for printing. We never group items that have addons to avoid horrible confusion,
+                // but we can group duplicate add-ons of the same parent.
                 val receiptLines = mutableListOf<ReceiptLine>()
-                for (i in 0..(positions.length() - 1)) {
+                val addonHolders = mutableSetOf<Long>()
+                for (i in 0 until positions.length()) {
+                    val position = positions.getJSONObject(i)
+                    if (!position.isNull("addon_to")) {
+                        addonHolders.add(position.getLong("addon_to"))
+                    }
+                }
+                for (i in 0 until positions.length()) {
                     val position = positions.getJSONObject(i)
                     receiptLines.add(ReceiptLine(
                             type = position.optString("type", ""),
@@ -200,6 +210,14 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                             tax_rule = position.optLong("tax_rule", 0),
                             subevent = position.optLong("subevent", 0),
                             voucher_code = position.optString("voucher_code", ""),
+                            is_addon = !position.isNull("addon_to"),
+                            addon_group = if (!position.isNull("addon_to")) {
+                                position.getLong("addon_to")
+                            } else if (addonHolders.contains(position.getLong("position_id"))) {
+                                position.getLong("position_id")
+                            } else {
+                                null
+                            }
                     ))
                 }
 
@@ -213,8 +231,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         emphasize(false)
                     }
                     splitline(
-                            line.sale_text,
-                            DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar()
+                            (if(line.is_addon) "+ " else "") + line.sale_text,
+                            DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar(),
+                            indentation = if(line.is_addon) 2 else 0
                     )
                     newline()
                     val singlePrice = DecimalFormat("0.00").format(line.price)
@@ -222,11 +241,11 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         splitline(
                                 "$cnt x ${receipt.getString("currency")} $singlePrice",
                                 "        ",
-                                indentation=2
+                                indentation=if(line.is_addon) 4 else 2
                         )
                         newline()
                     }
-                    if (!line.subevent_text.isNullOrBlank() && line.subevent_text != "null") {
+                    if (!line.subevent_text.isNullOrBlank() && line.subevent_text != "null" && !line.is_addon) {
                         splitline(
                                 line.subevent_text,
                                 "        ",
@@ -241,8 +260,9 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         emphasize(false)
 
                         splitline(
-                                line.sale_text,
-                                "- " + DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar()
+                                (if(line.is_addon) "+ " else "") + line.sale_text,
+                                "- " + DecimalFormat("0.00").format(line.price * cnt) + " " + (taxindex + 65).toChar(),
+                                indentation = if(line.is_addon) 2 else 0
                         )
                         newline()
                         if (cnt > 1) {
@@ -831,6 +851,8 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             val tax_rule: Long?,
             val voucher_code: String?,
             val subevent: Long?,
+            val is_addon: Boolean,
+            val addon_group: Long?,
     )
 
     private fun <E> List<E>.mergeConsecutive(): List<Pair<E, Int>>
