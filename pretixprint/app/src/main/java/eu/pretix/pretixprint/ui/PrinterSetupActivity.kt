@@ -2,6 +2,7 @@ package eu.pretix.pretixprint.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,7 +82,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
-            if (ContextCompat.checkSelfPermission(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(
                     applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 return
