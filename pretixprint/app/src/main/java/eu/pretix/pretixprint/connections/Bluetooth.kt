@@ -52,7 +52,8 @@ class BluetoothConnection : ConnectionType {
         }
 
         Log.i("PrintService", "Starting Bluetooth printing")
-        val device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address)
+        val adapter = BluetoothAdapter.getDefaultAdapter()
+        val device = adapter.getRemoteDevice(address)
 
         try {
             Log.i("PrintService", "Starting renderPages")
@@ -67,15 +68,25 @@ class BluetoothConnection : ConnectionType {
                         val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
                         val m = clazz.getMethod("createRfcommSocket", *paramTypes)
                         val fallbackSocket = m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
-                        try {
-                            Log.i("PrintService", "Start connection to $address")
-                            fallbackSocket.connect()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                            throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message));
+                        var connFailure: Exception? = null
+                        // sometimes a closed socket from the previous print is not fully gone yet
+                        // therefore we have to try multiple times to get a working one
+                        for (i in 0..5) {
+                            try {
+                                connFailure = null
+                                Log.i("PrintService", "Start connection to $address, try $i")
+                                adapter.cancelDiscovery()
+                                fallbackSocket.connect()
+                                break
+                            } catch (e: Exception) {
+                                connFailure = e
+                                Thread.sleep(100L)
+                            }
+                        }
+                        if (connFailure != null) {
+                            connFailure.printStackTrace()
+                            val err = if (connFailure is IOException) R.string.err_job_io else R.string.err_generic
+                            throw PrintException(context.applicationContext.getString(err, connFailure.message))
                         }
 
                         val ostream = fallbackSocket.outputStream
@@ -86,8 +97,6 @@ class BluetoothConnection : ConnectionType {
                             proto.send(futures, istream, ostream, conf, type)
                             Log.i("PrintService", "Finished proto.send()")
                         } finally {
-                            istream.close()
-                            ostream.close()
                             socket.close()
                         }
                     }
@@ -105,6 +114,9 @@ class BluetoothConnection : ConnectionType {
         } catch (e: TimeoutException) {
             e.printStackTrace()
             throw PrintException("Rendering timeout, thread may have crashed")
+        } catch (e: PrintException) {
+            e.printStackTrace()
+            throw e // doesn't need to be wrapped again
         } catch (e: IOException) {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
