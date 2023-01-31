@@ -83,6 +83,8 @@
     <string name="receiptline_transactionid">Transaction-ID:</string>
     <string name="receiptline_terminalid">Terminal-ID:</string>
     <string name="receiptline_receiptnumber">Receipt-Nr:</string>
+    <string name="receiptline_cardtype">Card Type:</string>
+    <string name="receiptline_tracenr">Trace-Nr:</string>
     <string name="receiptline_paymentreceipt">Payment Receipt</string>
     <string name="receiptline_amount">Amount</string>
     <string name="receiptline_cardissuerpaymenttext">I HEREBY AGREE TO PAY THE ABOVE MENTIONED TOTAL ACCORDING TO THE CARD ISSUER TERMS AND CONDITIONS.</string>

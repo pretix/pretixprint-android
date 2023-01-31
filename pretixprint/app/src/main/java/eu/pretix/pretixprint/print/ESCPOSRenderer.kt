@@ -393,6 +393,17 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         newline(2)
                         text("-".repeat(charsPerLine), CENTER); newline()
                     }
+                    "terminal_zvt" -> {
+                        text(ctx.getString(R.string.receiptline_paidcard))
+                        newline()
+                        val payment_data = receipt.getJSONObject("payment_data")
+                        text(ctx.getString(R.string.receiptline_cardtype) + " " + payment_data.getString("cardName"))
+                        newline()
+                        text(ctx.getString(R.string.receiptline_tracenr) + " " + payment_data.getString("traceNumber"))
+                        newline()
+                        text(ctx.getString(R.string.receiptline_receiptnumber) + " " + payment_data.getString("receiptNumber"))
+                        newline()
+                    }
                     "external" -> {
                         text(ctx.getString(R.string.receiptline_paidcard))
                         newline()

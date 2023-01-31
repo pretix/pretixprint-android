@@ -74,6 +74,8 @@
     <string name="receiptline_transactionid">Transaktion-ID:</string>
     <string name="receiptline_receiptnumber">Beleg-Nr:</string>
     <string name="receiptline_terminalid">Terminal-ID:</string>
+    <string name="receiptline_cardtype">Kartentyp:</string>
+    <string name="receiptline_tracenr">Trace-Nr:</string>
     <string name="receiptline_paymentreceipt">Zahlungsbeleg</string>
     <string name="receiptline_amount">Betrag</string>
     <string name="receiptline_cardissuerpaymenttext">ICH BESTÄTIGE DEN OBEN GENANNTEN GESAMTBETRAG ENTSPRECHEND DER VEREINBARUNG DES KARTENHERAUSGEBERS ZU ZAHLEN.</string>
