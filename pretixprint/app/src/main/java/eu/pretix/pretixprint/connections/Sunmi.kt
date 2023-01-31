@@ -37,7 +37,7 @@ class SunmiInternalConnection : ConnectionType {
         val baos = ByteArrayOutputStream()
         val bais = ByteArrayInputStream(byteArrayOf())
 
-        val mode = conf["hardware_${type}printer_mode"] ?: "FGL"
+        val mode = if (type == "receipt") "ESC/POS" else "PNG"
         val proto = getProtoClass(mode)
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi")
                 ?: proto.defaultDPI.toString()).toFloat()
