@@ -110,4 +110,8 @@ class SunmiInternalConnection : ConnectionType {
             throw PrintError(e.message ?: e.toString())
         }
     }
+
+    override fun isConfiguredFor(context: Context, type: String): Boolean {
+        return true
+    }
 }
