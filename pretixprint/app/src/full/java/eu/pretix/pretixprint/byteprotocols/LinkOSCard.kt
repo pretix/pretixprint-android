@@ -193,7 +193,12 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     }
 
     private fun drawImage(graphics: ZebraGraphics, printType: PrintType, imageData: ByteArray, xOffset: Int, yOffset: Int, width: Int, height: Int, context: Context) : ZebraCardImageI {
-        graphics.initialize(context, 0, 0, OrientationType.Landscape, printType, Color.WHITE)
+        val orientation = if (width > height) {
+            OrientationType.Landscape
+        } else {
+            OrientationType.Portrait
+        }
+        graphics.initialize(context, 0, 0, orientation, printType, Color.WHITE)
         graphics.drawImage(imageData, xOffset, yOffset, width, height, RotationType.RotateNoneFlipNone)
         return graphics.createImage()
     }
