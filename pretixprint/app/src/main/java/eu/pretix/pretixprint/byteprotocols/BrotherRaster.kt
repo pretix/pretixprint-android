@@ -90,12 +90,6 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         val matrix = Matrix()
         var imgW = img.width
         var imgH = img.height
-        // rotate
-        if (conf.get("hardware_${type}printer_rotate90") == "true") {
-            matrix.setRotate(90f)
-            imgH = img.width
-            imgW = img.height
-        }
         // resize
         var targetHeight = imgH
         if (imgW > targetWidth) {

@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.renderers
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.pdf.PdfRenderer
 import android.os.Build
 import android.os.ParcelFileDescriptor
@@ -10,20 +11,37 @@ import com.tom_roush.pdfbox.rendering.PDFRenderer
 import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import java8.util.concurrent.CompletableFuture
 import java.io.File
-import java.lang.RuntimeException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-fun <T> renderFileTo(file: File, pageIndex: Int, dpi: Float, future: CompletableFuture<T>, type: Class<T>) {
+fun <T> renderFileTo(file: File, pageIndex: Int, dpi: Float, rotation: Int, future: CompletableFuture<T>, type: Class<T>) {
     if (type.isAssignableFrom(Bitmap::class.java)) {
         if (Build.VERSION.SDK_INT >= 21) {
             val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
             val renderer = android.graphics.pdf.PdfRenderer(fd)
             val page = renderer.openPage(pageIndex)
-            val img = Bitmap.createBitmap((page.width / 72.0 * dpi).toInt(), (page.height / 72.0 * dpi).toInt(), Bitmap.Config.ARGB_8888)
-            page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+            val renderedImg = Bitmap.createBitmap((page.width / 72.0 * dpi).toInt(), (page.height / 72.0 * dpi).toInt(), Bitmap.Config.ARGB_8888)
+            page.render(renderedImg, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+
+            val img = if (rotation == 0) {
+                renderedImg
+            } else {
+                val matrix = Matrix()
+                matrix.postRotate(rotation.toFloat())
+                Bitmap.createBitmap(
+                    renderedImg,
+                    0,
+                    0,
+                    renderedImg.width,
+                    renderedImg.height,
+                    matrix,
+                    true
+                )
+            }
+
             @Suppress("UNCHECKED_CAST")
             future.complete(img as T)
+
             page.close()
             renderer.close()
             fd.close()
@@ -45,7 +63,7 @@ fun <T> renderFileTo(file: File, pageIndex: Int, dpi: Float, future: Completable
 
 val threadPool: ExecutorService = Executors.newCachedThreadPool()
 
-inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, dpi: Float, numPages: Int, conf: Map<String, String>, type: String): List<CompletableFuture<ByteArray>> {
+inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, dpi: Float, rotation: Int, numPages: Int, conf: Map<String, String>, type: String): List<CompletableFuture<ByteArray>> {
     val futures = mutableListOf<CompletableFuture<ByteArray>>()
     var previousBmpFuture: CompletableFuture<T>? = null
 
@@ -57,7 +75,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             previousBmpFuture.thenApplyAsync {
                 try {
                     Log.i("PrintService", "renderPages: Start rendering page $pageIndex to an image")
-                    renderFileTo<T>(file, pageIndex, dpi, bmpFuture, protocol.inputClass())
+                    renderFileTo<T>(file, pageIndex, dpi, rotation, bmpFuture, protocol.inputClass())
                     Log.i("PrintService", "renderPages: Completed rendering page $pageIndex to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()
@@ -78,7 +96,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             threadPool.submit {
                 try {
                     Log.i("PrintService", "renderPages: Start rendering page $pageIndex to an image")
-                    renderFileTo<T>(file, pageIndex, dpi, bmpFuture, protocol.inputClass())
+                    renderFileTo<T>(file, pageIndex, dpi, rotation, bmpFuture, protocol.inputClass())
                     Log.i("PrintService", "renderPages: Completed rendering page $pageIndex to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()

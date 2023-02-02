@@ -39,6 +39,7 @@ class NetworkConnection : ConnectionType {
         val ip = conf.get("hardware_${type}printer_ip") ?: "127.0.0.1"
         val port = Integer.valueOf(conf.get("hardware_${type}printer_port") ?: "9100")
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+        val rotation = Integer.valueOf(conf.get("hardware_${type}printer_rotation") ?: "0")
 
         Sentry.configureScope { scope ->
             scope.setTag("printer.mode", mode)
@@ -46,13 +47,14 @@ class NetworkConnection : ConnectionType {
             scope.setContexts("printer.ip", ip)
             scope.setContexts("printer.port", port)
             scope.setContexts("printer.dpi", dpi)
+            scope.setContexts("printer.rotation", rotation)
         }
 
         val serverAddr = InetAddress.getByName(ip)
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
             lockManager.withLock("$identifier:${serverAddr.hostAddress}:$port") {
                 when (proto) {
                     is StreamByteProtocol<*> -> {

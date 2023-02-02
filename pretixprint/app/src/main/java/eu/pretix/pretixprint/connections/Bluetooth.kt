@@ -43,12 +43,14 @@ class BluetoothConnection : ConnectionType {
         val proto = getProtoClass(mode)
         val address = conf.get("hardware_${type}printer_ip") ?: ""
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi") ?: proto.defaultDPI.toString()).toFloat()
+        val rotation = Integer.valueOf(conf.get("hardware_${type}printer_rotation") ?: "0")
 
         Sentry.configureScope { scope ->
             scope.setTag("printer.mode", mode)
             scope.setTag("printer.type", type)
             scope.setContexts("printer.ip", address)
             scope.setContexts("printer.dpi", dpi)
+            scope.setContexts("printer.rotation", rotation)
         }
 
         Log.i("PrintService", "Starting Bluetooth printing")
@@ -57,7 +59,7 @@ class BluetoothConnection : ConnectionType {
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
 
             lockManager.withLock("$identifier:$address") {
                 when (proto) {
