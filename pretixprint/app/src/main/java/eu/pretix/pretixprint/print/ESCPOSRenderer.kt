@@ -397,12 +397,30 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         text(ctx.getString(R.string.receiptline_paidcard))
                         newline()
                         val payment_data = receipt.getJSONObject("payment_data")
-                        text(ctx.getString(R.string.receiptline_cardtype) + " " + payment_data.getString("cardName"))
-                        newline()
-                        text(ctx.getString(R.string.receiptline_tracenr) + " " + payment_data.getString("traceNumber"))
-                        newline()
-                        text(ctx.getString(R.string.receiptline_receiptnumber) + " " + payment_data.getString("receiptNumber"))
-                        newline()
+                        if (payment_data.has("cardName") && !payment_data.isNull("cardName")) {
+                            text(
+                                ctx.getString(R.string.receiptline_cardtype) + " " + payment_data.getString(
+                                    "cardName"
+                                )
+                            )
+                            newline()
+                        }
+                        if (payment_data.has("traceNumber") && !payment_data.isNull("traceNumber")) {
+                            text(
+                                ctx.getString(R.string.receiptline_tracenr) + " " + payment_data.getString(
+                                    "traceNumber"
+                                )
+                            )
+                            newline()
+                        }
+                        if (payment_data.has("receiptNumber") && !payment_data.isNull("receiptNumber")) {
+                            text(
+                                ctx.getString(R.string.receiptline_receiptnumber) + " " + payment_data.getString(
+                                    "receiptNumber"
+                                )
+                            )
+                            newline()
+                        }
                     }
                     "external" -> {
                         text(ctx.getString(R.string.receiptline_paidcard))
