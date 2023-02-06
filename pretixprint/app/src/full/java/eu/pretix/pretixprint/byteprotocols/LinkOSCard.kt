@@ -26,9 +26,11 @@ import eu.pretix.pretixprint.ui.LinkOSCardSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.defaultSharedPreferences
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import javax.imageio.ImageIO
 
 
 class LinkOSCard : CustomByteProtocol<Bitmap> {
@@ -193,13 +195,14 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
     }
 
     private fun drawImage(graphics: ZebraGraphics, printType: PrintType, imageData: ByteArray, xOffset: Int, yOffset: Int, width: Int, height: Int, context: Context) : ZebraCardImageI {
-        val orientation = if (width > height) {
-            OrientationType.Landscape
+        val image = ImageIO.read(ByteArrayInputStream(imageData))
+        val rotation = if (image.width > image.height) {
+            RotationType.RotateNoneFlipNone
         } else {
-            OrientationType.Portrait
+            RotationType.Rotate90FlipNone
         }
-        graphics.initialize(context, 0, 0, orientation, printType, Color.WHITE)
-        graphics.drawImage(imageData, xOffset, yOffset, width, height, RotationType.RotateNoneFlipNone)
+        graphics.initialize(context, 0, 0, OrientationType.Landscape, printType, Color.WHITE)
+        graphics.drawImage(imageData, xOffset, yOffset, width, height, rotation)
         return graphics.createImage()
     }
 
