@@ -13,8 +13,6 @@ import com.evolis.libevolis.androidsdk.model.ASDK_OUTTRAY
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.zebra.sdk.common.card.enumerations.CardDestination
-import com.zebra.sdk.common.card.enumerations.CardSource
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.LinkOSCard
