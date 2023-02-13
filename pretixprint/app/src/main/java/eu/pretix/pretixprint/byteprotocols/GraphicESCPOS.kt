@@ -1,10 +1,8 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.util.Log
 import com.github.anastaciocintra.escpos.EscPos
-import com.github.anastaciocintra.escpos.EscPosConst
 import com.github.anastaciocintra.escpos.image.BitonalThreshold
 import com.github.anastaciocintra.escpos.image.CoffeeImage
 import com.github.anastaciocintra.escpos.image.EscPosImage
@@ -45,19 +43,11 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
                 ?: defaultDPI.toString()).toFloat()
         val targetWidth = (targetWidthMM * 0.0393701 * dpi).toInt()
 
-        var rotated = if (conf.get("hardware_${type}printer_rotate90") == "true") {
-            val matrix = Matrix()
-            matrix.postRotate(90f)
-            Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+        val scaled = if (img.width > targetWidth) {
+            val targetHeight = (targetWidth.toFloat() / img.width.toFloat() * img.height.toFloat()).toInt()
+            Bitmap.createScaledBitmap(img, targetWidth, targetHeight, true)
         } else {
             img
-        }
-
-        val scaled = if (rotated.width > targetWidth) {
-            val targetHeight = (targetWidth.toFloat() / rotated.width.toFloat() * rotated.height.toFloat()).toInt()
-            Bitmap.createScaledBitmap(rotated, targetWidth, targetHeight, true)
-        } else {
-            rotated
         }
 
         var yoff = 0

@@ -53,18 +53,25 @@
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/swRotate90"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilRotation"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/field_label_rotate90"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tilLabel" />
+                app:layout_constraintTop_toBottomOf="@+id/tilLabel"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                <AutoCompleteTextView
+                    android:id="@+id/teRotation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/field_label_rotation"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/swQuality"
@@ -76,7 +83,7 @@
                 android:text="@string/field_label_quality"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/swRotate90" />
+                app:layout_constraintTop_toBottomOf="@+id/tilRotation" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

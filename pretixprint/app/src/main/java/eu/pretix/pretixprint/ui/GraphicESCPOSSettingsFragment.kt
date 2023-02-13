@@ -5,11 +5,14 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
-import eu.pretix.pretixprint.byteprotocols.FGL
+import eu.pretix.pretixprint.Rotation
+import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class GraphicESCPOSSettingsFragment : SetupFragment() {
@@ -20,7 +23,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
             savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_graphicescpos_settings, container, false)
-        val proto = FGL()
+        val proto = GraphicESCPOS()
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?)
@@ -39,10 +42,17 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 ?: defaultSharedPreferences.getString("hardware_${useCase}printer_waitafterpage", "2000")
         view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
 
-        val currentRotate90 = ((activity as PrinterSetupActivity).settingsStagingArea.get(
-                "hardware_${useCase}printer_rotate90"
-        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotate90", "false")!!.toBoolean()
-        view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked = currentRotate90
+        val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
+            it.toString()
+        })
+        (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
+        val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_rotation"
+        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        if (chosenRotation?.isNotEmpty() == true) {
+            val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
+            (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
+        }
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
@@ -51,7 +61,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
             val wap = view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).text.toString()
             val mw = view.findViewById<TextInputEditText>(R.id.teMaxWidth).text.toString()
-            val rotate90 = view.findViewById<SwitchMaterial>(R.id.swRotate90).isChecked
+            val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
             if (TextUtils.isEmpty(mw)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(mw)) {
@@ -66,9 +76,11 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
+                val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
+
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotation", mappedRotation.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",
                         dpi)
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotate90", rotate90.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_maxwidth",
                         mw)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_waitafterpage",

@@ -121,7 +121,6 @@
     <string name="btn_save">Save settings</string>
     <string name="setup_bluetooth_settings">Please select your printer</string>
     <string name="setup_bluetooth_select">Select device</string>
-    <string name="field_label_rotate90">Rotate by 90 degrees</string>
     <string name="field_label_print_double_sided">Print double sided (same image on both sides)</string>
     <string name="field_label_card_source">Card Source</string>
     <string name="field_label_card_destination">Card Destination</string>
@@ -129,6 +128,7 @@
     <string name="field_label_ticketpath_fgl">Ticket path (Lemur-2 only)</string>
     <string name="field_label_dialect">Dialect</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
+    <string name="field_label_rotation">Rotation</string>
     <string name="label_two_color">red/black</string>
     <string name="label_continuous">continuous</string>
     <string name="pin_protection_pin">Set settings PIN</string>

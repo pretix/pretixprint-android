@@ -11,6 +11,7 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.renderers.renderPages
+import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -41,10 +42,18 @@ class SunmiInternalConnection : ConnectionType {
         val proto = getProtoClass(mode)
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi")
                 ?: proto.defaultDPI.toString()).toFloat()
+        val rotation = Integer.valueOf(conf.get("hardware_${type}printer_rotation") ?: "0")
+
+        Sentry.configureScope { scope ->
+            scope.setTag("printer.mode", mode)
+            scope.setTag("printer.type", type)
+            scope.setContexts("printer.dpi", dpi)
+            scope.setContexts("printer.rotation", rotation)
+        }
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
 
             Log.i("PrintService", "bindService")
             InnerPrinterManager.getInstance().bindService(context, object : InnerPrinterCallback() {

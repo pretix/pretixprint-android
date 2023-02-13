@@ -320,6 +320,7 @@ class USBConnection : ConnectionType {
         val mode = conf.get("hardware_${type}printer_mode") ?: "FGL"
         val serial = conf.get("hardware_${type}printer_ip") ?: "0"
         val compat = (conf.get("hardware_${type}printer_usbcompat") ?: "false") == "true"
+        val rotation = Integer.valueOf(conf.get("hardware_${type}printer_rotation") ?: "0")
         val proto = getProtoClass(mode)
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi")
                 ?: proto.defaultDPI.toString()).toFloat()
@@ -330,6 +331,7 @@ class USBConnection : ConnectionType {
             scope.setContexts("printer.ip", serial)
             scope.setContexts("printer.usbcompat", compat)
             scope.setContexts("printer.dpi", dpi)
+            scope.setContexts("printer.rotation", rotation)
         }
 
         Log.i("PrintService", "Discovering USB device $serial compat=$compat")
@@ -369,7 +371,7 @@ class USBConnection : ConnectionType {
                             Log.i("PrintService", "Found USB device")
                             try {
                                 Log.i("PrintService", "Starting renderPages")
-                                val futures = renderPages(proto, tmpfile, dpi, numPages, conf, type)
+                                val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
                                 lockManager.withLock("$identifier:$serial") {
                                     when (proto) {
                                         is StreamByteProtocol<*> -> {

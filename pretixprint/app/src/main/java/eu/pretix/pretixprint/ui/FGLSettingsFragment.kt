@@ -11,6 +11,7 @@ import android.widget.Button
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.FGL
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
@@ -37,6 +38,18 @@ class FGLSettingsFragment : SetupFragment() {
             (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setText(chosenPath, false)
         }
 
+        val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
+            it.toString()
+        })
+        (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
+        val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_rotation"
+        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        if (chosenRotation?.isNotEmpty() == true) {
+            val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
+            (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
+        }
+
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
@@ -48,6 +61,7 @@ class FGLSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val path = view.findViewById<TextInputLayout>(R.id.tilPath).editText?.text.toString()
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
+            val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
             if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(dpi)) {
@@ -58,6 +72,9 @@ class FGLSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
+                val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
+
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotation", mappedRotation.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",
                         dpi)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_path",
