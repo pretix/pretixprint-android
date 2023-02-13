@@ -15,7 +15,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
-import eu.pretix.pretixprint.byteprotocols.LinkOSCard
+import eu.pretix.pretixprint.byteprotocols.EvolisDirect
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 
@@ -27,7 +27,7 @@ class EvolisDirectSettingsFragment : SetupFragment() {
             savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_linkoscard_settings, container, false)
-        val proto = LinkOSCard()
+        val proto = EvolisDirect()
 
         val currentDoubleSided = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_doublesided"

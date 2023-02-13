@@ -8,12 +8,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
-import eu.pretix.pretixprint.byteprotocols.FGL
+import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class GraphicESCPOSSettingsFragment : SetupFragment() {
@@ -24,7 +23,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
             savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_graphicescpos_settings, container, false)
-        val proto = FGL()
+        val proto = GraphicESCPOS()
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?)
