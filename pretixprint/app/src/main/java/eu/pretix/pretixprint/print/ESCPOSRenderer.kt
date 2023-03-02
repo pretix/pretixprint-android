@@ -427,8 +427,10 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         newline()
                     }
                     "cash" -> {
-                        text(ctx.getString(R.string.receiptline_paidcash))
-                        newline()
+                        if (calcTotal().compareTo(0.0f) != 0) {
+                            text(ctx.getString(R.string.receiptline_paidcash))
+                            newline()
+                        }
                     }
                 }
             }
