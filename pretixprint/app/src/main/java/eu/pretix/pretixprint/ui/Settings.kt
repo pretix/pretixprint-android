@@ -13,23 +13,19 @@ import android.view.LayoutInflater
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import com.andrognito.pinlockview.IndicatorDots
-import com.andrognito.pinlockview.PinLockListener
-import com.andrognito.pinlockview.PinLockView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.selector
-import java.lang.RuntimeException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
 
 
-class SettingsFragment : PreferenceFragment() {
+class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
     val types = listOf("ticket", "badge", "receipt")
+    var pendingPinAction: ((pin: String) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,46 +176,21 @@ class SettingsFragment : PreferenceFragment() {
             valid("")
             return
         }
-        val pinLength = defaultSharedPreferences.getString("pref_pin", "")!!.length
-        val view = activity.layoutInflater.inflate(R.layout.dialog_pin, null)
-        val dialog = MaterialAlertDialogBuilder(activity)
-            .setView(view)
-            .create()
-        dialog.setOnShowListener {
-            val mPinLockListener: PinLockListener = object : PinLockListener {
-                override fun onComplete(pin: String) {
-                    this.onPinChange(pin.length, pin)
-                }
-
-                override fun onEmpty() {
-                }
-
-                override fun onPinChange(pinLength: Int, intermediatePin: String) {
-                    if (defaultSharedPreferences.getString("pref_pin", "") == intermediatePin) {
-                        dialog.dismiss()
-                        valid(intermediatePin)
-                    }
-                }
-            }
-
-            val lockView = view.findViewById(R.id.pin_lock_view) as PinLockView
-            lockView.pinLength = pinLength
-            lockView.setPinLockListener(mPinLockListener)
-            val idots = view.findViewById(R.id.indicator_dots) as IndicatorDots
-            idots.pinLength = pinLength
-            lockView.attachIndicatorDots(idots);
-        }
-        dialog.show()
+        pendingPinAction = valid
+        PinDialog().show(childFragmentManager, PinDialog.TAG)
     }
 
-    fun startWithPIN(intent: Intent, resultCode: Int? = null, bundle: Bundle? = null) {
+    override fun checkPin(pin: String) {
+        if (defaultSharedPreferences.getString("pref_pin", "") == pin) {
+            (childFragmentManager.findFragmentByTag(PinDialog.TAG) as? PinDialog)?.dismiss()
+            pendingPinAction?.let { it(pin) }
+        }
+    }
+
+    fun startWithPIN(intent: Intent) {
         pinProtect { pin ->
             intent.putExtra("pin", pin)
-            if (resultCode != null) {
-                startActivityForResult(intent, resultCode, bundle)
-            } else {
-                startActivity(intent)
-            }
+            startActivity(intent)
         }
     }
 }

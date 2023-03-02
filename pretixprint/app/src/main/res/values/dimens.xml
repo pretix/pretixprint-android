@@ -5,4 +5,5 @@
     <dimen name="keyboard_button_text_size">30sp</dimen>
     <dimen name="keyboard_button_padding">15dp</dimen>
     <dimen name="keyboard_button_ripple_padding">30dp</dimen>
+    <dimen name="dialog_minwidth">300dp</dimen>
 </resources>
