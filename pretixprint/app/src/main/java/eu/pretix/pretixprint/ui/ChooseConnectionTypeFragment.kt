@@ -14,7 +14,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.connectionTypes
 import eu.pretix.pretixprint.databinding.ItemConnectionTypeBinding
-import org.jetbrains.anko.support.v4.toast
+import splitties.toast.toast
 
 
 class ConnectionTypeDiffCallback : DiffUtil.ItemCallback<ConnectionType>() {
@@ -117,7 +117,7 @@ class ChooseConnectionTypeFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_connection", adapter.selectedValue!!.identifier)
                 (activity as PrinterSetupActivity).startConnectionSettings()
             } else {
-                toast(R.string.error_no_choice).show()
+                toast(R.string.error_no_choice)
             }
         }
 

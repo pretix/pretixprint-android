@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.ui
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
@@ -13,9 +12,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.preference.PreferenceManager
+import com.github.razir.progressbutton.bindProgressButton
+import com.github.razir.progressbutton.hideProgress
+import com.github.razir.progressbutton.showProgress
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.support.v4.*
+import splitties.toast.toast
 
 class CUPSSettingsFragment : SetupFragment() {
     companion object {
@@ -25,21 +28,20 @@ class CUPSSettingsFragment : SetupFragment() {
 
     private var services = emptyList<NsdServiceInfo>().toMutableList()
     private lateinit var nsdManager: NsdManager
-    private lateinit var MODES: Array<String>
-    private var pgResolve: ProgressDialog? = null
+    private var autoDetectBtn: Button? = null
 
     private val resolveListener = object : NsdManager.ResolveListener {
         override fun onResolveFailed(service: NsdServiceInfo?, errorCode: Int) {
             Log.d(TAG, "Service resolve failed. Error: $errorCode Service: $service")
-            runOnUiThread {
-                pgResolve?.dismiss()
-                toast(R.string.err_resolv_failed).show()
+            requireActivity().runOnUiThread {
+                autoDetectBtn!!.hideProgress(R.string.btn_auto)
+                toast(R.string.err_resolv_failed)
             }
         }
 
         override fun onServiceResolved(service: NsdServiceInfo?) {
-            runOnUiThread {
-                pgResolve?.dismiss()
+            requireActivity().runOnUiThread {
+                autoDetectBtn!!.hideProgress(R.string.btn_auto)
 
                 Log.d(TAG, "Service resolved. Service: $service")
                 view?.findViewById<TextInputEditText>(R.id.teIP)?.setText(service?.host?.hostAddress)
@@ -84,7 +86,7 @@ class CUPSSettingsFragment : SetupFragment() {
             } else {
                 Log.d(TAG, "Unknown service type: ${service.serviceType}")
             }
-            runOnUiThread {
+            requireActivity().runOnUiThread {
                 view?.findViewById<Button>(R.id.btnAuto)?.isEnabled = services.isNotEmpty()
             }
         }
@@ -102,7 +104,7 @@ class CUPSSettingsFragment : SetupFragment() {
                     }
                 }
             }
-            runOnUiThread {
+            requireActivity().runOnUiThread {
                 view?.findViewById<Button>(R.id.btnAuto)?.isEnabled = services.isNotEmpty()
             }
         }
@@ -111,7 +113,7 @@ class CUPSSettingsFragment : SetupFragment() {
             Log.i(TAG, "Discovery stopped: $serviceType")
             if (activity == null)
                 return
-            runOnUiThread {
+            requireActivity().runOnUiThread {
                 view?.findViewById<Button>(R.id.btnAuto)?.isEnabled = services.isNotEmpty()
             }
         }
@@ -141,14 +143,12 @@ class CUPSSettingsFragment : SetupFragment() {
     fun selectService(service: NsdServiceInfo) {
         try {
             nsdManager.resolveService(service, resolveListener)
-            runOnUiThread {
-                pgResolve = progressDialog(R.string.resolving) {
-                    isIndeterminate = true
-                    setCancelable(false)
+            requireActivity().runOnUiThread {
+                autoDetectBtn!!.showProgress {
+                    buttonTextRes = R.string.resolving
                 }
             }
         } catch (e: IllegalArgumentException) {
-
         }
     }
 
@@ -221,11 +221,17 @@ class CUPSSettingsFragment : SetupFragment() {
         }
 
 
-        view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
+        autoDetectBtn = view.findViewById<Button>(R.id.btnAuto)
+        requireActivity().bindProgressButton(autoDetectBtn!!)
+        autoDetectBtn!!.setOnClickListener {
             val services = ArrayList(this.services)
-            selector(getString(R.string.headline_found_network_printers), services.map { it.serviceName }) { dialogInterface, i ->
-                selectService(services[i])
-            }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.headline_found_network_printers)
+                .setItems(services.map { it.serviceName }.toTypedArray()) { _, i ->
+                    selectService(services[i])
+                }
+                .create()
+                .show()
         }
         return view
     }

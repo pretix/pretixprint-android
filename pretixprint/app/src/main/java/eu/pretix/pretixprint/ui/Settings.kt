@@ -10,16 +10,14 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.webkit.WebView
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.support.v4.intentFor
-import org.jetbrains.anko.support.v4.selector
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
@@ -128,7 +126,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val webView = WebView(requireActivity())
         webView.loadUrl("file:///android_asset/about.html")
 
-        val dialog = AlertDialog.Builder(requireActivity())
+        val dialog = MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(title)
                 .setView(webView)
                 .setPositiveButton(R.string.dismiss, null)
@@ -152,29 +150,32 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     "${f.format(Date(it.lastModified()))} (${it.name.split(".")[1]})"
                 }
 
-        selector(getString(R.string.settings_label_last_prints), names) { dialogInterface, i ->
-            val file = files[i]
-            val extension = file.name.split(".")[1]
-            when (extension) {
-                "escpos" -> {
-                    val intent = intentFor<FileViewerEscposActivity>()
-                    intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
-                    requireActivity().startActivity(intent)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_label_last_prints)
+            .setItems(names.toTypedArray()) { _, i ->
+                val file = files[i]
+                val extension = file.name.split(".")[1]
+                when (extension) {
+                    "escpos" -> {
+                        startActivity(Intent(requireContext(), FileViewerEscposActivity::class.java).apply {
+                            putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
+                        })
+                    }
+                    "log" -> {
+                        startActivity(Intent(requireContext(), FileViewerLogActivity::class.java).apply {
+                            putExtra(FileViewerLogActivity.EXTRA_PATH, file.absolutePath)
+                        })
+                    }
+                    "pdf" -> {
+                        startActivity(Intent(requireContext(), FileViewerPdfActivity::class.java).apply {
+                            putExtra(FileViewerPdfActivity.EXTRA_PATH, file.absolutePath)
+                        })
+                    }
+                    else -> throw RuntimeException("Unknown file type for file $file")
                 }
-                "log" -> {
-                    val intent = intentFor<FileViewerLogActivity>()
-                    intent.putExtra(FileViewerLogActivity.EXTRA_PATH, file.absolutePath)
-                    requireActivity().startActivity(intent)
-                }
-                "pdf" -> {
-                    val intent = intentFor<FileViewerPdfActivity>()
-                    intent.putExtra(FileViewerPdfActivity.EXTRA_PATH, file.absolutePath)
-                    requireActivity().startActivity(intent)
-                }
-                else -> throw RuntimeException("Unknown file type for file $file")
             }
-
-        }
+            .create()
+            .show()
     }
 
     fun hasPin(): Boolean {

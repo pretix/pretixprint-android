@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.ui
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -15,16 +14,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.PreferenceManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.support.v4.act
-import org.jetbrains.anko.support.v4.selector
-import org.jetbrains.anko.support.v4.toast
+import splitties.toast.toast
 
 class USBSettingsFragment : SetupFragment() {
     private val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.settings.USB_PERMISSION"
@@ -88,11 +84,16 @@ class USBSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
             val manager = activity!!.getSystemService(Context.USB_SERVICE) as UsbManager
             val deviceList = manager.deviceList.values.toList()
-            selector(getString(R.string.headline_found_usb_devices), deviceList.map { "${it.manufacturerName} ${it.productName} (${String.format("%04x", it.vendorId)}:${String.format("%04x", it.productId)})" }) { dialogInterface, i ->
-                val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION),
+            val deviceNames = deviceList.map { "${it.manufacturerName} ${it.productName} (${String.format("%04x", it.vendorId)}:${String.format("%04x", it.productId)})" }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.headline_found_usb_devices)
+                .setItems(deviceNames.toTypedArray()) { _, i ->
+                    val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION),
                         if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
-                manager.requestPermission(deviceList[i], permissionIntent)
-            }
+                    manager.requestPermission(deviceList[i], permissionIntent)
+                }
+                .create()
+                .show()
         }
 
         return view

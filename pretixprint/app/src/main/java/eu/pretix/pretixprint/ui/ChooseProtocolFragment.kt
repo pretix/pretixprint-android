@@ -15,7 +15,7 @@ import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.connectionTypes
 import eu.pretix.pretixprint.databinding.ItemByteProtocolBinding
-import org.jetbrains.anko.support.v4.toast
+import splitties.toast.toast
 
 
 class ByteProtocolDiffCallback : DiffUtil.ItemCallback<ByteProtocolInterface<*>>() {
@@ -122,7 +122,7 @@ class ChooseByteProtocolFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_mode", adapter.selectedValue!!.identifier)
                 (activity as PrinterSetupActivity).startProtocolSettings()
             } else {
-                toast(R.string.error_no_choice).show()
+                toast(R.string.error_no_choice)
             }
         }
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

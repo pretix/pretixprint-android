@@ -6,6 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import com.github.razir.progressbutton.attachTextChangeAnimator
+import com.github.razir.progressbutton.bindProgressButton
+import com.github.razir.progressbutton.hideProgress
+import com.github.razir.progressbutton.showProgress
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
@@ -15,23 +20,22 @@ import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
 import io.sentry.Sentry
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.indeterminateProgressDialog
-import org.jetbrains.anko.uiThread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 
 class FinishSettingsFragment : SetupFragment() {
+    val bgScope = CoroutineScope(Dispatchers.IO)
 
     fun writeDemoPage(proto: String, filename: String): File {
-        val file = File(ctx.cacheDir, filename)
+        val file = File(requireContext().cacheDir, filename)
         if (file.exists()) {
             file.delete()
         }
-        val asset = ctx.assets.open(filename)
+        val asset = requireContext().assets.open(filename)
         val output = FileOutputStream(file)
 
         val buffer = ByteArray(1024)
@@ -72,38 +76,41 @@ class FinishSettingsFragment : SetupFragment() {
         val activity = activity as PrinterSetupActivity
         val view = inflater.inflate(R.layout.fragment_finish_settings, container, false)
 
-        view.findViewById<Button>(R.id.btnTestPage).setOnClickListener {
-            val pb = indeterminateProgressDialog(R.string.testing)
-            pb.setCancelable(true)
-            pb.show()
-            doAsync {
+        val testPageButton = view.findViewById<Button>(R.id.btnTestPage)
+        activity.bindProgressButton(testPageButton)
+        testPageButton.attachTextChangeAnimator()
+        testPageButton.setOnClickListener {
+            testPageButton.showProgress {
+                buttonTextRes = R.string.testing
+            }
+            bgScope.launch {
                 try {
                     testprint()
-                    uiThread {
+                    activity.runOnUiThread {
                         if (this@FinishSettingsFragment.activity == null)
-                            return@uiThread
-                        alert(R.string.test_success).show()
+                            return@runOnUiThread
+                        MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.test_success).create().show()
                     }
                 } catch (e: PrintException) {
                     Sentry.captureException(e)
-                    uiThread {
+                    activity.runOnUiThread {
                         if (this@FinishSettingsFragment.activity == null)
-                            return@uiThread
-                        alert(e.message).show()
+                            return@runOnUiThread
+                        MaterialAlertDialogBuilder(requireContext()).setMessage(e.message).create().show()
                     }
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                     Sentry.captureException(e)
-                    uiThread {
+                    activity.runOnUiThread {
                         if (this@FinishSettingsFragment.activity == null)
-                            return@uiThread
-                        alert(e.toString()).show()
+                            return@runOnUiThread
+                        MaterialAlertDialogBuilder(requireContext()).setMessage(e.toString()).create().show()
                     }
                 } finally {
-                    uiThread {
+                    activity.runOnUiThread {
                         if (this@FinishSettingsFragment.activity == null)
-                            return@uiThread
-                        pb.dismiss()
+                            return@runOnUiThread
+                        testPageButton.hideProgress(R.string.button_label_test)
                     }
                 }
 
