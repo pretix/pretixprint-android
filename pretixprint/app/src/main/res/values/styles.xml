@@ -1,14 +1,53 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.Material3.Light">
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
         <item name="logo">@drawable/ic_logo</item>
         <item name="android:windowActionBarOverlay">true</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.App.ActionBar</item>
+        <item name="preferenceTheme">@style/ThemeOverlay.App.Preference</item>
     </style>
 
-    <style name="AppTheme.Dialog" parent="Theme.MaterialComponents.Light.Dialog">
+    <style name="ThemeOverlay.App.Preference" parent="PreferenceThemeOverlay">
+        <item name="preferenceStyle">@style/ThemeOverlay.Preference.Material</item>
+        <item name="preferenceCategoryStyle">@style/ThemeOverlay.Preference.Category.Material</item>
+        <item name="editTextPreferenceStyle">@style/ThemeOverlay.Preference.DialogPreference.EditTextPreference.Material</item>
+        <item name="dialogPreferenceStyle">@style/ThemeOverlay.Preference.DialogPreference.Material</item>
+    </style>
+
+    <style name="ThemeOverlay.Preference.Material" parent="Preference.Material">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ThemeOverlay.Preference.Category.Material" parent="Preference.Category.Material">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ThemeOverlay.Preference.DialogPreference.Material" parent="Preference.DialogPreference.Material">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ThemeOverlay.Preference.DialogPreference.EditTextPreference.Material" parent="Preference.DialogPreference.EditTextPreference.Material">
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">false</item>
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ThemeOverlay.App.ActionBar" parent="">
+        <item name="colorSurface">@color/pretix_brand_light</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="Theme.Material3.Light.Dialog">
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
@@ -17,7 +56,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
