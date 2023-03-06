@@ -12,6 +12,7 @@ import android.os.ResultReceiver
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.preference.PreferenceManager
 import com.lowagie.text.Document
 import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
@@ -24,7 +25,6 @@ import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
 import org.jetbrains.anko.ctx
-import org.jetbrains.anko.defaultSharedPreferences
 import org.json.JSONObject
 import java.io.*
 import java.util.concurrent.TimeUnit
@@ -81,7 +81,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
-        val prefs = ctx.defaultSharedPreferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
 
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
@@ -330,7 +330,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
-        val prefs = ctx.defaultSharedPreferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         if (connection == "system") {

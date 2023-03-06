@@ -4,13 +4,13 @@ import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.util.Log
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.SetupFragment
 import eu.pretix.pretixprint.ui.ePOSPrintXMLSettingsFragment
 import java8.util.concurrent.CompletableFuture
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -41,7 +41,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
 
     override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
-            return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
+            return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
 
         val deviceId = getSetting("hardware_${type}printer_deviceId", "local_printer")

@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class ePOSPrintXMLSettingsFragment : SetupFragment() {
 
@@ -17,14 +17,15 @@ class ePOSPrintXMLSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_eposprintxml_settings, container, false)
         val currentWaitAfterPage = (activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_waitafterpage"
-        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_waitafterpage", "100")
+        ) ?: prefs.getString("hardware_${useCase}printer_waitafterpage", "100")
         view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
         val currentDeviceId = (activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_deviceId"
-        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_deviceId", "local_printer")
+        ) ?: prefs.getString("hardware_${useCase}printer_deviceId", "local_printer")
         view.findViewById<TextInputEditText>(R.id.teDeviceId).setText(currentDeviceId)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

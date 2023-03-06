@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.SLCS
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class SLCSSettingsFragment : SetupFragment() {
 
@@ -22,12 +22,13 @@ class SLCSSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_fgl_settings, container, false)
         val proto = SLCS()
 
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
@@ -36,7 +37,7 @@ class SLCSSettingsFragment : SetupFragment() {
         (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
         val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_rotation"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        )) ?: prefs.getString("hardware_${useCase}printer_rotation", "0")
         if (chosenRotation?.isNotEmpty() == true) {
             val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
             (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)

@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.support.v4.*
@@ -166,23 +167,24 @@ class CUPSSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_cups_settings, container, false)
 
         val currentIP = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_ip", "")
         view.findViewById<TextInputEditText>(R.id.teIP).setText(currentIP)
 
         val currentPort = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_port"
         ) as String?)
-                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_port", "631")
+                ?: prefs.getString("hardware_${useCase}printer_port", "631")
         view.findViewById<TextInputEditText>(R.id.tePort).setText(currentPort)
 
         val currentName = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_printername"
         ) as String?)
-                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_printername", "")
+                ?: prefs.getString("hardware_${useCase}printer_printername", "")
         view.findViewById<TextInputEditText>(R.id.teQueue).setText(currentName)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

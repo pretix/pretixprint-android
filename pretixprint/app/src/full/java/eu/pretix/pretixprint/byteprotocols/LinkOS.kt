@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Looper
+import androidx.preference.PreferenceManager
 import com.zebra.sdk.comm.*
 import com.zebra.sdk.graphics.ZebraImageFactory
 import com.zebra.sdk.printer.ZebraPrinter
@@ -19,7 +20,6 @@ import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.LinkOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutionException
@@ -86,7 +86,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
 
     private fun send(pages: List<CompletableFuture<ByteArray>>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
-            return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
+            return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
 
         val future = CompletableFuture<Void>()

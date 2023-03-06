@@ -18,7 +18,6 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.selector
 import java.text.SimpleDateFormat
@@ -232,7 +231,11 @@ class SettingsActivity : AppCompatActivity() {
             ?: return
         val restrictions = restrictionsMgr.applicationRestrictions
         if (restrictions.containsKey("pref_pin")) {
-            defaultSharedPreferences.edit().putString("pref_pin", restrictions.getString("pref_pin")).apply()
+            PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .edit()
+                .putString("pref_pin", restrictions.getString("pref_pin"))
+                .apply()
         }
     }
 }

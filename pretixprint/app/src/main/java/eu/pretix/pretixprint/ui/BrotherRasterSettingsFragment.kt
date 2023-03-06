@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.BrotherRaster
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class BrotherRasterSettingsFragment : SetupFragment() {
 
@@ -37,6 +37,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_brotherraster_settings, container, false)
         val proto = BrotherRaster()
 
@@ -47,7 +48,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
 
         val chosenLabelId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_label"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_label", "")
+        )) ?: prefs.getString("hardware_${useCase}printer_label", "")
         if (chosenLabelId?.isNotEmpty() == true) {
             val chosenLabel = translatedLabelName(BrotherRaster.Label.values().find { it.name == chosenLabelId }!!)
             (view.findViewById<TextInputLayout>(R.id.tilLabel).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
@@ -59,7 +60,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
         (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
         val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_rotation"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        )) ?: prefs.getString("hardware_${useCase}printer_rotation", "0")
         if (chosenRotation?.isNotEmpty() == true) {
             val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
             (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
@@ -67,7 +68,7 @@ class BrotherRasterSettingsFragment : SetupFragment() {
 
         val currentQuality = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_quality"
-        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_quality", "false")!!.toBoolean()
+        )?.toBoolean() ) ?: prefs.getString("hardware_${useCase}printer_quality", "false")!!.toBoolean()
         view.findViewById<SwitchMaterial>(R.id.swQuality).isChecked = currentQuality
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

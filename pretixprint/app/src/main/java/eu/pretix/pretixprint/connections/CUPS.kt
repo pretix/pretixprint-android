@@ -1,13 +1,13 @@
 package eu.pretix.pretixprint.connections
 
 import android.content.Context
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.print.getPrinter
 import io.sentry.Sentry
 import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 
@@ -24,7 +24,7 @@ class CUPSConnection : ConnectionType {
     override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings ?: emptyMap()
         fun getSetting(key: String, def: String): String {
-            return conf!![key] ?: context.defaultSharedPreferences.getString(key, def)!!
+            return conf!![key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
 
         val serverAddr = getSetting("hardware_${type}printer_ip", "127.0.0.1")

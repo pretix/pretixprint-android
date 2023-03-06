@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CompoundButton
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -13,7 +14,6 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.connectionTypes
 import eu.pretix.pretixprint.databinding.ItemConnectionTypeBinding
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.toast
 
 
@@ -95,11 +95,12 @@ class ChooseConnectionTypeFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_choose_connection_type, container, false)
 
         val current = (activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_connection"
-        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_connection", "")
+        ) ?: prefs.getString("hardware_${useCase}printer_connection", "")
 
         val adapter = ConnectionTypeAdapter(connectionTypes.firstOrNull {
             it.identifier == current

@@ -18,11 +18,11 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.preference.PreferenceManager
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.support.v4.act
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.selector
 import org.jetbrains.anko.support.v4.toast
 
@@ -56,16 +56,17 @@ class USBSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_usb_settings, container, false)
 
         val currentSerial = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_ip", "")
         view.findViewById<TextInputEditText>(R.id.teSerial).setText(currentSerial)
 
         val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_usbcompat"
-        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_usbcompat", "false")!!.toBoolean()
+        )?.toBoolean() ) ?: prefs.getString("hardware_${useCase}printer_usbcompat", "false")!!.toBoolean()
         view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked = currentCompat
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

@@ -2,13 +2,13 @@ package eu.pretix.pretixprint.connections
 
 import android.content.Context
 import android.util.Log
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
@@ -27,7 +27,7 @@ class NetworkConnection : ConnectionType {
 
     override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
-        for (entry in context.defaultSharedPreferences.all.iterator()) {
+        for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
             if (!conf.containsKey(entry.key)) {
                 conf[entry.key] = entry.value.toString()
             }

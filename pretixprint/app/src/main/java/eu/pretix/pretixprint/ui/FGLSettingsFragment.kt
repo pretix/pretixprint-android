@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.FGL
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class FGLSettingsFragment : SetupFragment() {
 
@@ -22,6 +22,7 @@ class FGLSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_fgl_settings, container, false)
         val proto = FGL()
 
@@ -32,7 +33,7 @@ class FGLSettingsFragment : SetupFragment() {
 
         val chosenPathId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_path"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_path", "1")
+        )) ?: prefs.getString("hardware_${useCase}printer_path", "1")
         if (chosenPathId?.isNotEmpty() == true) {
             val chosenPath = FGL.Ticketpath.values().find { it.id.toString() == chosenPathId }!!.id.toString()
             (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setText(chosenPath, false)
@@ -44,7 +45,7 @@ class FGLSettingsFragment : SetupFragment() {
         (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
         val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_rotation"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        )) ?: prefs.getString("hardware_${useCase}printer_rotation", "0")
         if (chosenRotation?.isNotEmpty() == true) {
             val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
             (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
@@ -52,7 +53,7 @@ class FGLSettingsFragment : SetupFragment() {
 
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.preference.PreferenceManager
 import com.evolis.libevolis.androidsdk.EvolisPrinter
 import com.evolis.libevolis.androidsdk.model.*
 import com.evolis.libevolis.androidsdk.model.info.ASDK_EvolisPrinterInfos
@@ -25,7 +26,6 @@ import eu.pretix.pretixprint.print.ESCPOSRenderer
 import eu.pretix.pretixprint.ui.EvolisDirectSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -118,7 +118,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
         context: Context
     ) {
         fun getSetting(key: String, def: String): String {
-            return conf[key] ?: context.defaultSharedPreferences.getString(key, def)!!
+            return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
 
         val future = CompletableFuture<Void>()

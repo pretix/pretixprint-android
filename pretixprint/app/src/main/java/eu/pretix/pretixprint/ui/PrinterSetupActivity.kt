@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -9,10 +10,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
-import org.jetbrains.anko.defaultSharedPreferences
 import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
@@ -38,6 +39,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)
 
+        val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         if (!defaultSharedPreferences.getString("pref_pin", "").isNullOrBlank() &&
             (!intent.hasExtra("pin") ||
                 defaultSharedPreferences.getString("pref_pin", "") != intent.getStringExtra("pin")!!)) {
@@ -163,8 +165,9 @@ class PrinterSetupActivity : AppCompatActivity() {
     }
 
     fun save() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         for (p in settingsStagingArea) {
-            defaultSharedPreferences.edit().putString(p.key, p.value).apply()
+            prefs.edit().putString(p.key, p.value).apply()
         }
     }
 
