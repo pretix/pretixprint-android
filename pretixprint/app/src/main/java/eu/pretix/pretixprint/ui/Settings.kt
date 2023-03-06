@@ -4,37 +4,41 @@ import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.content.RestrictionsManager
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.PreferenceFragment
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.selector
+import org.jetbrains.anko.support.v4.intentFor
+import org.jetbrains.anko.support.v4.selector
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
 
 
-class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
+class SettingsFragment : PreferenceFragmentCompat() {
+    lateinit var defaultSharedPreferences: SharedPreferences
     val types = listOf("ticket", "badge", "receipt")
     var pendingPinAction: ((pin: String) -> Unit)? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
         // Load the preferences from an XML resource
-        addPreferencesFromResource(R.xml.preferences)
+        setPreferencesFromResource(R.xml.preferences, rootKey)
 
         for (type in types) {
-            findPreference("hardware_${type}printer_find").setOnPreferenceClickListener {
+            findPreference<Preference>("hardware_${type}printer_find")?.setOnPreferenceClickListener {
                 val intent = Intent(activity, PrinterSetupActivity::class.java)
                 intent.putExtra(PrinterSetupActivity.EXTRA_USECASE, type)
                 startWithPIN(intent)
@@ -42,23 +46,22 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
             }
         }
 
-        findPreference("hardware_receiptprinter_cpl").setOnPreferenceChangeListener { preference, newValue ->
-            val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
-            findPreference("hardware_receiptprinter_cpl").summary = getString(R.string.pref_printer_cpl, newValue)
+        findPreference<ListPreference>("hardware_receiptprinter_cpl")?.setOnPreferenceChangeListener { preference, newValue ->
+            preference.summary = getString(R.string.pref_printer_cpl, newValue)
             return@setOnPreferenceChangeListener true
         }
 
-        findPreference("last_prints").setOnPreferenceClickListener {
+        findPreference<Preference>("last_prints")?.setOnPreferenceClickListener {
             show_last_prints()
             return@setOnPreferenceClickListener true
         }
 
-        findPreference("licenses").setOnPreferenceClickListener {
+        findPreference<Preference>("licenses")?.setOnPreferenceClickListener {
             asset_dialog(R.string.settings_label_licenses)
             return@setOnPreferenceClickListener true
         }
 
-        (findPreference("hardware_receiptprinter_cpl") as ProtectedListPreference).setEarlyPreferenceClickListener { pref ->
+        findPreference<ProtectedListPreference>("hardware_receiptprinter_cpl")?.setEarlyPreferenceClickListener { pref ->
             if (!hasPin()) {
                 // false: handle normally
                 return@setEarlyPreferenceClickListener false
@@ -70,7 +73,7 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
             return@setEarlyPreferenceClickListener true
         }
 
-        (findPreference("pref_pin") as ProtectedEditTextPreference).setEarlyPreferenceClickListener { pref ->
+        findPreference<ProtectedEditTextPreference>("pref_pin")?.setEarlyPreferenceClickListener { pref ->
             if (!hasPin()) {
                 // false: handle normally
                 return@setEarlyPreferenceClickListener false
@@ -81,7 +84,15 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
             return@setEarlyPreferenceClickListener true
         }
 
-        findPreference("version").summary = BuildConfig.VERSION_NAME
+        findPreference<Preference>("version")?.summary = BuildConfig.VERSION_NAME
+
+        childFragmentManager.setFragmentResultListener(PinDialog.RESULT_PIN, this) { _, bundle ->
+            val pin = bundle.getString(PinDialog.RESULT_PIN)
+            if (pin != null && defaultSharedPreferences.getString("pref_pin", "") == pin) {
+                (childFragmentManager.findFragmentByTag(PinDialog.TAG) as? PinDialog)?.dismiss()
+                pendingPinAction?.let { it(pin) }
+            }
+        }
     }
 
     override fun onResume() {
@@ -93,32 +104,32 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
                 val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
                 val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
 
-                findPreference("hardware_${type}printer_find").summary = getString(
-                        R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", activity.packageName))
+                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(
+                        R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName))
                 )
             } else if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
-                findPreference("hardware_${type}printer_find").summary = getString(R.string.pref_printer_current_short,
-                    getString(resources.getIdentifier(connection, "string", activity.packageName)))
+                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(R.string.pref_printer_current_short,
+                    getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
             } else {
-                findPreference("hardware_${type}printer_find").summary = ""
+                findPreference<Preference>("hardware_${type}printer_find")?.summary = ""
             }
         }
 
-        val cpl = findPreference("hardware_receiptprinter_cpl") as ListPreference
-        findPreference("hardware_receiptprinter_cpl").summary = if (cpl.entry.isNullOrEmpty()) {
-            getString(R.string.pref_printer_cpl, cpl.entries[31])
-        } else {
-            getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
+        val cpl = findPreference<ListPreference>("hardware_receiptprinter_cpl")
+        if (cpl != null) {
+            cpl.summary = if (cpl.entry.isNullOrEmpty()) {
+                getString(R.string.pref_printer_cpl, cpl.entries[31])
+            } else {
+                getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
+            }
         }
     }
 
     private fun asset_dialog(@StringRes title: Int) {
-
-        val webView = WebView(activity!!)
+        val webView = WebView(requireActivity())
         webView.loadUrl("file:///android_asset/about.html")
 
-        val view = LayoutInflater.from(activity).inflate(R.layout.dialog_about, null, false)
-        val dialog = AlertDialog.Builder(activity)
+        val dialog = AlertDialog.Builder(requireActivity())
                 .setTitle(title)
                 .setView(webView)
                 .setPositiveButton(R.string.dismiss, null)
@@ -129,7 +140,7 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
 
     fun show_last_prints() {
         val f = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val files = activity!!.cacheDir
+        val files = requireActivity().cacheDir
                 .listFiles { file, s -> s.startsWith("print_") || s.startsWith("error_") }!!
                 .toList()
                 .filter {
@@ -149,17 +160,17 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
                 "escpos" -> {
                     val intent = intentFor<FileViewerEscposActivity>()
                     intent.putExtra(FileViewerEscposActivity.EXTRA_PATH, file.absolutePath)
-                    activity!!.startActivity(intent)
+                    requireActivity().startActivity(intent)
                 }
                 "log" -> {
                     val intent = intentFor<FileViewerLogActivity>()
                     intent.putExtra(FileViewerLogActivity.EXTRA_PATH, file.absolutePath)
-                    activity!!.startActivity(intent)
+                    requireActivity().startActivity(intent)
                 }
                 "pdf" -> {
                     val intent = intentFor<FileViewerPdfActivity>()
                     intent.putExtra(FileViewerPdfActivity.EXTRA_PATH, file.absolutePath)
-                    activity!!.startActivity(intent)
+                    requireActivity().startActivity(intent)
                 }
                 else -> throw RuntimeException("Unknown file type for file $file")
             }
@@ -177,14 +188,7 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
             return
         }
         pendingPinAction = valid
-        PinDialog().show(childFragmentManager, PinDialog.TAG)
-    }
-
-    override fun checkPin(pin: String) {
-        if (defaultSharedPreferences.getString("pref_pin", "") == pin) {
-            (childFragmentManager.findFragmentByTag(PinDialog.TAG) as? PinDialog)?.dismiss()
-            pendingPinAction?.let { it(pin) }
-        }
+        PinDialog().show(childFragmentManager)
     }
 
     fun startWithPIN(intent: Intent) {
@@ -195,23 +199,28 @@ class SettingsFragment : ChecksPinFragment, PreferenceFragment() {
     }
 }
 
-class SettingsActivity : AppCompatPreferenceActivity() {
+class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         applyRestrictions(this)
-        if (!defaultSharedPreferences.contains("first_start")) {
-            defaultSharedPreferences.edit().putBoolean("first_start", true).apply();
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        if (!prefs.contains("first_start")) {
+            prefs.edit().putBoolean("first_start", true).apply()
             val intent = Intent(this, WelcomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK.or(Intent.FLAG_ACTIVITY_TASK_ON_HOME)
             startActivity(intent)
             finish()
         }
 
+        setContentView(R.layout.activity_settings)
+
         // Display the fragment as the main content.
-        fragmentManager.beginTransaction()
-                .replace(android.R.id.content, SettingsFragment())
-                .commit()
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.content, SettingsFragment())
+            .commit()
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

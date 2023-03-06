@@ -67,7 +67,8 @@
         </activity>
         <activity
             android:name=".ui.PrinterSetupActivity"
-            android:parentActivityName=".ui.SettingsActivity" />
+            android:parentActivityName=".ui.SettingsActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="true"

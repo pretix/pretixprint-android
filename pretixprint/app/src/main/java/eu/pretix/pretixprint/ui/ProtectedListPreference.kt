@@ -1,8 +1,8 @@
 package eu.pretix.pretixprint.ui
 
 import android.content.Context
-import android.preference.ListPreference
 import android.util.AttributeSet
+import androidx.preference.ListPreference
 
 class ProtectedListPreference(context: Context, attrs: AttributeSet):
     ListPreference(context, attrs) {
@@ -22,6 +22,6 @@ class ProtectedListPreference(context: Context, attrs: AttributeSet):
     }
 
     fun showDialog() {
-        super.showDialog(null)
+        preferenceManager.showDialog(this)
     }
 }
