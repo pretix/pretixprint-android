@@ -5,6 +5,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'org.cups4j'
 
 }
 repositories {

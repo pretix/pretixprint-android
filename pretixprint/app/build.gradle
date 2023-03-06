@@ -40,7 +40,7 @@ android {
     }
 
     buildTypes {
-        def sentry_dsn = "";
+        def sentry_dsn = ""
         try {
             Properties properties = new Properties()
             properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -97,6 +97,7 @@ android {
         abortOnError false
         disable 'InvalidPackage', 'MissingTranslation'
     }
+    namespace 'eu.pretix.pretixprint'
 }
 
 dependencies {
