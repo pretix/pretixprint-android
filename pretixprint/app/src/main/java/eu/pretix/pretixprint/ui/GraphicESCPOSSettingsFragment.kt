@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
@@ -42,6 +43,11 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 ?: defaultSharedPreferences.getString("hardware_${useCase}printer_waitafterpage", "2000")
         view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
 
+        val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_graphicescposcompat"
+        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_graphicescposcompat", "false")!!.toBoolean()
+        view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked = currentCompat
+
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
             it.toString()
         })
@@ -62,6 +68,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
             val wap = view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).text.toString()
             val mw = view.findViewById<TextInputEditText>(R.id.teMaxWidth).text.toString()
             val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
+            val compat = view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked
             if (TextUtils.isEmpty(mw)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(mw)) {
@@ -78,6 +85,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
                 val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
 
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_graphicescposcompat", compat.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotation", mappedRotation.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",
                         dpi)

@@ -3,10 +3,8 @@ package eu.pretix.pretixprint.byteprotocols
 import android.graphics.Bitmap
 import android.util.Log
 import com.github.anastaciocintra.escpos.EscPos
-import com.github.anastaciocintra.escpos.image.BitonalThreshold
-import com.github.anastaciocintra.escpos.image.CoffeeImage
-import com.github.anastaciocintra.escpos.image.EscPosImage
-import com.github.anastaciocintra.escpos.image.GraphicsImageWrapper
+import com.github.anastaciocintra.escpos.EscPosConst
+import com.github.anastaciocintra.escpos.image.*
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
@@ -33,10 +31,46 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
         return type !is SunmiInternalConnection
     }
 
+    class GSV0ImageWrapper(): ImageWrapperInterface {
+        override fun getBytes(image: EscPosImage): ByteArray {
+            // https://reference.epson-biz.com/modules/ref_escpos/index.php?content_id=94
+            //  GS v 0   [obsolete command]
+            // Required e.g. on iMin devices
+            val bytes = ByteArrayOutputStream()
+
+            bytes.write(EscPosConst.GS)
+            bytes.write('v'.code)
+            bytes.write('0'.code)
+            bytes.write(0)
+
+            //  bits in horizontal direction for the bit image
+            val horizontalBytes = image.horizontalBytesOfRaster
+            val xL = horizontalBytes and 0xFF
+            val xH = horizontalBytes and 0xFF00 shr 8
+
+            //  bits in vertical direction for the bit image
+            val verticalBits = image.heightOfImageInBits
+
+            val yL = verticalBits and 0xFF
+            val yH = verticalBits and 0xFF00 shr 8
+
+            bytes.write(xL)
+            bytes.write(xH)
+            bytes.write(yL)
+            bytes.write(yH)
+
+            val rasterBytes = image.rasterBytes.toByteArray()
+            bytes.write(rasterBytes, 0, rasterBytes.size)
+            return bytes.toByteArray()
+        }
+
+    }
+
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         val escpos = EscPos(ostream)
 
+        val compat = (conf.get("hardware_${type}printer_graphicescposcompat") ?: "false") == "true"
         val targetWidthMM = Integer.valueOf(conf.get("hardware_${type}printer_maxwidth")
                 ?: "100000").toFloat()
         val dpi = Integer.valueOf(conf.get("hardware_${type}printer_dpi")
@@ -56,9 +90,14 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
             val cropped = Bitmap.createBitmap(scaled, 0, yoff, scaled.width, Math.min(scaled.height - yoff, maxheight), null, false)
             val algorithm = BitonalThreshold(127)
             val escposImage = EscPosImage(CoffeeImageAndroidImpl(cropped), algorithm)
-            val imageWrapper = GraphicsImageWrapper()
-            imageWrapper.setGraphicsImageBxBy(GraphicsImageWrapper.GraphicsImageBxBy.Normal_Default)
-            escpos.write(imageWrapper, escposImage)
+            if (compat) {
+                val imageWrapper = GSV0ImageWrapper()
+                escpos.write(imageWrapper, escposImage)
+            } else {
+                val imageWrapper = GraphicsImageWrapper()
+                imageWrapper.setGraphicsImageBxBy(GraphicsImageWrapper.GraphicsImageBxBy.Normal_Default)
+                escpos.write(imageWrapper, escposImage)
+            }
             yoff += maxheight
         }
 
