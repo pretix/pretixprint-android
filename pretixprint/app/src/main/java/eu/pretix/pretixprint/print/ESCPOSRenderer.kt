@@ -56,6 +56,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             Thai17(25),
             Thai18(26),
             StarCp1252(32),
+            IminCp1250(0x48),
             UserDefined1(254),
             UserDefined2(255)
         }
@@ -101,6 +102,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         enum class Dialect(val description: String) {
             EpsonDefault("Epson, Bixolon, Metapace, SNBC"),
             Sunmi("Sunmi"),
+            IMin("iMin"),
             StarPRNT("StarPRNT")
         }
     }
@@ -120,6 +122,10 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             Dialect.Sunmi -> {
                 selectKanjiCharacterMode()
                 selectKanjiCharacterCodeSystem(-1)
+            }
+            Dialect.IMin -> {
+                cancelKanjiCharacterMode()
+                characterCodeTable(CharacterCodeTable.IminCp1250.codeTable)
             }
         }
 
@@ -748,6 +754,8 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
         if (dialect == Dialect.Sunmi) {
             out.addAll(printText.toByteArray(Charset.forName("UTF-8")).toTypedArray())
+        } else if (dialect == Dialect.IMin) {
+            out.addAll(printText.toByteArray(Charset.forName("cp1250")).toTypedArray())
         } else {
             for (char in printText) {
                 out.add(char.toByte())
@@ -852,6 +860,10 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             Dialect.Sunmi -> {
                 selectKanjiCharacterMode()
                 selectKanjiCharacterCodeSystem(-1)
+            }
+            Dialect.IMin -> {
+                cancelKanjiCharacterMode()
+                characterCodeTable(CharacterCodeTable.IminCp1250.codeTable)
             }
         }
         qr("TEST COMPLETED", 6)
