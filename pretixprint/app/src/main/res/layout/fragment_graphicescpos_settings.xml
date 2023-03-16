@@ -111,6 +111,18 @@
                     android:hint="@string/field_label_waitafterpage"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/swCompat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tilWaitAfterPage"
+                android:text="@string/field_label_graphicescposcompat"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
