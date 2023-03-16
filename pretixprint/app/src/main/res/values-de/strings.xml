@@ -134,4 +134,5 @@
     <string name="print_now_notification">Druck bereit. Antippen um Druckdialog zu öffnen.</string>
     <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
     <string name="pin_protection_description">Einstellungen mit einer selbstgewählten PIN sperren, die zum Ändern der Drucker-Konfiguration eingegeben werden muss</string>
+    <string name="operation_pin_headline">PIN eingeben</string>
 </resources>
