@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.connections
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -16,6 +17,7 @@ import io.sentry.Sentry
 import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
+import java.util.*
 import java.util.concurrent.TimeoutException
 
 class BluetoothConnection : ConnectionType {
@@ -65,7 +67,13 @@ class BluetoothConnection : ConnectionType {
                 when (proto) {
                     is StreamByteProtocol<*> -> {
                         // Yes, unfortunately this is necessary when using Services/IntentServices to connect to BT devices.
-                        val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+                        device.fetchUuidsWithSdp()
+                        val socket = if (Build.BRAND == "iMin" && address == "00:11:22:33:44:55") {
+                            // Hardcoded UUID for virtual bluetooth interface of built-in printer in iMin Falcon 1
+                            device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
+                        } else {
+                            device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+                        }
                         val clazz = socket.remoteDevice.javaClass
                         val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
                         val m = clazz.getMethod("createRfcommSocket", *paramTypes)
