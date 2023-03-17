@@ -14,8 +14,8 @@ import java.util.*
 
 
 class OrderPositionContentProvider(private val order: JSONObject, private val op: JSONObject, private val imageMap: Map<String, InputStream?>) : ContentProvider {
-    fun i18nToString(str: JSONObject): String? {
-        val lng = Locale.getDefault().language
+    fun i18nToString(str: JSONObject, locale: String?): String? {
+        val lng = locale ?: Locale.getDefault().language
         val lngparts = lng.split("[-_]".toRegex()).toTypedArray()
         try {
             if (str.has(lng) && str.getString(lng) != "") {
@@ -51,7 +51,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
         if (content == "other") {
             return interpolate(text ?: "")
         } else if (content == "other_i18n") {
-            return if (textI18n != null) interpolate(i18nToString(textI18n) ?: "") else ""
+            return if (textI18n != null) interpolate(i18nToString(textI18n, order.optString("locale")) ?: "") else ""
         } else if (op.has("pdf_data") && op.getJSONObject("pdf_data").has(content)) {
             if (op.getJSONObject("pdf_data").isNull(content)) {
                 return ""
