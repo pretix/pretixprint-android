@@ -3,7 +3,6 @@ package eu.pretix.pretixprint
 import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
 import com.facebook.flipper.android.AndroidFlipperClient
-import com.facebook.flipper.android.utils.FlipperUtils
 import com.facebook.flipper.core.FlipperClient
 import com.facebook.soloader.SoLoader
 import com.tom_roush.pdfbox.util.PDFBoxResourceLoader
@@ -17,7 +16,7 @@ class PretixPrint : MultiDexApplication() {
         PDFBoxResourceLoader.init(getApplicationContext())
 
         SoLoader.init(this, false)
-        if (BuildConfig.DEBUG && FlipperUtils.shouldEnableFlipper(this)) {
+        if (BuildConfig.DEBUG && FlipperInitializer.active(this)) {
             val client: FlipperClient = AndroidFlipperClient.getInstance(this)
             FlipperInitializer.initFlipperPlugins(this, client)
         }

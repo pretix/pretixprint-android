@@ -2,6 +2,7 @@ package eu.pretix.pretixprint
 
 import android.app.Application
 import android.content.Context
+import com.facebook.flipper.android.utils.FlipperUtils
 import com.facebook.flipper.core.FlipperClient
 import com.facebook.flipper.plugins.crashreporter.CrashReporterPlugin
 import com.facebook.flipper.plugins.inspector.DescriptorMapping
@@ -21,5 +22,9 @@ object FlipperInitializer {
         client.addPlugin(CrashReporterPlugin.getInstance())
         client.addPlugin(SharedPreferencesFlipperPlugin(context))
         client.start()
+    }
+
+    fun active(context: Context): Boolean {
+        return FlipperUtils.shouldEnableFlipper(context)
     }
 }
