@@ -1,11 +1,15 @@
 package eu.pretix.pretixprint.ui
 
 import android.app.Dialog
-import android.app.DialogFragment
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.databinding.ObservableField
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.setFragmentResult
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.databinding.DialogPinBinding
 import java.util.Collections
@@ -16,14 +20,11 @@ class PINInputDataHolder() {
     val text = ObservableField("")
 }
 
-interface ChecksPinFragment {
-    fun checkPin(pin: String)
-}
-
-// PinDialog, backported for old android.app.DialogFragment (no androidx yet)
 class PinDialog : DialogFragment() {
     companion object {
         const val TAG = "PinDialogFragment"
+        const val RESULT_PIN = "pin"
+        const val RESULT_DISMISS = "dismiss"
     }
 
     val data = PINInputDataHolder()
@@ -31,7 +32,7 @@ class PinDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         data.input.set("")
 
-        val binding = DialogPinBinding.inflate(parentFragment.layoutInflater)
+        val binding = DialogPinBinding.inflate(layoutInflater)
         binding.data = data
 
         binding.keyboardButtonView0.setOnClickListener { pushDigit("0") }
@@ -82,6 +83,15 @@ class PinDialog : DialogFragment() {
         val current = data.input.get()!!
         data.input.set(current + digit)
         data.text.set(Collections.nCopies(data.input.get()!!.length, "*").joinToString(""))
-        (parentFragment as ChecksPinFragment).checkPin(data.input.get()!!)
+        setFragmentResult(RESULT_PIN, bundleOf(RESULT_PIN to data.input.get()!!))
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        setFragmentResult(RESULT_DISMISS, bundleOf())
+        super.onDismiss(dialog)
+    }
+
+    fun show(manager: FragmentManager) {
+        super.show(manager, TAG)
     }
 }

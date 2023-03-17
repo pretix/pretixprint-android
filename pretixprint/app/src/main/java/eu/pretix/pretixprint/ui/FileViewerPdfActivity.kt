@@ -11,12 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.rendering.PDFRenderer
 import eu.pretix.pretixprint.databinding.ActivityFileViewerPdfBinding
-import org.jetbrains.anko.doAsync
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
 class FileViewerPdfActivity : AppCompatActivity() {
+    val bgScope = CoroutineScope(Dispatchers.IO)
+
     companion object {
         val EXTRA_PATH = "path"
     }
@@ -36,7 +40,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
         binding.tvPdfInfo.text = "Loading…"
         pageIndex = page
         val file = File(intent.getStringExtra(EXTRA_PATH))
-        doAsync {
+        bgScope.launch {
             if (Build.VERSION.SDK_INT >= 21) {
                 val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
                 val renderer = android.graphics.pdf.PdfRenderer(fd)

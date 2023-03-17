@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CompoundButton
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,8 +15,7 @@ import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.connectionTypes
 import eu.pretix.pretixprint.databinding.ItemByteProtocolBinding
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.toast
+import splitties.toast.toast
 
 
 class ByteProtocolDiffCallback : DiffUtil.ItemCallback<ByteProtocolInterface<*>>() {
@@ -95,6 +95,7 @@ class ChooseByteProtocolFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_choose_byte_protocol, container, false)
 
         val connectionIdentifier = (activity as PrinterSetupActivity).settingsStagingArea.get(
@@ -104,7 +105,7 @@ class ChooseByteProtocolFragment : SetupFragment() {
 
         val current = (activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_mode"
-        ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_mode", "")
+        ) ?: prefs.getString("hardware_${useCase}printer_mode", "")
 
         val adapter = ByteProtocolAdapter(protocols.firstOrNull {
             it.identifier == current
@@ -121,7 +122,7 @@ class ChooseByteProtocolFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_mode", adapter.selectedValue!!.identifier)
                 (activity as PrinterSetupActivity).startProtocolSettings()
             } else {
-                toast(R.string.error_no_choice).show()
+                toast(R.string.error_no_choice)
             }
         }
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

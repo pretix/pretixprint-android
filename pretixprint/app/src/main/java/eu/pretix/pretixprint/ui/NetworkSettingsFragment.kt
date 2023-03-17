@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class NetworkSettingsFragment : SetupFragment() {
 
@@ -17,16 +17,17 @@ class NetworkSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_network_settings, container, false)
 
         val currentIP = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_ip", "")
         view.findViewById<TextInputEditText>(R.id.teIP).setText(currentIP)
 
         val currentPort = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_port"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_port", "9100")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_port", "9100")
         view.findViewById<TextInputEditText>(R.id.tePort).setText(currentPort)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

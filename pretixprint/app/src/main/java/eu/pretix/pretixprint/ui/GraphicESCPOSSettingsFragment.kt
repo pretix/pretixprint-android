@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 class GraphicESCPOSSettingsFragment : SetupFragment() {
 
@@ -23,29 +23,30 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_graphicescpos_settings, container, false)
         val proto = GraphicESCPOS()
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?)
-                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
+                ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         val currentMaxWidth = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_maxwidth"
         ) as String?)
-                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_maxwidth", "72")
+                ?: prefs.getString("hardware_${useCase}printer_maxwidth", "72")
         view.findViewById<TextInputEditText>(R.id.teMaxWidth).setText(currentMaxWidth)
 
         val currentWaitAfterPage = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_waitafterpage"
         ) as String?)
-                ?: defaultSharedPreferences.getString("hardware_${useCase}printer_waitafterpage", "2000")
+                ?: prefs.getString("hardware_${useCase}printer_waitafterpage", "2000")
         view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
 
         val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_graphicescposcompat"
-        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_graphicescposcompat", "false")!!.toBoolean()
+        )?.toBoolean() ) ?: prefs.getString("hardware_${useCase}printer_graphicescposcompat", "false")!!.toBoolean()
         view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked = currentCompat
 
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
@@ -54,7 +55,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
         (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
         val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_rotation"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        )) ?: prefs.getString("hardware_${useCase}printer_rotation", "0")
         if (chosenRotation?.isNotEmpty() == true) {
             val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
             (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.CustomByteProtocol
@@ -14,7 +15,6 @@ import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
-import org.jetbrains.anko.defaultSharedPreferences
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -35,7 +35,7 @@ class BluetoothConnection : ConnectionType {
         this.context = context
 
         val conf = settings?.toMutableMap() ?: mutableMapOf()
-        for (entry in context.defaultSharedPreferences.all.iterator()) {
+        for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
             if (!conf.containsKey(entry.key)) {
                 conf[entry.key] = entry.value.toString()
             }

@@ -1,7 +1,7 @@
 package eu.pretix.pretixprint.connections
 
 import android.content.Context
-import org.jetbrains.anko.defaultSharedPreferences
+import androidx.preference.PreferenceManager
 import java.io.File
 
 interface ConnectionType {
@@ -18,6 +18,6 @@ interface ConnectionType {
     fun print(tmpfile: File, numPages: Int, context: Context, useCase: String, settings: Map<String, String>? = null)
 
     fun isConfiguredFor(context: Context, type: String): Boolean {
-        return !context.defaultSharedPreferences.getString("hardware_${type}printer_ip", "").isNullOrEmpty()
+        return !PreferenceManager.getDefaultSharedPreferences(context).getString("hardware_${type}printer_ip", "").isNullOrEmpty()
     }
 }

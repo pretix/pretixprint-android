@@ -12,6 +12,7 @@ import android.os.ResultReceiver
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.preference.PreferenceManager
 import com.lowagie.text.Document
 import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
@@ -23,8 +24,6 @@ import eu.pretix.pretixprint.ui.SettingsActivity
 import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
-import org.jetbrains.anko.ctx
-import org.jetbrains.anko.defaultSharedPreferences
 import org.json.JSONObject
 import java.io.*
 import java.util.concurrent.TimeUnit
@@ -81,7 +80,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
-        val prefs = ctx.defaultSharedPreferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
 
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
@@ -126,7 +125,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         var tmpfile: File?
         var pagenum = 0
 
-        val dataInputStream = ctx.contentResolver.openInputStream(intent.clipData!!.getItemAt(0).uri)
+        val dataInputStream = applicationContext.contentResolver.openInputStream(intent.clipData!!.getItemAt(0).uri)
         val jsonData = JSONObject(dataInputStream!!.bufferedReader().use { it.readText() })
         val positions = jsonData.getJSONArray("positions")
 
@@ -158,7 +157,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout")
 
-                            val _tmpfile = File.createTempFile("page_$i", ".pdf", ctx.cacheDir)
+                            val _tmpfile = File.createTempFile("page_$i", ".pdf", applicationContext.cacheDir)
 
                             val imageMap = mutableMapOf<String, InputStream?>()
                             if (position.has("__image_map")) {
@@ -330,7 +329,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
-        val prefs = ctx.defaultSharedPreferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
         if (connection == "system") {

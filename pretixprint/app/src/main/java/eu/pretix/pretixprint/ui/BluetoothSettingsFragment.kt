@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.ui.BluetoothDeviceManager.BluetoothDevicePickResultHandler
@@ -26,7 +27,6 @@ import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.ACTION_LAUNCH
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_FILTER_TYPE
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.EXTRA_NEED_AUTH
 import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.FILTER_TYPE_ALL
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 
 class BluetoothSettingsFragment : SetupFragment() {
@@ -35,6 +35,7 @@ class BluetoothSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_bluetooth_settings, container, false)
 
         val deviceManager = BluetoothDeviceManager(this.requireContext())
@@ -51,7 +52,7 @@ class BluetoothSettingsFragment : SetupFragment() {
 
         val currentIP = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_ip", "")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_ip", "")
         teMAC.setText(currentIP)
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {

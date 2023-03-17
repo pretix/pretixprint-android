@@ -1,8 +1,8 @@
 package eu.pretix.pretixprint.ui
 
 import android.content.Context
-import android.preference.EditTextPreference
 import android.util.AttributeSet
+import androidx.preference.EditTextPreference
 
 class ProtectedEditTextPreference(context: Context, attrs: AttributeSet) :
     EditTextPreference(context, attrs) {
@@ -22,6 +22,6 @@ class ProtectedEditTextPreference(context: Context, attrs: AttributeSet) :
     }
 
     fun showDialog() {
-        super.showDialog(null)
+        preferenceManager.showDialog(this)
     }
 }

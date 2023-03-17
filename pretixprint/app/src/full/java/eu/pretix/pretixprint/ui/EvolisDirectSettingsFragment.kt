@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import androidx.preference.PreferenceManager
 import com.evolis.libevolis.androidsdk.model.ASDK_INTRAY
 import com.evolis.libevolis.androidsdk.model.ASDK_OUTTRAY
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -16,7 +17,6 @@ import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.EvolisDirect
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
 
 
 class EvolisDirectSettingsFragment : SetupFragment() {
@@ -26,27 +26,28 @@ class EvolisDirectSettingsFragment : SetupFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_linkoscard_settings, container, false)
         val proto = EvolisDirect()
 
         val currentDoubleSided = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_doublesided"
-        )?.toBoolean() ) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_doublesided", "false")!!.toBoolean()
+        )?.toBoolean() ) ?: prefs.getString("hardware_${useCase}printer_doublesided", "false")!!.toBoolean()
         view.findViewById<SwitchMaterial>(R.id.swDoubleSided).isChecked = currentDoubleSided
 
         val currentCardSource = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_cardsource"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_cardsource", "EVOLIS_IT_BOTH")  // todo: is this allowed on primacy?
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_cardsource", "EVOLIS_IT_BOTH")  // todo: is this allowed on primacy?
         view.findViewById<TextInputLayout>(R.id.tilCardSource).editText?.setText(currentCardSource)
 
         val currentCardDestination = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_carddestination"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_carddestination", "EVOLIS_OT_STANDARD")
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_carddestination", "EVOLIS_OT_STANDARD")
         view.findViewById<TextInputLayout>(R.id.tilCardDestination).editText?.setText(currentCardDestination)
 
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
+        ) as String?) ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
@@ -55,7 +56,7 @@ class EvolisDirectSettingsFragment : SetupFragment() {
         (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setAdapter(rotationAdapter)
         val chosenRotation = ((activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_rotation"
-        )) ?: defaultSharedPreferences.getString("hardware_${useCase}printer_rotation", "0")
+        )) ?: prefs.getString("hardware_${useCase}printer_rotation", "0")
         if (chosenRotation?.isNotEmpty() == true) {
             val chosenLabel = Rotation.values().find { it.degrees == Integer.valueOf(chosenRotation) }!!.toString()
             (view.findViewById<TextInputLayout>(R.id.tilRotation).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
