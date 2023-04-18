@@ -692,8 +692,8 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
 
         if (dialect == Dialect.StarPRNT) {
             // https://www.starmicronics.com/support/Mannualfolder/escpos_cm_en.pdf
-            // QR Code: Select the model
-            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x30, 0x01).map { it.toByte() })
+            // QR Code: Select model 2
+            out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x30, 0x02).map { it.toByte() })
             // Set n for error correction [x00 -> 7%] [x01-> 15%] [x02 -> 25%] [x03 -> 30%]
             out.addAll(listOf(0x1b, 0x1d, 0x79, 0x53, 0x31, 0x01).map { it.toByte() })
             // QR Code: Set the size of module
