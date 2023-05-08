@@ -143,6 +143,11 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             cut()
         }
         if (receipt.optBoolean("drawerAfter", true)) {
+            if (layout.length() == 0 && dialect == Dialect.IMin) {
+                // iMin does not open drawer on completely empty print, cut is required.
+                newline()
+                cut()
+            }
             opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
             opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
         }
