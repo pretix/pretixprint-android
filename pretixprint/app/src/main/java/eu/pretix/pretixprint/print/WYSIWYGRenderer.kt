@@ -99,6 +99,7 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
         fun registerFonts(ctx: Context) {
             registerFontFamily(ctx, "Open Sans", "fonts/OpenSans-%s.ttf")
             registerFontFamily(ctx, "Noto Sans", "fonts/NotoSans-%s-webfont.ttf")
+            registerFontFamily(ctx, "Noto Sans Japanese", "fonts/noto-sans-jp-v52-cyrillic_japanese_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
             registerFontFamily(ctx, "Roboto", "fonts/Roboto-%s.ttf")
             registerFontFamily(ctx, "Droid Serif", "fonts/DroidSerif-%s-webfont.ttf")
             registerFontFamily(ctx, "Fira Sans", "fonts/firasans-%s-webfont.ttf")
