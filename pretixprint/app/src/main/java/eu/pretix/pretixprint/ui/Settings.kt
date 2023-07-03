@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.ui
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
@@ -8,8 +9,11 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.webkit.WebView
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -35,11 +39,20 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
         for (type in types) {
-            findPreference<Preference>("hardware_${type}printer_find")?.setOnPreferenceClickListener {
-                val intent = Intent(activity, PrinterSetupActivity::class.java)
-                intent.putExtra(PrinterSetupActivity.EXTRA_USECASE, type)
-                startWithPIN(intent)
-                return@setOnPreferenceClickListener true
+            findPreference<PrinterPreference>("hardware_${type}printer_find")?.apply {
+                setOnPreferenceClickListener {
+                    val intent = Intent(activity, PrinterSetupActivity::class.java)
+                    intent.putExtra(PrinterSetupActivity.EXTRA_USECASE, type)
+                    startWithPIN(intent)
+                    return@setOnPreferenceClickListener true
+                }
+                setOnMenuItemClickListener = { menuItem ->
+                    when (menuItem.itemId) {
+                        R.id.maintenance -> { openMaintainPrinter(type); true }
+                        R.id.remove -> { confirmRemovePrinter(type); true }
+                        else -> false
+                    }
+                }
             }
         }
 
@@ -95,20 +108,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         for (type in types) {
-            val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
-
-            if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
-                val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
-                val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
-
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(
-                        R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName))
-                )
-            } else if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = getString(R.string.pref_printer_current_short,
-                    getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
-            } else {
-                findPreference<Preference>("hardware_${type}printer_find")?.summary = ""
+            findPreference<PrinterPreference>("hardware_${type}printer_find")?.apply {
+                if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
+                    moreVisibility = VISIBLE
+                    summary = printerSummary(type)
+                } else {
+                    moreVisibility = GONE
+                    summary = ""
+                }
             }
         }
 
@@ -120,6 +127,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
             }
         }
+    }
+
+    private fun printerSummary(type: String): String {
+        val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
+        val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
+        val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
+        return getString(R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
     }
 
     private fun asset_dialog(@StringRes title: Int) {
@@ -196,6 +210,39 @@ class SettingsFragment : PreferenceFragmentCompat() {
             intent.putExtra("pin", pin)
             startActivity(intent)
         }
+    }
+
+    fun openMaintainPrinter(type: String) {
+        val intent = Intent(requireContext(), MaintenanceActivity::class.java)
+        intent.putExtra(MaintenanceActivity.EXTRA_TYPE, type)
+        startWithPIN(intent)
+    }
+
+    fun confirmRemovePrinter(type: String) {
+        pinProtect {
+            val typeRef = resources.getIdentifier("settings_label_${type}printer", "string", requireActivity().packageName)
+            val summary = printerSummary(type)
+            val alert = AlertDialog.Builder(requireActivity())
+                .setTitle(getString(R.string.pref_delete_printer, getString(typeRef)))
+                .setMessage(summary)
+                .setPositiveButton(R.string.action_delete) { dialog, _ ->
+                    removePrinter(type)
+                    onResume() // refresh preferences
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+            alert.show()
+        }
+    }
+
+    @SuppressLint("ApplySharedPref")
+    fun removePrinter(type: String) {
+        defaultSharedPreferences.edit()
+            .remove("hardware_${type}printer_ip")
+            .remove("hardware_${type}printer_printername")
+            .remove("hardware_${type}printer_connection")
+            .commit()
     }
 }
 

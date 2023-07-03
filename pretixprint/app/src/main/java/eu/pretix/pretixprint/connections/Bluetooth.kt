@@ -1,6 +1,7 @@
 package eu.pretix.pretixprint.connections
 
-import android.bluetooth.BluetoothAdapter
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.os.Build
@@ -15,10 +16,13 @@ import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeoutException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class BluetoothConnection : ConnectionType {
     override val identifier = "bluetooth_printer"
@@ -56,8 +60,8 @@ class BluetoothConnection : ConnectionType {
         }
 
         Log.i("PrintService", "Starting Bluetooth printing")
-        val adapter = BluetoothAdapter.getDefaultAdapter()
-        val device = adapter.getRemoteDevice(address)
+        val bme = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val device = bme.adapter.getRemoteDevice(conf.get("hardware_${type}printer_ip") ?: "")
 
         try {
             Log.i("PrintService", "Starting renderPages")
@@ -85,7 +89,7 @@ class BluetoothConnection : ConnectionType {
                             try {
                                 connFailure = null
                                 Log.i("PrintService", "Start connection to $address, try $i")
-                                adapter.cancelDiscovery()
+                                bme.adapter.cancelDiscovery()
                                 fallbackSocket.connect()
                                 break
                             } catch (e: Exception) {
@@ -134,5 +138,42 @@ class BluetoothConnection : ConnectionType {
             e.printStackTrace()
             throw PrintException(context.applicationContext.getString(R.string.err_generic, e.message))
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCancellableCoroutine { cont ->
+        val conf = PreferenceManager.getDefaultSharedPreferences(context)
+        val addr = conf.getString("hardware_${type}printer_ip", "")
+        val fallbackSocket: BluetoothSocket
+        try {
+            val bme = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val adapter = bme.adapter
+            if (adapter == null || !adapter.isEnabled) {
+                cont.resumeWithException(IllegalStateException("Bluetooth not enabled"))
+                return@suspendCancellableCoroutine
+            }
+            val device = adapter.getRemoteDevice(addr)
+            if (device.uuids == null) {
+                cont.resumeWithException(IllegalStateException("Bluetooth device not available"))
+                return@suspendCancellableCoroutine
+            }
+            val socket = device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
+            val clazz = socket.remoteDevice.javaClass
+            val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
+            val m = clazz.getMethod("createRfcommSocket", *paramTypes)
+            fallbackSocket =
+                m.invoke(socket.remoteDevice, Integer.valueOf(1)) as BluetoothSocket
+            cont.invokeOnCancellation { fallbackSocket.close() }
+
+            fallbackSocket.connect()
+        } catch (e: Exception) {
+            cont.resumeWithException(e)
+            return@suspendCancellableCoroutine
+        }
+
+        val istream = fallbackSocket.inputStream
+        val ostream = fallbackSocket.outputStream
+
+        cont.resume(CloseableStreamHolder(istream, ostream, fallbackSocket))
     }
 }
