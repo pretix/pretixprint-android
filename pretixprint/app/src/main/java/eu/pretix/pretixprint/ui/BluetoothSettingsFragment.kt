@@ -71,19 +71,29 @@ class BluetoothSettingsFragment : SetupFragment() {
         }
 
         val requestPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-                if (!isGranted) {
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { isGranted: Map<String, Boolean> ->
+                if (isGranted.values.contains(false)) {
                     back()
                 }
             }
 
-        val perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val perms = mutableListOf<String>()
+        var perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 Manifest.permission.BLUETOOTH_CONNECT
             } else {
                 Manifest.permission.BLUETOOTH_ADMIN
             }
         if (ContextCompat.checkSelfPermission(requireContext(), perm) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissionLauncher.launch(perm)
+            perms.add(perm)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            perm = Manifest.permission.BLUETOOTH_SCAN
+            if (ContextCompat.checkSelfPermission(requireContext(), perm) != PackageManager.PERMISSION_GRANTED) {
+                perms.add(perm)
+            }
+        }
+        if (perms.isNotEmpty()) {
+            requestPermissionLauncher.launch(perms.toTypedArray())
         }
 
         return view
