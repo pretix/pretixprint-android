@@ -82,6 +82,7 @@ class FinishSettingsFragment : SetupFragment() {
         testPageButton.setOnClickListener {
             testPageButton.showProgress {
                 buttonTextRes = R.string.testing
+                progressColorRes = R.color.white
             }
             bgScope.launch {
                 try {
