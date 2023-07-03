@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -46,6 +45,13 @@ class BluetoothSettingsFragment : SetupFragment() {
             deviceManager.pickDevice(object : BluetoothDevicePickResultHandler {
                 override fun onDevicePicked(device: BluetoothDevice?) {
                     teMAC.setText(device?.address, TextView.BufferType.EDITABLE)
+
+                    // fill cache with uuids for this device
+                    // helps with never/freshly connected BLE devices on Android 12+
+                    try {
+                        device?.fetchUuidsWithSdp()
+                    } catch (_: Exception) {
+                    }
                 }
             })
         }
