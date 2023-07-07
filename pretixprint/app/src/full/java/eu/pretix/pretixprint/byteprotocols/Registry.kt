@@ -12,5 +12,6 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         EvolisDirect(),
         PNG(),
         LinkOSCard(),
-        LinkOS()
+        LinkOS(),
+        ESCLabel()
 )

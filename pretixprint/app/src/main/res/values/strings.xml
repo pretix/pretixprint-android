@@ -116,6 +116,7 @@
     <string name="protocol_linkos">Zebra thermal printer (CPCL and ZPL protocol)</string>
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT receipt printer (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
+    <string name="protocol_esclabel">ESC/Label color label printers (e.g. Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
