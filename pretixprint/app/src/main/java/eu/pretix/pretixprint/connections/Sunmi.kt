@@ -53,7 +53,7 @@ class SunmiInternalConnection : ConnectionType {
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type, context)
 
             Log.i("PrintService", "bindService")
             InnerPrinterManager.getInstance().bindService(context, object : InnerPrinterCallback() {

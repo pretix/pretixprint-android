@@ -27,7 +27,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
         return type == "receipt"
     }
 
-    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String): ByteArray {
+    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String, context: Context): ByteArray {
         return img
     }
 

@@ -61,7 +61,7 @@ class BluetoothConnection : ConnectionType {
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type, context)
 
             lockManager.withLock("$identifier:$address") {
                 when (proto) {

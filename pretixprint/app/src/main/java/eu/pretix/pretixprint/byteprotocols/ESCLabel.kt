@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.byteprotocols
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import eu.pretix.pretixprint.R
@@ -32,7 +33,7 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
         return ESCLabelSettingsFragment()
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
         val ostream = ByteArrayOutputStream()
         val pixels = IntArray(img.width * img.height)
         img.getPixels(pixels, 0, img.width, 0, 0, img.width, img.height)

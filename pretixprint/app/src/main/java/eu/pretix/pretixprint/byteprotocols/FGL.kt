@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.byteprotocols
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -38,7 +39,7 @@ class FGL : StreamByteProtocol<Bitmap> {
     // to the last page. Could be faster,  but just causes more problems with most printers.
     val diffRendering = false
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
         val ostream = ByteArrayOutputStream()
         val w = img.width
         val h = img.height

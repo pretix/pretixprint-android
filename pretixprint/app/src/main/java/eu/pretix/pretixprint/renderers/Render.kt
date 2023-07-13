@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.renderers
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.pdf.PdfRenderer
@@ -63,7 +64,7 @@ fun <T> renderFileTo(file: File, pageIndex: Int, dpi: Float, rotation: Int, futu
 
 val threadPool: ExecutorService = Executors.newCachedThreadPool()
 
-inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, dpi: Float, rotation: Int, numPages: Int, conf: Map<String, String>, type: String): List<CompletableFuture<ByteArray>> {
+inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: File, dpi: Float, rotation: Int, numPages: Int, conf: Map<String, String>, type: String, context: Context): List<CompletableFuture<ByteArray>> {
     val futures = mutableListOf<CompletableFuture<ByteArray>>()
     var previousBmpFuture: CompletableFuture<T>? = null
 
@@ -85,7 +86,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
                 try {
                     Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
-                    byteFuture.complete(protocol.convertPageToBytes(bmp1, pageIndex == numPages - 1, bmp2, conf, type))
+                    byteFuture.complete(protocol.convertPageToBytes(bmp1, pageIndex == numPages - 1, bmp2, conf, type, context))
                     Log.i("PrintService", "renderPages: Completed convertPageToBytes for page $pageIndex")
                 } catch (e: Throwable) {
                     e.printStackTrace()
@@ -106,7 +107,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             bmpFuture.thenApplyAsync {
                 try {
                     Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
-                    byteFuture.complete(protocol.convertPageToBytes(it, pageIndex == numPages - 1, null, conf, type))
+                    byteFuture.complete(protocol.convertPageToBytes(it, pageIndex == numPages - 1, null, conf, type, context))
                     Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
                 } catch (e: Throwable) {
                     e.printStackTrace()

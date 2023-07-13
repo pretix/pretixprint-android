@@ -1,5 +1,6 @@
 package eu.pretix.pretixprint.byteprotocols
 
+import android.content.Context
 import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
@@ -25,7 +26,7 @@ open class ESCPOS : StreamByteProtocol<ByteArray> {
         return true
     }
 
-    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String): ByteArray {
+    override fun convertPageToBytes(img: ByteArray, isLastPage: Boolean, previousPage: ByteArray?, conf: Map<String, String>, type: String, context: Context): ByteArray {
         return img
     }
 
