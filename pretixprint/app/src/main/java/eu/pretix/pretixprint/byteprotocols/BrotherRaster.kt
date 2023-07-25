@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
@@ -82,7 +81,7 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         return type is NetworkConnection || type is USBConnection
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
 
         val label = Label.values().find { it.name == conf.get("hardware_${type}printer_label") }!!

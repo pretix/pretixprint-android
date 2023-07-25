@@ -57,8 +57,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
         isLastPage: Boolean,
         previousPage: Bitmap?,
         conf: Map<String, String>,
-        type: String,
-        context: Context
+        type: String
     ): ByteArray {
         // Evolis does not cope well with transparency - it's just black.
         // So we're actively drawing the original picture on a white background.

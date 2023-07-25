@@ -54,7 +54,7 @@ class NetworkConnection : ConnectionType {
 
         try {
             Log.i("PrintService", "Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type, context)
+            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
             lockManager.withLock("$identifier:${serverAddr.hostAddress}:$port") {
                 when (proto) {
                     is StreamByteProtocol<*> -> {

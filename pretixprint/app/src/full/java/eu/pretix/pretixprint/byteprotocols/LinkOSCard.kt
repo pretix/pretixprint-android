@@ -48,7 +48,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
         return type is USBConnection || type is NetworkConnection || type is BluetoothConnection
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         img.compress(Bitmap.CompressFormat.PNG, 0, ostream)
         return ostream.toByteArray()

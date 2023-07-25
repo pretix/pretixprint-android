@@ -41,7 +41,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
         return type is USBConnection || type is NetworkConnection || type is BluetoothConnection
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         // ZebraImageFactory does not cope well with transparency - it's just black.
         // So we're actively drawing the original picture on a white background.
         val backgroundedImage = Bitmap.createBitmap(img.width, img.height, img.config)

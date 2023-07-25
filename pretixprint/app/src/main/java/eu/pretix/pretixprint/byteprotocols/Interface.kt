@@ -19,7 +19,7 @@ sealed interface ByteProtocolInterface<T> {
 
     fun allowedForUsecase(type: String): Boolean
     fun allowedForConnection(type: ConnectionType): Boolean
-    fun convertPageToBytes(img: T, isLastPage: Boolean, previousPage: T?, conf: Map<String, String>, type: String, context: Context): ByteArray
+    fun convertPageToBytes(img: T, isLastPage: Boolean, previousPage: T?, conf: Map<String, String>, type: String): ByteArray
     fun createSettingsFragment(): SetupFragment?
     fun inputClass(): Class<T>
 }

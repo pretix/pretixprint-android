@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import com.github.anastaciocintra.escpos.EscPos
@@ -67,7 +66,7 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
 
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String, context: Context): ByteArray {
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val ostream = ByteArrayOutputStream()
         val escpos = EscPos(ostream)
 

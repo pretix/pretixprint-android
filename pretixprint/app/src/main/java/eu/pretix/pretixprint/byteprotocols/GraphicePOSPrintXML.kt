@@ -22,8 +22,8 @@ class GraphicePOSPrintXML : CustomByteProtocol<Bitmap> {
         return type != "receipt"
     }
 
-    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?,conf: Map<String, String>, type: String, context: Context): ByteArray {
-        return GraphicESCPOS().convertPageToBytes(img, isLastPage, previousPage, conf, type, context)
+    override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?,conf: Map<String, String>, type: String): ByteArray {
+        return GraphicESCPOS().convertPageToBytes(img, isLastPage, previousPage, conf, type)
     }
 
     override fun createSettingsFragment(): SetupFragment? {
