@@ -9,18 +9,10 @@ import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.ui.ESCLabelSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
-import java.awt.color.ICC_ColorSpace
-import java.awt.color.ICC_Profile
-import java.awt.image.BufferedImage
-import java.awt.image.ColorConvertOp
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
-import javax.imageio.ImageIO
 
 
 class ESCLabel : StreamByteProtocol<Bitmap> {
@@ -65,39 +57,6 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
         // Register image in printer in volatile memory as a PNG
         val stream = ByteArrayOutputStream()
         img.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
-        val iccConvert = true
-
-        if (iccConvert) {
-            System.setProperty("java.iccprofile.path", context.cacheDir.path)
-            for (filename in listOf("CIEXYZ.pf", "GRAY.pf", "LINEAR_RGB.pf", "PYCC.pf", "sRGB.pf")) {
-                val file = File(context.cacheDir, filename)
-                if (file.exists()) {
-                    file.delete()
-                }
-                val asset = context.assets.open("icc/$filename")
-                val output = FileOutputStream(file)
-
-                val buffer = ByteArray(1024)
-                var size = asset.read(buffer)
-                while (size != -1) {
-                    output.write(buffer, 0, size)
-                    size = asset.read(buffer)
-                }
-                asset.close()
-            }
-            val iccColorSpace = ICC_ColorSpace(
-                ICC_Profile.getInstance(context.resources.assets.open("icc/EB260 Normal - Epson C6000 series [MK].icm"))
-            )
-            val colorConvertOp = ColorConvertOp(iccColorSpace, null)
-            val bufferedImageIn = ImageIO.read(ByteArrayInputStream(stream.toByteArray()))
-            val bufferedImageOut = BufferedImage(bufferedImageIn.width, bufferedImageIn.height, bufferedImageIn.type)
-            colorConvertOp.filter(bufferedImageIn, bufferedImageOut)
-            bufferedImageIn.flush()
-            ImageIO.write(bufferedImageOut, "png", stream)
-        }
-
-        stream.flush()
         val imageHexString = stream.toByteArray().toHex()
         ostream.write("~DYR:IMAGE.PNG,P,P,${imageHexString.length/2},,${imageHexString}".toByteArray())
         img.recycle()
