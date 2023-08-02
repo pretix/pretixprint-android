@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.ui.FGLSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
@@ -26,7 +27,7 @@ class FGL : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type !is SunmiInternalConnection
+        return (type !is SunmiInternalConnection) && (type !is IMinInternalConnection)
     }
 
     enum class Ticketpath(val id: Int) {

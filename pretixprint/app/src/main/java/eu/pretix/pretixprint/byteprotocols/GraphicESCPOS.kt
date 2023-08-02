@@ -7,6 +7,7 @@ import com.github.anastaciocintra.escpos.EscPosConst
 import com.github.anastaciocintra.escpos.image.*
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.ui.GraphicESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
@@ -28,7 +29,7 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type !is SunmiInternalConnection
+        return (type !is SunmiInternalConnection) and (type !is IMinInternalConnection)
     }
 
     class GSV0ImageWrapper(): ImageWrapperInterface {

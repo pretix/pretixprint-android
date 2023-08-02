@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -12,8 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
+import eu.pretix.pretixprint.print.ESCPOSRenderer
 import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
@@ -80,6 +81,15 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             return startProtocolChoice()
         }
+        if (connection == IMinInternalConnection().identifier) {
+            settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
+            settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013") // FIXME: missing leading zero
+            settingsStagingArea.put("hardware_${useCase}printer_printername", "")
+            settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
+            settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
+            return startFinalPage()
+        }
         if (connection == SystemConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")
@@ -95,6 +105,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
             USBConnection().identifier -> USBSettingsFragment()
+            IMinInternalConnection().identifier -> USBSettingsFragment()
             CUPSConnection().identifier -> CUPSSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }

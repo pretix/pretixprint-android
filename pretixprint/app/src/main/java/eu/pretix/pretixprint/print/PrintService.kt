@@ -19,7 +19,6 @@ import com.lowagie.text.pdf.PdfReader
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
-import eu.pretix.pretixprint.ui.PrinterSetupActivity
 import eu.pretix.pretixprint.ui.SettingsActivity
 import eu.pretix.pretixprint.ui.SystemPrintActivity
 import io.sentry.Sentry
@@ -114,6 +113,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     throw PrintException("USB print is not supported on this Android version.")
                 }
             "sunmi" -> SunmiInternalConnection()
+            "imin" -> IMinInternalConnection()
             "system" -> SystemConnection()
             else -> null
         }

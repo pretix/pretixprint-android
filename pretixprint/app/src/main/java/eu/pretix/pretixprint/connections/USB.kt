@@ -295,7 +295,7 @@ class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: B
 }
 
 
-class USBConnection : ConnectionType {
+open class USBConnection : ConnectionType {
     override val identifier = "usb"
     override val nameResource = R.string.connection_type_usb
     override val inputType = ConnectionType.Input.PLAIN_BYTES
