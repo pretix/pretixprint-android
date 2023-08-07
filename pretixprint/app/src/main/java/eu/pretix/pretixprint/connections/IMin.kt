@@ -10,7 +10,9 @@ import androidx.annotation.RequiresApi
 import com.neostra.interfaces.INeostraInterfaces
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.print.ESCPOSRenderer
 import java.io.File
+import java.io.IOException
 
 
 class IMinInternalConnection : USBConnection() {
@@ -46,8 +48,26 @@ class IMinInternalConnection : USBConnection() {
 
         super.print(tmpfile, numPages, context, type, settings)
 
-        // always open cash drawer after print
-        if (iNeostraInterfaces != null) {
+        var shouldOpenCashDrawer = false
+        val reader = tmpfile.reader()
+        while (true) {
+            try {
+                val char = reader.read()
+                if (char == -1) {
+                    break
+                }
+                if (char.toByte() == ESCPOSRenderer.ESC) {
+                    if (reader.read().toChar() == 'p') {
+                        // that's a openCashDrawer command
+                        shouldOpenCashDrawer = true
+                        break
+                    }
+                }
+            } catch (e: IOException) {
+                break
+            }
+        }
+        if (shouldOpenCashDrawer) {
             iNeostraInterfaces?.openCashbox()
         }
     }
