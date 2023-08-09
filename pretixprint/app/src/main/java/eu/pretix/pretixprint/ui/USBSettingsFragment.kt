@@ -42,7 +42,7 @@ class USBSettingsFragment : SetupFragment() {
                 }
 
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE) ?: return
-                val deviceId = "${Integer.toHexString(device.vendorId)}:${Integer.toHexString(device.productId)}"
+                val deviceId = "${String.format("%04x", device.vendorId)}:${String.format("%04x", device.productId)}"
                 if (device.serialNumber != null && device.serialNumber != "null") {
                     view?.findViewById<TextInputLayout>(R.id.tilSerial)?.apply {
                         endIconMode = TextInputLayout.END_ICON_CUSTOM
