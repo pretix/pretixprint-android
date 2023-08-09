@@ -46,8 +46,6 @@ class IMinInternalConnection : USBConnection() {
             System.err.println("cannot bind to INeostraInterfaces service")
         }
 
-        super.print(tmpfile, numPages, context, type, settings)
-
         var shouldOpenCashDrawer = false
         val reader = tmpfile.reader()
         while (true) {
@@ -70,6 +68,8 @@ class IMinInternalConnection : USBConnection() {
         if (shouldOpenCashDrawer) {
             iNeostraInterfaces?.openCashbox()
         }
+
+        super.print(tmpfile, numPages, context, type, settings)
     }
 
 }
