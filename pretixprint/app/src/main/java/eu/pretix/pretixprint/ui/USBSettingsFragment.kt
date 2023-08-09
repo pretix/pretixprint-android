@@ -23,25 +23,30 @@ import eu.pretix.pretixprint.R
 import splitties.toast.toast
 
 class USBSettingsFragment : SetupFragment() {
-    private val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.settings.USB_PERMISSION"
+    companion object {
+        private const val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.settings.USB_PERMISSION"
+    }
 
     private val usbReceiver = object : BroadcastReceiver() {
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         override fun onReceive(context: Context, intent: Intent) {
-            if (ACTION_USB_PERMISSION == intent.action) {
-                synchronized(this) {
-                    val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+            if (ACTION_USB_PERMISSION != intent.action) {
+                return
+            }
 
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if (device!!.serialNumber != null && device!!.serialNumber != "null") {
-                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(device!!.serialNumber)
-                        } else {
-                            view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText("${Integer.toHexString(device!!.vendorId)}:${Integer.toHexString(device!!.productId)}")
-                        }
-                    } else {
-                        toast(R.string.err_usb_permission_denied)
-                    }
+            synchronized(this) {
+                if (!intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                    toast(R.string.err_usb_permission_denied)
+                    return
                 }
+
+                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE) ?: return
+                val deviceId = if (device!!.serialNumber != null && device!!.serialNumber != "null") {
+                    device!!.serialNumber
+                } else {
+                    "${Integer.toHexString(device!!.vendorId)}:${Integer.toHexString(device!!.productId)}"
+                }
+                view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(deviceId)
             }
         }
     }
@@ -55,9 +60,9 @@ class USBSettingsFragment : SetupFragment() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_usb_settings, container, false)
 
-        val currentSerial = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+        val currentSerial = (activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_ip"
-        ) as String?) ?: prefs.getString("hardware_${useCase}printer_ip", "")
+        ) ?: prefs.getString("hardware_${useCase}printer_ip", "")
         view.findViewById<TextInputEditText>(R.id.teSerial).setText(currentSerial)
 
         val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
@@ -75,14 +80,15 @@ class USBSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teSerial).error = getString(R.string.err_field_required)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teSerial).error = null
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_usbcompat", compat.toString())
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
-                        serial)
-                (activity as PrinterSetupActivity).startProtocolChoice()
+                (activity as PrinterSetupActivity).apply {
+                    settingsStagingArea.put("hardware_${useCase}printer_usbcompat", compat.toString())
+                    settingsStagingArea.put("hardware_${useCase}printer_ip", serial)
+                    startProtocolChoice()
+                }
             }
         }
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
-            val manager = activity!!.getSystemService(Context.USB_SERVICE) as UsbManager
+            val manager = requireActivity().getSystemService(Context.USB_SERVICE) as UsbManager
             val deviceList = manager.deviceList.values.toList()
             val deviceNames = deviceList.map { "${it.manufacturerName} ${it.productName} (${String.format("%04x", it.vendorId)}:${String.format("%04x", it.productId)})" }
             MaterialAlertDialogBuilder(requireContext())
