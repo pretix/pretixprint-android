@@ -84,7 +84,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         if (connection == IMinInternalConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
             settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
-            settingsStagingArea.put("hardware_${useCase}printer_ip", "0519:2013")
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
             settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
