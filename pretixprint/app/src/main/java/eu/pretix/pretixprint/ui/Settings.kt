@@ -21,6 +21,9 @@ import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.IMinInternalConnection
+import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.connections.SystemConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
@@ -107,7 +110,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onResume()
         for (type in types) {
             findPreference<PrinterPreference>("hardware_${type}printer_find")?.apply {
-                if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_ip", ""))) {
+                if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
                     moreVisibility = VISIBLE
                     summary = printerSummary(type)
                 } else {
@@ -131,6 +134,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
         val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
         val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
+        if (connection in listOf(IMinInternalConnection().identifier, SunmiInternalConnection().identifier, SystemConnection().identifier)) {
+            return getString(R.string.pref_printer_current_short, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
+        }
         return getString(R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
     }
 
