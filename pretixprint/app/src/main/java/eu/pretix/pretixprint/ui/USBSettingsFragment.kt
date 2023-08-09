@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import splitties.toast.toast
 
@@ -41,10 +42,17 @@ class USBSettingsFragment : SetupFragment() {
                 }
 
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE) ?: return
-                val deviceId = if (device!!.serialNumber != null && device!!.serialNumber != "null") {
-                    device!!.serialNumber
-                } else {
-                    "${Integer.toHexString(device!!.vendorId)}:${Integer.toHexString(device!!.productId)}"
+                val deviceId = "${Integer.toHexString(device.vendorId)}:${Integer.toHexString(device.productId)}"
+                if (device.serialNumber != null && device.serialNumber != "null") {
+                    view?.findViewById<TextInputLayout>(R.id.tilSerial)?.apply {
+                        endIconMode = TextInputLayout.END_ICON_CUSTOM
+                        isEndIconVisible = true
+                        setEndIconOnClickListener {
+                            view?.findViewById<TextInputEditText>(R.id.teSerial)
+                                ?.setText(device.serialNumber)
+                            isEndIconVisible = false
+                        }
+                    }
                 }
                 view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(deviceId)
             }

@@ -55,6 +55,7 @@
     <string name="button_label_test">Testseite drucken</string>
     <string name="dismiss">Schließen</string>
     <string name="field_label_macaddress">MAC-Adresse</string>
+    <string name="field_label_identifier">Gerätekennung</string>
     <string-array name="printer_modes">
     </string-array>
     <string name="bluetooth_printer">Bluetooth Drucker</string>

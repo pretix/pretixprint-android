@@ -74,6 +74,7 @@
     <string name="err_usb_connection">USB connection failed</string>
     <string name="field_label_macaddress">MAC address</string>
     <string name="field_label_serial">Serial number</string>
+    <string name="field_label_identifier">Device identifier</string>
     <string name="field_label_usbcompat">Compatibility mode (needed e.g. for Boca printers on HP devices)</string>
     <string name="field_label_graphicescposcompat">Use old image printing mode (no longer supported on modern Epson printers, but maybe required on other printers)</string>
     <string name="err_not_supported">Not supported</string>
