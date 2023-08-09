@@ -52,7 +52,7 @@
                     android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
+            <CheckBox
                 android:id="@+id/swCompat"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

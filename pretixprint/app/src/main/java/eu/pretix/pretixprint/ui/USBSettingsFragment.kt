@@ -14,10 +14,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import splitties.toast.toast
@@ -63,14 +63,14 @@ class USBSettingsFragment : SetupFragment() {
         val currentCompat = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_usbcompat"
         )?.toBoolean() ) ?: prefs.getString("hardware_${useCase}printer_usbcompat", "false")!!.toBoolean()
-        view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked = currentCompat
+        view.findViewById<CheckBox>(R.id.swCompat).isChecked = currentCompat
 
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val serial = view.findViewById<TextInputEditText>(R.id.teSerial).text.toString()
-            val compat = view.findViewById<SwitchMaterial>(R.id.swCompat).isChecked
+            val compat = view.findViewById<CheckBox>(R.id.swCompat).isChecked
             if (TextUtils.isEmpty(serial)) {
                 view.findViewById<TextInputEditText>(R.id.teSerial).error = getString(R.string.err_field_required)
             } else {
