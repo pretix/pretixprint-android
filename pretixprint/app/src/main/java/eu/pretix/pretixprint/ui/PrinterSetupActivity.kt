@@ -1,7 +1,11 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
@@ -72,6 +76,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         if (is_back) {
             when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
                 SunmiInternalConnection().identifier -> return startConnectionChoice()
+                IMinInternalConnection().identifier -> return startConnectionChoice()
             }
         }
         val fragmentTransaction = fragmentManager.beginTransaction()
@@ -82,6 +87,17 @@ class PrinterSetupActivity : AppCompatActivity() {
             return startProtocolChoice()
         }
         if (connection == IMinInternalConnection().identifier) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val manager = getSystemService(Context.USB_SERVICE) as UsbManager
+                val iminPrinter = manager.deviceList.values.find { it.vendorId == 0x0519 && it.productId == 0x2013 }
+                if (iminPrinter != null && !manager.hasPermission(iminPrinter)) {
+                    // result is not relevant, print calls also try to acquire permission again
+                    val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(),
+                        if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 }
+                    )
+                    manager.requestPermission(iminPrinter, permissionIntent)
+                }
+            }
             settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
             settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
