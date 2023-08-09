@@ -84,7 +84,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         if (connection == IMinInternalConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
             settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
-            settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013") // FIXME: missing leading zero
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "0519:2013")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
             settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
@@ -135,6 +135,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
                 CUPSConnection().identifier -> return startConnectionSettings()
                 SystemConnection().identifier -> return startConnectionChoice()
+                IMinInternalConnection().identifier -> return startConnectionChoice()
             }
         }
 
