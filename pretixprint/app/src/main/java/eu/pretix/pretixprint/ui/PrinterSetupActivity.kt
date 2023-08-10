@@ -113,7 +113,11 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
             settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
-            return startFinalPage()
+            if (useCase == "receipt") {
+                return startFinalPage()
+            } else {
+                return startProtocolSettings()
+            }
         }
         if (connection == SystemConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
@@ -166,7 +170,11 @@ class PrinterSetupActivity : AppCompatActivity() {
             when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
                 CUPSConnection().identifier -> return startConnectionSettings()
                 SystemConnection().identifier -> return startConnectionChoice()
-                IMinInternalConnection().identifier -> return startConnectionChoice()
+                IMinInternalConnection().identifier -> {
+                    if (useCase == "receipt") {
+                        return startConnectionChoice()
+                    }
+                }
             }
         }
 
