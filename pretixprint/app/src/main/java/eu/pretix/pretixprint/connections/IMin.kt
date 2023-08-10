@@ -20,7 +20,7 @@ class IMinInternalConnection : USBConnection() {
     override val nameResource = R.string.connection_type_imin
 
     override fun allowedForUsecase(type: String): Boolean {
-        return type == "receipt" && Build.BRAND.uppercase() == "IMIN"
+        return Build.BRAND.uppercase() == "IMIN"
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

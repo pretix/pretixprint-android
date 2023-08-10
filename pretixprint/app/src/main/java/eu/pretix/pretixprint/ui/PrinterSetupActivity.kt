@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
+import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
@@ -98,7 +99,13 @@ class PrinterSetupActivity : AppCompatActivity() {
                     manager.requestPermission(iminPrinter, permissionIntent)
                 }
             }
-            settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
+            if (useCase == "receipt") {
+                settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
+            } else {
+                settingsStagingArea.put("hardware_${useCase}printer_mode", GraphicESCPOS().identifier)
+                settingsStagingArea.put("hardware_${useCase}printer_graphicescposcompat", "true")
+                // FIXME: does this need dpi and page width params?
+            }
             settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
