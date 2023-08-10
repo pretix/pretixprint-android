@@ -104,9 +104,11 @@ class PrinterSetupActivity : AppCompatActivity() {
             } else {
                 settingsStagingArea.put("hardware_${useCase}printer_mode", GraphicESCPOS().identifier)
                 settingsStagingArea.put("hardware_${useCase}printer_graphicescposcompat", "true")
-                // FIXME: does this need dpi and page width params?
+                settingsStagingArea.put("hardware_${useCase}printer_rotation", "90")
+                settingsStagingArea.put("hardware_${useCase}printer_maxwidth", "72")
+                settingsStagingArea.put("hardware_${useCase}printer_dpi", "203")
             }
-            settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "false")
+            settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "true")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
