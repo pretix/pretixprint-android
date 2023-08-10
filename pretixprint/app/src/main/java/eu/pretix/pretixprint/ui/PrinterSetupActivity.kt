@@ -139,7 +139,13 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    fun startProtocolChoice() {
+    fun startProtocolChoice(is_back: Boolean = false) {
+        if (is_back) {
+            when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
+                IMinInternalConnection().identifier -> return startConnectionChoice()
+            }
+        }
+
         val fragmentTransaction = fragmentManager.beginTransaction()
         when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
             CUPSConnection().identifier -> {
