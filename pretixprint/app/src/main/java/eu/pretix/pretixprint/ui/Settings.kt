@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.RestrictionsManager
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -137,6 +138,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun asset_dialog(@StringRes title: Int) {
         val webView = WebView(requireActivity())
         webView.loadUrl("file:///android_asset/about.html")
+        webView.setBackgroundColor(Color.TRANSPARENT)
 
         val dialog = MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(title)
