@@ -232,11 +232,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     @SuppressLint("ApplySharedPref")
     fun removePrinter(type: String) {
-        defaultSharedPreferences.edit()
-            .remove("hardware_${type}printer_ip")
-            .remove("hardware_${type}printer_printername")
-            .remove("hardware_${type}printer_connection")
-            .apply()
+        val edit = defaultSharedPreferences.edit()
+        defaultSharedPreferences.all.keys
+            .filter { it.startsWith("hardware_${type}") }
+            .forEach { edit.remove(it) }
+        edit.apply()
     }
 }
 
