@@ -132,7 +132,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
         val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
         val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
-        return getString(R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
+        val connectionStringId = resources.getIdentifier(connection, "string", requireActivity().packageName)
+        val humanConnection = if (connectionStringId != 0) getString(connectionStringId) else "???"
+        return getString(R.string.pref_printer_current, name, ip, humanConnection)
     }
 
     private fun asset_dialog(@StringRes title: Int) {
