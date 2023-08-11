@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.RestrictionsManager
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -134,15 +135,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val ip = defaultSharedPreferences.getString("hardware_${type}printer_ip", "")
         val name = defaultSharedPreferences.getString("hardware_${type}printer_printername", "")
         val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "network_printer")
+        val connectionStringId = resources.getIdentifier(connection, "string", requireActivity().packageName)
+        val humanConnection = if (connectionStringId != 0) getString(connectionStringId) else "???"
         if (connection in listOf(IMinInternalConnection().identifier, SunmiInternalConnection().identifier, SystemConnection().identifier)) {
-            return getString(R.string.pref_printer_current_short, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
+            return getString(R.string.pref_printer_current_short, humanConnection)
         }
-        return getString(R.string.pref_printer_current, name, ip, getString(resources.getIdentifier(connection, "string", requireActivity().packageName)))
+        return getString(R.string.pref_printer_current, name, ip, humanConnection)
     }
 
     private fun asset_dialog(@StringRes title: Int) {
         val webView = WebView(requireActivity())
         webView.loadUrl("file:///android_asset/about.html")
+        webView.setBackgroundColor(Color.TRANSPARENT)
 
         val dialog = MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(title)
@@ -236,11 +240,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     @SuppressLint("ApplySharedPref")
     fun removePrinter(type: String) {
-        defaultSharedPreferences.edit()
-            .remove("hardware_${type}printer_ip")
-            .remove("hardware_${type}printer_printername")
-            .remove("hardware_${type}printer_connection")
-            .apply()
+        val edit = defaultSharedPreferences.edit()
+        defaultSharedPreferences.all.keys
+            .filter { it.startsWith("hardware_${type}") }
+            .forEach { edit.remove(it) }
+        edit.apply()
     }
 }
 
