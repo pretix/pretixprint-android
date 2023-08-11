@@ -28,7 +28,7 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type !is SunmiInternalConnection
+        return (type !is SunmiInternalConnection)
     }
 
     class GSV0ImageWrapper(): ImageWrapperInterface {

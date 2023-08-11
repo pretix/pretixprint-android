@@ -12,4 +12,5 @@
     <usb-device vendor-id="1305" /> <!-- Star Micronics -->
     <usb-device vendor-id="5455" /> <!-- SNBC -->
     <usb-device vendor-id="3913" /> <!-- Evolis -->
+    <usb-device vendor-id="0519" /> <!-- iMin / M[ae]sung -->
 </usb>

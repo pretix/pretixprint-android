@@ -68,6 +68,6 @@ class LinkOSSettingsFragment : SetupFragment() {
     }
 
     override fun back() {
-        (activity as PrinterSetupActivity).startProtocolChoice()
+        (activity as PrinterSetupActivity).startProtocolChoice(true)
     }
 }

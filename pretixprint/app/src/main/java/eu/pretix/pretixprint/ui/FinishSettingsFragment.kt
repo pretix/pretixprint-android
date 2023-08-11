@@ -155,6 +155,13 @@ class FinishSettingsFragment : SetupFragment() {
             SunmiInternalConnection().identifier -> {
                 SunmiInternalConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
             }
+            IMinInternalConnection().identifier -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    IMinInternalConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)
+                } else {
+                    throw Exception("iMin USB not supported on this Android version.")
+                }
+            }
             USBConnection().identifier -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     USBConnection().print(file, 1, activity!!, activity.useCase, activity.settingsStagingArea)

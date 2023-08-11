@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.ui.SLCSSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
@@ -28,7 +29,7 @@ class SLCS : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type !is SunmiInternalConnection
+        return (type !is SunmiInternalConnection) and (type !is IMinInternalConnection)
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {

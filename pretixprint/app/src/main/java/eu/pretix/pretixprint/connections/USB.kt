@@ -295,7 +295,7 @@ class UsbInputStream(usbManager: UsbManager, usbDevice: UsbDevice, val compat: B
 }
 
 
-class USBConnection : ConnectionType {
+open class USBConnection : ConnectionType {
     override val identifier = "usb"
     override val nameResource = R.string.connection_type_usb
     override val inputType = ConnectionType.Input.PLAIN_BYTES
@@ -340,12 +340,13 @@ class USBConnection : ConnectionType {
 
         manager.deviceList.forEach {
             try {
-                if (it.value.serialNumber == serial) {
-                    devices[it.key] = it.value
-                } else if ("${Integer.toHexString(it.value.vendorId)}:${Integer.toHexString(it.value.productId)}" == serial) {
+                if ("${Integer.toHexString(it.value.vendorId)}:${Integer.toHexString(it.value.productId)}" == serial) {
                     devices[it.key] = it.value
                 } else if (it.value.deviceName == serial) {
                     // No longer used, but keep for backwards compatibility
+                    devices[it.key] = it.value
+                } else if (it.value.serialNumber == serial) {
+                    // can throw SecurityException (see below), must happen as last case
                     devices[it.key] = it.value
                 }
             } catch (e: SecurityException) {

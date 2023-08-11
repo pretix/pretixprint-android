@@ -1,8 +1,11 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
-import android.content.SharedPreferences
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
@@ -12,8 +15,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ESCPOS
+import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
+import eu.pretix.pretixprint.print.ESCPOSRenderer
 import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
@@ -71,6 +77,7 @@ class PrinterSetupActivity : AppCompatActivity() {
         if (is_back) {
             when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
                 SunmiInternalConnection().identifier -> return startConnectionChoice()
+                IMinInternalConnection().identifier -> return startConnectionChoice()
             }
         }
         val fragmentTransaction = fragmentManager.beginTransaction()
@@ -79,6 +86,38 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             return startProtocolChoice()
+        }
+        if (connection == IMinInternalConnection().identifier) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val manager = getSystemService(Context.USB_SERVICE) as UsbManager
+                val iminPrinter = manager.deviceList.values.find { it.vendorId == 0x0519 && it.productId == 0x2013 }
+                if (iminPrinter != null && !manager.hasPermission(iminPrinter)) {
+                    // result is not relevant, print calls also try to acquire permission again
+                    val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(),
+                        if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 }
+                    )
+                    manager.requestPermission(iminPrinter, permissionIntent)
+                }
+            }
+            if (useCase == "receipt") {
+                settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
+            } else {
+                settingsStagingArea.put("hardware_${useCase}printer_mode", GraphicESCPOS().identifier)
+                settingsStagingArea.put("hardware_${useCase}printer_graphicescposcompat", "true")
+                settingsStagingArea.put("hardware_${useCase}printer_rotation", "90")
+                settingsStagingArea.put("hardware_${useCase}printer_maxwidth", "72")
+                settingsStagingArea.put("hardware_${useCase}printer_dpi", "203")
+            }
+            settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "true")
+            settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
+            settingsStagingArea.put("hardware_${useCase}printer_printername", "")
+            settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
+            settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
+            if (useCase == "receipt") {
+                return startFinalPage()
+            } else {
+                return startProtocolSettings()
+            }
         }
         if (connection == SystemConnection().identifier) {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
@@ -95,6 +134,7 @@ class PrinterSetupActivity : AppCompatActivity() {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
             USBConnection().identifier -> USBSettingsFragment()
+            IMinInternalConnection().identifier -> USBSettingsFragment()
             CUPSConnection().identifier -> CUPSSettingsFragment()
             else -> throw RuntimeException("Unknown connection type")
         }
@@ -103,7 +143,13 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragmentTransaction.commit()
     }
 
-    fun startProtocolChoice() {
+    fun startProtocolChoice(is_back: Boolean = false) {
+        if (is_back) {
+            when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
+                IMinInternalConnection().identifier -> return startConnectionChoice()
+            }
+        }
+
         val fragmentTransaction = fragmentManager.beginTransaction()
         when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
             CUPSConnection().identifier -> {
@@ -124,6 +170,11 @@ class PrinterSetupActivity : AppCompatActivity() {
             when (settingsStagingArea.get("hardware_${useCase}printer_connection") as String) {
                 CUPSConnection().identifier -> return startConnectionSettings()
                 SystemConnection().identifier -> return startConnectionChoice()
+                IMinInternalConnection().identifier -> {
+                    if (useCase == "receipt") {
+                        return startConnectionChoice()
+                    }
+                }
             }
         }
 
