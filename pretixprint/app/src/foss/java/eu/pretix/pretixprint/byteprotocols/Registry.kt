@@ -9,5 +9,6 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         GraphicESCPOS(),
         GraphicePOSPrintXML(),
         BrotherRaster(),
-        PNG()
+        PNG(),
+        SunmiPrinterXLabels(),
 )

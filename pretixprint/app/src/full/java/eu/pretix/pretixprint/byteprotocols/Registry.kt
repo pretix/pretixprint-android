@@ -11,6 +11,7 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         BrotherRaster(),
         EvolisDirect(),
         PNG(),
+        SunmiPrinterXLabels(),
         LinkOSCard(),
         LinkOS()
 )

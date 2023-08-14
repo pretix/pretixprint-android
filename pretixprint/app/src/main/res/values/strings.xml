@@ -139,4 +139,20 @@
     <string name="pin_protection_pin">Set settings PIN</string>
     <string name="pin_protection_description">Lock settings with a custom PIN that must be entered if you want to change printer configuration</string>
     <string name="operation_pin_headline">Enter PIN</string>
+    <string name="protocol_sunmi_printerx_labels">Sunmi label printer</string>
+    <string name="field_helper_sunmiprinterxlabels_print_width">Make sure that the same print width is also set in the device\'s printer settings in the system settings. Please also ensure that the device is set to \"label mode\". If the study mode is set to manual, a manual study must be done to correctly identify the gaps for your label roll.</string>
+    <string name="field_label_sunmipprinterxlabels_print_width">Print width</string>
+    <string name="field_label_sunmiprinterxlabels_roll_width">Roll width (mm)</string>
+    <string name="field_label_sunmiprinterxlabels_label_width">Label width (mm)</string>
+    <string name="field_label_sunmiprinterxlabels_label_height">Label height (mm)</string>
+    <string name="field_helper_sunmiprinterxlabels_label_width">Width along the same direction as the roll width</string>
+    <string name="field_helper_sunmiprinterxlabels_label_height">Height along the direction of the unrolling roll</string>
+    <string name="err_field_sunmiprinterxlabels_roll_width_small">The roll should be at least 30mm wide</string>
+    <string name="err_field_sunmiprinterxlabels_roll_width_large">The roll width cannot be larger than the print width</string>
+    <string name="err_field_sunmiprinterxlabels_label_width_large">The label width cannot be larger than the roll width</string>
+    <string name="err_field_sunmiprinterxlabels_label_width_small">The label width should be at least 27mm</string>
+    <string name="err_field_sunmiprinterxlabels_label_height_small">The label height should be at least 20mm</string>
+    <string name="title_design_dimensions">Design dimensions</string>
+    <string name="btn_ok">Okay</string>
+    <string name="dialog_calculated_dimensions">Please use the following dimensions in the pretix PDF-editor:\nWidth: %1$d mm\nHeight: %2$d mm</string>
 </resources>

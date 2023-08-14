@@ -398,6 +398,10 @@ open class USBConnection : ConnectionType {
                                         is SunmiByteProtocol -> {
                                             throw PrintException("Unsupported combination")
                                         }
+
+                                        is SunmiPrinterXByteProtocol -> {
+                                            throw PrintException("Unsupported combination")
+                                        }
                                     }
                                 }
                             } catch (e: TimeoutException) {
