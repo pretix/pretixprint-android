@@ -54,7 +54,7 @@
     <string name="pref_delete_printer">%s entfernen?</string>
     <string name="button_label_test">Testseite drucken</string>
     <string name="dismiss">Schließen</string>
-    <string name="field_label_macaddress">MAC Addresse</string>
+    <string name="field_label_macaddress">MAC-Adresse</string>
     <string-array name="printer_modes">
     </string-array>
     <string name="bluetooth_printer">Bluetooth Drucker</string>
@@ -68,7 +68,7 @@
     <string name="field_label_eposprintxml_deviceid">Device ID (Standardmäßig: local_printer)</string>
     <string name="network_printer">Netzwerkdrucker</string>
     <string name="settings_label_version">Version</string>
-    <string name="err_not_supported">Nicht unterstüzt</string>
+    <string name="err_not_supported">Nicht unterstützt</string>
     <string name="settings_label_receiptwidth">Breite des Belegpapiers</string>
     <string name="receiptline_cancellation">*** STORNO ***</string>
     <string name="receiptline_return">*** RETOURE ***</string>
