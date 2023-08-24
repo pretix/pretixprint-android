@@ -47,11 +47,18 @@ class USBSettingsFragment : SetupFragment() {
                     view?.findViewById<TextInputLayout>(R.id.tilSerial)?.apply {
                         endIconMode = TextInputLayout.END_ICON_CUSTOM
                         isEndIconVisible = true
+                        helperText = getString(R.string.field_helper_serial)
                         setEndIconOnClickListener {
                             view?.findViewById<TextInputEditText>(R.id.teSerial)
                                 ?.setText(device.serialNumber)
                             isEndIconVisible = false
+                            helperText = ""
                         }
+                    }
+                } else {
+                    view?.findViewById<TextInputLayout>(R.id.tilSerial)?.apply {
+                        helperText = ""
+                        isEndIconVisible = false
                     }
                 }
                 view?.findViewById<TextInputEditText>(R.id.teSerial)?.setText(deviceId)

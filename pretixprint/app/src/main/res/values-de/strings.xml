@@ -41,6 +41,7 @@
     <string name="field_helper_port">Für fast alle Drucker sollte Port 9100 verwendet werden.</string>
     <string name="field_helper_port_cups">Für fast alle Drucker sollte Port 631 verwendet werden.</string>
     <string name="field_label_queue">Druckername</string>
+    <string name="field_helper_serial">Pin drücken, um Verbindung nur mit diesen exakten Drucker anhand der Seriennummer herzustellen.</string>
     <string name="resolving">Adresse auflösen…</string>
     <string name="testing">Testdruck…</string>
     <string name="test_success">Der Verbindungstest war erfolgreich.</string>
