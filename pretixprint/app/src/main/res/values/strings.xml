@@ -51,6 +51,7 @@
     <string name="field_label_queue">Printer name</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>
+    <string name="testing_printer">Printing test page on %s…</string>
     <string name="test_success">The connection test was successful.</string>
     <string name="err_resolv_failed">Resolving the network printer failed.</string>
     <string name="err_field_required">This field is required.</string>

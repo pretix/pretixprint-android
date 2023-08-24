@@ -20,6 +20,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -237,28 +239,35 @@ class SettingsFragment : PreferenceFragmentCompat() {
             val settingsMap = mutableMapOf<String, String>()
             defaultSharedPreferences.all.mapValuesTo(settingsMap) { it.value.toString() }
 
-            // FIXME: this needs an activity indicator somewhere
+            val typeRef = resources.getIdentifier("settings_label_${useCase}printer", "string", requireActivity().packageName)
+            val testMessage = getString(R.string.testing_printer, getString(typeRef))
+
+            val progress = Snackbar.make(requireContext(), listView, testMessage, BaseTransientBottomBar.LENGTH_INDEFINITE)
+            progress.show()
             bgScope.launch {
                 try {
                     testPrint(requireContext(), proto, mode, useCase, settingsMap)
 
                     activity?.runOnUiThread {
+                        progress.dismiss()
                         MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.test_success).create().show()
                     }
                 } catch (e: PrintException) {
                     Sentry.captureException(e)
                     activity?.runOnUiThread {
+                        progress.dismiss()
                         MaterialAlertDialogBuilder(requireContext()).setMessage(e.message).create().show()
                     }
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                     Sentry.captureException(e)
                     activity?.runOnUiThread {
+                        progress.dismiss()
                         MaterialAlertDialogBuilder(requireContext()).setMessage(e.toString()).create().show()
                     }
                 } finally {
                     activity?.runOnUiThread {
-                        // FIXME: hideProgress
+                        progress.dismiss()
                     }
                 }
             }
