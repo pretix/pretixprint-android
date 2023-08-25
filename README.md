@@ -12,6 +12,7 @@ Printer Compatibility
 | -- | -- | -- | -- | -- |
 | FGL ticket printers (Boca, Practical Automation) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
 | SLCS label printers (Bixolon, Metapace) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing |
+| ESC/Label color label printers (Epson Colorworks CW-C4000, CW-C6000, CW-C6500) | ✔️ | ❓ | | Ticket printing, badge printing |
 | ESC/POS receipt printers (Epson, Bixolon, SNBC, Metapace, …) | ✔️ | ✔️ | ✔️ (some) | Ticket printing, badge printing, receipt printing |
 | StarPRNT receipt printers | ✔️ | ✔️ | ✔️ (some) | Receipt printing |
 | Sunmi built-in printers |  | ✔️ (internal) | | Ticket printing, badge printing, receipt printing |

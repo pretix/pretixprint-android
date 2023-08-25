@@ -13,5 +13,6 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         PNG(),
         SunmiPrinterXLabels(),
         LinkOSCard(),
-        LinkOS()
+        LinkOS(),
+        ESCLabel()
 )
