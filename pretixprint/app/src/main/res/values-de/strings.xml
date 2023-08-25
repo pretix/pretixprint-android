@@ -120,6 +120,7 @@
     <string name="protocol_linkos">Zebra-Thermodrucker (Protkolle CPCL und ZPL)</string>
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent-Bondrucker (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT-Bondrucker (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
+    <string name="protocol_esclabel">ESC/Label-Farblabeldrucker (experimentell, z.B. Epson Colorworks Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>
