@@ -4,6 +4,9 @@
         android:id="@+id/maintenance"
         android:title="Maintenance Mode" />-->
     <item
+        android:id="@+id/testpage"
+        android:title="@string/button_label_test" />
+    <item
         android:id="@+id/remove"
         android:title="@string/action_delete" />
 </menu>
