@@ -234,7 +234,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         pinProtect {
             val proto = defaultSharedPreferences.getString("hardware_${useCase}printer_mode", "")!!
             val mode = defaultSharedPreferences.getString("hardware_${useCase}printer_connection", "")!!
-            if (proto == "" || mode == "") return@pinProtect
+            if (proto == "" && mode == "") return@pinProtect
 
             val settingsMap = mutableMapOf<String, String>()
             defaultSharedPreferences.all.mapValuesTo(settingsMap) { it.value.toString() }
