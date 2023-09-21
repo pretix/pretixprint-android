@@ -97,6 +97,8 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
 
     companion object {
         fun registerFonts(ctx: Context) {
+            registerFontFamily(ctx, "Almarai", "fonts/almarai-v5-arabic-%s.ttf", "regular", "800", "800", "regular")
+            registerFontFamily(ctx, "Baloo Bhaijaan", "fonts/baloo-bhaijaan-v6-latin-ext_vietnamese_latin_arabic-%s.ttf", "regular", "regular", "regular", "regular")
             registerFontFamily(ctx, "Open Sans", "fonts/OpenSans-%s.ttf")
             registerFontFamily(ctx, "Noto Sans", "fonts/NotoSans-%s-webfont.ttf")
             registerFontFamily(ctx, "Noto Sans Japanese", "fonts/noto-sans-jp-v52-cyrillic_japanese_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
@@ -107,13 +109,15 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Vollkorn", "fonts/Vollkorn-%s.ttf")
             registerFontFamily(ctx, "Montserrat", "fonts/montserrat-%s-webfont.ttf")
             registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
+            registerFontFamily(ctx, "Tajawal", "fonts/tajawal-v3-latin_arabic-%s.ttf", "regular", "700", "700", "regular")
             registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
             registerFontFamily(ctx, "Titillium Upright", "fonts/titillium-%s-webfont.ttf", "RegularUpright", "BoldUpright", "BoldUpright", "RegularUpright")
             registerFontFamily(ctx, "Titillium Semibold Upright", "fonts/titillium-%s-webfont.ttf", "SemiboldUpright", "BoldUpright", "BoldUpright", "SemiboldUpright")
             registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
             registerFontFamily(ctx, "DejaVu Sans", "fonts/DejaVuSans-%s-webfont.ttf")
-            registerFontFamily(ctx, "Poppins", "fonts/Poppins-%s-webfont.ttf")
-            registerFontFamily(ctx, "Space Mono", "fonts/Space-Mono-%s.ttf")
+            registerFontFamily(ctx, "Poppins", "fonts/poppins-v12-latin-%s.ttf", "500", "700", "700italic", "500italic")
+            registerFontFamily(ctx, "Space Mono", "fonts/space-mono-v10-latin-ext_latin-%s.ttf", "regular", "700", "700italic", "italic")
+            registerFontFamily(ctx, "Ubuntu", "fonts/ubuntu-v15-latin-ext_latin-%s.ttf", "regular", "700", "700italic", "italic")
         }
 
         fun storeFont(ctx: Context, path: String): String {
