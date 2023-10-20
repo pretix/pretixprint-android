@@ -56,7 +56,6 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             Thai17(25),
             Thai18(26),
             StarCp1252(32),
-            IminCp1250(0x48),
             UserDefined1(254),
             UserDefined2(255)
         }
@@ -125,7 +124,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             }
             Dialect.IMin -> {
                 cancelKanjiCharacterMode()
-                characterCodeTable(CharacterCodeTable.IminCp1250.codeTable)
+                characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
             }
         }
 
@@ -863,7 +862,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             }
             Dialect.IMin -> {
                 cancelKanjiCharacterMode()
-                characterCodeTable(CharacterCodeTable.IminCp1250.codeTable)
+                characterCodeTable(CharacterCodeTable.WPC1252.codeTable)
             }
         }
         qr("TEST COMPLETED", 6)
