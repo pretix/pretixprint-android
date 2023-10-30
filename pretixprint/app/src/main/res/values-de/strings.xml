@@ -141,4 +141,20 @@
     <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
     <string name="pin_protection_description">Einstellungen mit einer selbstgewählten PIN sperren, die zum Ändern der Drucker-Konfiguration eingegeben werden muss</string>
     <string name="operation_pin_headline">PIN eingeben</string>
+    <string name="protocol_sunmi_printerx_labels">Sunmi Etikettendrucker</string>
+    <string name="field_helper_sunmiprinterxlabels_print_width">Stellen Sie sicher, dass in den Systemeinstellungen auch in den Druckeinstellungen des Geräts die gleiche Druckbreite eingestellt ist. Bitte stellen Sie außerdem sicher, dass das Gerät auf den \"Label Modus\" eingestellt ist. Wenn bei "Label prüfen" der Studienmodus auf \"Manuell\" eingestellt ist, muss eine manuelle Studie durchgeführt werden, um die Lücken für Ihre Etikettenrolle korrekt zu identifizieren.</string>
+    <string name="field_label_sunmipprinterxlabels_print_width">Druckbreite</string>
+    <string name="field_label_sunmiprinterxlabels_roll_width">Rollenbreite (mm)</string>
+    <string name="field_label_sunmiprinterxlabels_label_width">Etikettenbreite (mm)</string>
+    <string name="field_label_sunmiprinterxlabels_label_height">Etikettenhöhe (mm)</string>
+    <string name="field_helper_sunmiprinterxlabels_label_width">Breite entlang der gleichen Richtung wie die Rollenbreite</string>
+    <string name="field_helper_sunmiprinterxlabels_label_height">Höhe entlang der Abrollrichtung der Rolle</string>
+    <string name="err_field_sunmiprinterxlabels_roll_width_small">Die Rolle sollte mindestens 30 mm breit sein</string>
+    <string name="err_field_sunmiprinterxlabels_roll_width_large">Die Rollenbreite darf nicht größer sein als die Druckbreite</string>
+    <string name="err_field_sunmiprinterxlabels_label_width_large">Die Etikettenbreite darf nicht größer als die Rollenbreite sein</string>
+    <string name="err_field_sunmiprinterxlabels_label_width_small">Die Etikettenbreite sollte mindestens 27 mm betragen</string>
+    <string name="err_field_sunmiprinterxlabels_label_height_small">Die Etikettenhöhe sollte mindestens 20 mm betragen</string>
+    <string name="title_design_dimensions">Designmaße</string>
+    <string name="btn_ok">Okay</string>
+    <string name="dialog_calculated_dimensions">Bitte verwenden Sie im Pretix PDF-Editor folgende Maße:\nBreite: %1$d mm\nHöhe: %2$d mm</string>
 </resources>
