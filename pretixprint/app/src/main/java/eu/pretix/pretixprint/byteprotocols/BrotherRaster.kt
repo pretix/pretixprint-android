@@ -192,16 +192,16 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         var prefix = byteArrayOf(0x1B, '@'.code.toByte())
 
         for (f in pages) {
-            Log.i("PrintService", "Waiting for page to be converted")
+            Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get()
-            Log.i("PrintService", "Page ready, sending page")
+            Log.i("PrintService", "[$type] Page ready, sending page")
             ostream.write(prefix + page)
             ostream.flush()
             // prefix is only needed for the first page
             prefix = byteArrayOf()
-            Log.i("PrintService", "Page sent")
+            Log.i("PrintService", "[$type] Page sent")
         }
-        Log.i("PrintService", "Job done, sleep")
+        Log.i("PrintService", "[$type] Job done, sleep")
         Thread.sleep(2000)
     }
 

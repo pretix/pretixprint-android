@@ -53,20 +53,20 @@ class NetworkConnection : ConnectionType {
         val serverAddr = InetAddress.getByName(ip)
 
         try {
-            Log.i("PrintService", "Starting renderPages")
+            Log.i("PrintService", "[$type] Starting renderPages")
             val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
             lockManager.withLock("$identifier:${serverAddr.hostAddress}:$port") {
                 when (proto) {
                     is StreamByteProtocol<*> -> {
-                        Log.i("PrintService", "Start connection to ${serverAddr.hostAddress}:$port")
+                        Log.i("PrintService", "[$type] Start connection to ${serverAddr.hostAddress}:$port")
                         val socket = Socket(serverAddr, port)
                         val ostream = socket.getOutputStream()
                         val istream = socket.getInputStream()
 
                         try {
-                            Log.i("PrintService", "Start proto.send()")
+                            Log.i("PrintService", "[$type] Start proto.send()")
                             proto.send(futures, istream, ostream, conf, type)
-                            Log.i("PrintService", "Finished proto.send()")
+                            Log.i("PrintService", "[$type] Finished proto.send()")
                         } finally {
                             istream.close()
                             ostream.close()
@@ -75,9 +75,9 @@ class NetworkConnection : ConnectionType {
                     }
 
                     is CustomByteProtocol<*> -> {
-                        Log.i("PrintService", "Start proto.sendNetwork()")
+                        Log.i("PrintService", "[$type] Start proto.sendNetwork()")
                         proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
-                        Log.i("PrintService", "Finished proto.sendNetwork()")
+                        Log.i("PrintService", "[$type] Finished proto.sendNetwork()")
                     }
                     is SunmiByteProtocol -> {
                         throw PrintException("Unsupported combination")

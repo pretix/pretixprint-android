@@ -334,7 +334,7 @@ open class USBConnection : ConnectionType {
             scope.setContexts("printer.rotation", rotation)
         }
 
-        Log.i("PrintService", "Discovering USB device $serial compat=$compat")
+        Log.i("PrintService", "[$type] Discovering USB device $serial compat=$compat")
         val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
         val devices = mutableMapOf<String, UsbDevice>()
 
@@ -362,6 +362,7 @@ open class USBConnection : ConnectionType {
         val start = System.currentTimeMillis()
         var err: Exception? = null
 
+        Log.i("PrintService", "[$type] Looking for USB device for $type")
         val recv = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 try {
@@ -369,9 +370,9 @@ open class USBConnection : ConnectionType {
                     if (ACTION_USB_PERMISSION == intent.action) {
                         val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            Log.i("PrintService", "Found USB device")
+                            Log.i("PrintService", "[$type] Found USB device for $type")
                             try {
-                                Log.i("PrintService", "Starting renderPages")
+                                Log.i("PrintService", "[$type] Starting renderPages")
                                 val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
                                 lockManager.withLock("$identifier:$serial") {
                                     when (proto) {
@@ -380,9 +381,9 @@ open class USBConnection : ConnectionType {
                                             val istream = UsbInputStream(manager, device, compat)
 
                                             try {
-                                                Log.i("PrintService", "Start proto.send()")
+                                                Log.i("PrintService", "[$type] Start proto.send()")
                                                 proto.send(futures, istream, ostream, conf, type)
-                                                Log.i("PrintService", "Finished proto.send()")
+                                                Log.i("PrintService", "[$type] Finished proto.send()")
                                             } finally {
                                                 istream.close()
                                                 ostream.close()
@@ -390,9 +391,9 @@ open class USBConnection : ConnectionType {
                                         }
 
                                         is CustomByteProtocol<*> -> {
-                                            Log.i("PrintService", "Start proto.sendUSB()")
+                                            Log.i("PrintService", "[$type] Start proto.sendUSB()")
                                             proto.sendUSB(manager, device, futures, conf, type, context)
-                                            Log.i("PrintService", "Finished proto.sendUSB()")
+                                            Log.i("PrintService", "[$type] Finished proto.sendUSB()")
                                         }
                                         
                                         is SunmiByteProtocol -> {

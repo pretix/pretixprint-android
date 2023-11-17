@@ -99,12 +99,12 @@ class FGL : StreamByteProtocol<Bitmap> {
             istream.read()
         }
         for (f in pages) {
-            Log.i("PrintService", "Waiting for page to be converted")
+            Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
-            Log.i("PrintService", "Page ready, sending page")
+            Log.i("PrintService", "[$type] Page ready, sending page")
             ostream.write(page)
             ostream.flush()
-            Log.i("PrintService", "Page sent, waiting for printer to complete")
+            Log.i("PrintService", "[$type] Page sent, waiting for printer to complete")
             val loopStarted = System.currentTimeMillis()
             wait@ while (true) {
                 val r = istream.read()
@@ -148,7 +148,7 @@ class FGL : StreamByteProtocol<Bitmap> {
                 }
             }
         }
-        Log.i("PrintService", "Job done, sleep")
+        Log.i("PrintService", "[$type] Job done, sleep")
         Thread.sleep(2000)
     }
 

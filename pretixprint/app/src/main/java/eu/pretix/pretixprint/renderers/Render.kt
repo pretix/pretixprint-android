@@ -74,9 +74,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
         if (previousBmpFuture != null) {
             previousBmpFuture.thenApplyAsync {
                 try {
-                    Log.i("PrintService", "renderPages: Start rendering page $pageIndex to an image")
+                    Log.i("PrintService", "[$type] renderPages: Start rendering page $pageIndex to an image")
                     renderFileTo<T>(file, pageIndex, dpi, rotation, bmpFuture, protocol.inputClass())
-                    Log.i("PrintService", "renderPages: Completed rendering page $pageIndex to an image")
+                    Log.i("PrintService", "[$type] renderPages: Completed rendering page $pageIndex to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -84,9 +84,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             }
             bmpFuture.thenCombineAsync(previousBmpFuture) { bmp1, bmp2 ->
                 try {
-                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
+                    Log.i("PrintService", "[$type] renderPages: Start convertPageToBytes for page $pageIndex")
                     byteFuture.complete(protocol.convertPageToBytes(bmp1, pageIndex == numPages - 1, bmp2, conf, type))
-                    Log.i("PrintService", "renderPages: Completed convertPageToBytes for page $pageIndex")
+                    Log.i("PrintService", "[$type] renderPages: Completed convertPageToBytes for page $pageIndex")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -95,9 +95,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
         } else {
             threadPool.submit {
                 try {
-                    Log.i("PrintService", "renderPages: Start rendering page $pageIndex to an image")
+                    Log.i("PrintService", "[$type] renderPages: Start rendering page $pageIndex to an image")
                     renderFileTo<T>(file, pageIndex, dpi, rotation, bmpFuture, protocol.inputClass())
-                    Log.i("PrintService", "renderPages: Completed rendering page $pageIndex to an image")
+                    Log.i("PrintService", "[$type] renderPages: Completed rendering page $pageIndex to an image")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
@@ -105,9 +105,9 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
             }
             bmpFuture.thenApplyAsync {
                 try {
-                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
+                    Log.i("PrintService", "[$type] renderPages: Start convertPageToBytes for page $pageIndex")
                     byteFuture.complete(protocol.convertPageToBytes(it, pageIndex == numPages - 1, null, conf, type))
-                    Log.i("PrintService", "renderPages: Start convertPageToBytes for page $pageIndex")
+                    Log.i("PrintService", "[$type] renderPages: Start convertPageToBytes for page $pageIndex")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)

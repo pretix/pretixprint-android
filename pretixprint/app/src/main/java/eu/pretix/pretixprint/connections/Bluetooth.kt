@@ -55,12 +55,12 @@ class BluetoothConnection : ConnectionType {
             scope.setContexts("printer.rotation", rotation)
         }
 
-        Log.i("PrintService", "Starting Bluetooth printing")
+        Log.i("PrintService", "[$type] Starting Bluetooth printing")
         val adapter = BluetoothAdapter.getDefaultAdapter()
         val device = adapter.getRemoteDevice(address)
 
         try {
-            Log.i("PrintService", "Starting renderPages")
+            Log.i("PrintService", "[$type] Starting renderPages")
             val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
 
             lockManager.withLock("$identifier:$address") {
@@ -84,7 +84,7 @@ class BluetoothConnection : ConnectionType {
                         for (i in 0..5) {
                             try {
                                 connFailure = null
-                                Log.i("PrintService", "Start connection to $address, try $i")
+                                Log.i("PrintService", "[$type] Start connection to $address, try $i")
                                 adapter.cancelDiscovery()
                                 fallbackSocket.connect()
                                 break
@@ -103,18 +103,18 @@ class BluetoothConnection : ConnectionType {
                         val istream = fallbackSocket.inputStream
 
                         try {
-                            Log.i("PrintService", "Start proto.send()")
+                            Log.i("PrintService", "[$type] Start proto.send()")
                             proto.send(futures, istream, ostream, conf, type)
-                            Log.i("PrintService", "Finished proto.send()")
+                            Log.i("PrintService", "[$type] Finished proto.send()")
                         } finally {
                             socket.close()
                         }
                     }
 
                     is CustomByteProtocol<*> -> {
-                        Log.i("PrintService", "Start proto.sendBluetooth()")
+                        Log.i("PrintService", "[$type] Start proto.sendBluetooth()")
                         proto.sendBluetooth(device.address, futures, conf, type, context)
-                        Log.i("PrintService", "Finished proto.sendBluetooth()")
+                        Log.i("PrintService", "[$type] Finished proto.sendBluetooth()")
                     }
                     is SunmiByteProtocol -> {
                         throw PrintException("Unsupported combination")

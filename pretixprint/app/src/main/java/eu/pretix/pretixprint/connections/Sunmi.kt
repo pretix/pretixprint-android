@@ -52,24 +52,24 @@ class SunmiInternalConnection : ConnectionType {
         }
 
         try {
-            Log.i("PrintService", "Starting renderPages")
+            Log.i("PrintService", "[$type] Starting renderPages")
             val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
 
-            Log.i("PrintService", "bindService")
+            Log.i("PrintService", "[$type] bindService")
             InnerPrinterManager.getInstance().bindService(context, object : InnerPrinterCallback() {
                 override fun onConnected(printerService: SunmiPrinterService) {
-                    Log.i("PrintService", "PrinterService connected")
+                    Log.i("PrintService", "[$type] PrinterService connected")
                     when (proto) {
                         is StreamByteProtocol<*> -> {
                             proto.send(futures, bais, baos, conf, type)
                             printerService.sendRAWData(baos.toByteArray(), object : InnerResultCallback() {
                                 override fun onRunResult(p0: Boolean) {
-                                    Log.i("PrintService", "PrinterService onRunResult: $p0")
+                                    Log.i("PrintService", "[$type] PrinterService onRunResult: $p0")
                                     future.complete(null)
                                 }
 
                                 override fun onReturnString(p0: String?) {
-                                    Log.i("PrintService", "PrinterService onReturnString: $p0")
+                                    Log.i("PrintService", "[$type] PrinterService onReturnString: $p0")
                                 }
 
                                 override fun onRaiseException(code: Int, msg: String?) {
@@ -77,7 +77,7 @@ class SunmiInternalConnection : ConnectionType {
                                 }
 
                                 override fun onPrintResult(p0: Int, p1: String?) {
-                                    Log.i("PrintService", "PrinterService onPrintResult: $p0 $p1")
+                                    Log.i("PrintService", "[$type] PrinterService onPrintResult: $p0 $p1")
                                 }
 
                             })
@@ -95,7 +95,7 @@ class SunmiInternalConnection : ConnectionType {
                 }
 
                 override fun onDisconnected() {
-                    Log.i("PrintService", "PrinterService onDisconnected")
+                    Log.i("PrintService", "[$type] PrinterService onDisconnected")
                 }
             })
         } catch (e: TimeoutException) {

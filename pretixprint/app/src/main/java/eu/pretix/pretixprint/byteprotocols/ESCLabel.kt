@@ -78,14 +78,14 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         for (f in pages) {
-            Log.i("PrintService", "Waiting for page to be converted")
+            Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
-            Log.i("PrintService", "Page ready, sending page")
+            Log.i("PrintService", "[$type] Page ready, sending page")
             ostream.write(page)
             ostream.flush()
-            Log.i("PrintService", "Page sent")
+            Log.i("PrintService", "[$type] Page sent")
         }
-        Log.i("PrintService", "Job done, sleep")
+        Log.i("PrintService", "[$type] Job done, sleep")
         Thread.sleep(2000)
     }
 

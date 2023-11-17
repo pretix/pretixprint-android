@@ -89,7 +89,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         } else {
             "WYSIWYG"
         }
-        Log.i("PrintService", "Starting print job mode=$mode connection=$connection renderer=$renderer")
+        Log.i("PrintService", "[$type] Starting print job mode=$mode connection=$connection renderer=$renderer")
 
         Sentry.configureScope { scope ->
             scope.setTag("type", type)
@@ -153,7 +153,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     for (i in 0 until positions.length()) {
                         val future = CompletableFuture<File?>()
                         future.completeAsync {
-                            Log.i("PrintService", "Page $i: Starting render thread")
+                            Log.i("PrintService", "[$type] Page $i: Starting render thread")
                             val position = positions.getJSONObject(i)
                             val layout = position.getJSONArray("__layout")
 
@@ -173,11 +173,11 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
                                     val bgInputStream = this.contentResolver.openInputStream(intent.clipData!!.getItemAt(fileIndex).uri)
                                     bgInputStream.use {
-                                        Log.i("PrintService", "Page $i: Starting WYSIWYG renderer")
+                                        Log.i("PrintService", "[$type] Page $i: Starting WYSIWYG renderer")
                                         WYSIWYGRenderer(layout, jsonData, i, it, this, imageMap).writePDF(_tmpfile)
                                     }
                                 } else {
-                                    Log.i("PrintService", "Page $i: Starting WYSIWYG renderer")
+                                    Log.i("PrintService", "[$type] Page $i: Starting WYSIWYG renderer")
                                     WYSIWYGRenderer(layout, jsonData, i, null, this, imageMap).writePDF(_tmpfile)
                                 }
                             } finally {
@@ -189,14 +189,14 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                                     // pass
                                 }
                             }
-                            Log.i("PrintService", "Page $i: Completing rendering future")
+                            Log.i("PrintService", "[$type] Page $i: Completing rendering future")
                             _tmpfile
                         }
                         pages.add(future)
                     }
 
                     tmpfile = File.createTempFile("print_", ".pdf", this.cacheDir)
-                    Log.i("PrintService", "Writing to tmpfile $tmpfile")
+                    Log.i("PrintService", "[$type] Writing to tmpfile $tmpfile")
                     var doc : Document? = null
                     var copy : PdfCopy? = null
                     for (page in pages) {
@@ -214,7 +214,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                         pf.deleteOnExit()
                         pagedoc.close()
                     }
-                    Log.i("PrintService", "Built combined PDF file")
+                    Log.i("PrintService", "[$type] Built combined PDF file")
                     doc?.close()
                 } catch (e: TimeoutException) {
                     e.printStackTrace()
@@ -232,7 +232,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
-        Log.i("PrintService", "Starting connection adapter")
+        Log.i("PrintService", "[$type] Starting connection adapter")
         if (connection == "system") {
             // printManager.print is only allowed to be called by activities
             // so lets move the call into it's own activity and try to get the user
@@ -262,9 +262,9 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             conn.print(tmpfile, pagenum, this, type, null)
         }
 
-        Log.i("PrintService", "Cleaning up old files")
+        Log.i("PrintService", "[$type] Cleaning up old files")
         cleanupOldFiles()
-        Log.i("PrintService", "Job done")
+        Log.i("PrintService", "[$type] Job done")
     }
 
     fun cleanupOldFiles() {

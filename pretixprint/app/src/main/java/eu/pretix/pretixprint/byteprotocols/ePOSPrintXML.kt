@@ -54,9 +54,9 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
                 setRequestProperty("SOAPAction", "\"\"")
 
                 val wr = OutputStreamWriter(outputStream)
-                Log.i("PrintService", "Waiting for page to be converted")
+                Log.i("PrintService", "[$type] Waiting for page to be converted")
                 val escposdata = f.get(60, TimeUnit.SECONDS).toHex()
-                Log.i("PrintService", "Page ready, sending page")
+                Log.i("PrintService", "[$type] Page ready, sending page")
                 wr.write("""
                     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
                         <s:Body>
@@ -70,7 +70,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
                 """.trimIndent())
                 wr.flush()
                 wr.close()
-                Log.i("PrintService", "Page sent")
+                Log.i("PrintService", "[$type] Page sent")
 
                 responseCode
             }

@@ -50,9 +50,9 @@ class PNG : SunmiByteProtocol<Bitmap> {
 
     override fun sendSunmi(printerService: SunmiPrinterService, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String) {
         for (f in pages) {
-            Log.i("PrintService", "Waiting for page to be converted")
+            Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
-            Log.i("PrintService", "Page ready, sending page")
+            Log.i("PrintService", "[$type] Page ready, sending page")
             val future = CompletableFuture<Void>()
             val bmp = BitmapFactory.decodeByteArray(page, 0, page.size)
             printerService.enterPrinterBuffer(true)
@@ -65,12 +65,12 @@ class PNG : SunmiByteProtocol<Bitmap> {
             }
             printerService.commitPrinterBufferWithCallback(object : InnerResultCallback() {
                 override fun onRunResult(p0: Boolean) {
-                    Log.i("PrintService", "PrinterService onRunResult: $p0")
+                    Log.i("PrintService", "[$type] PrinterService onRunResult: $p0")
                     future.complete(null)
                 }
 
                 override fun onReturnString(p0: String?) {
-                    Log.i("PrintService", "PrinterService onReturnString: $p0")
+                    Log.i("PrintService", "[$type] PrinterService onReturnString: $p0")
                 }
 
                 override fun onRaiseException(code: Int, msg: String?) {
@@ -78,7 +78,7 @@ class PNG : SunmiByteProtocol<Bitmap> {
                 }
 
                 override fun onPrintResult(p0: Int, p1: String?) {
-                    Log.i("PrintService", "PrinterService onPrintResult: $p0 $p1")
+                    Log.i("PrintService", "[$type] PrinterService onPrintResult: $p0 $p1")
                     if (p0 == 0) { // Transaction print successful
                         future.complete(null)
                     }
@@ -86,7 +86,7 @@ class PNG : SunmiByteProtocol<Bitmap> {
             })
             printerService.exitPrinterBuffer(true)
             future.get()
-            Log.i("PrintService", "Page sent")
+            Log.i("PrintService", "[$type] Page sent")
         }
     }
 
