@@ -17,3 +17,4 @@ class LockManager() {
 
 
 val lockManager = LockManager()
+val usbPermissionLock = ReentrantLock()

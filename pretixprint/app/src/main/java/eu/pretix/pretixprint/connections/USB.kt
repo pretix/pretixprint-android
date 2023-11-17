@@ -14,6 +14,7 @@ import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
 import eu.pretix.pretixprint.print.lockManager
+import eu.pretix.pretixprint.print.usbPermissionLock
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import java.io.File
@@ -21,6 +22,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.math.min
 
@@ -358,19 +361,27 @@ open class USBConnection : ConnectionType {
         if (devices.size != 1) {
             throw PrintException(context.getString(R.string.err_printer_not_found, serial))
         }
+        val requestedDevice = devices.values.first()
+
         var done = false
+        var receiverStarted = false
         val start = System.currentTimeMillis()
         var err: Exception? = null
 
-        Log.i("PrintService", "[$type] Looking for USB device for $type")
+        Log.i("PrintService", "[$type] Looking for USB device")
         val recv = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 try {
+                    receiverStarted = true
                     context.unregisterReceiver(this)
                     if (ACTION_USB_PERMISSION == intent.action) {
                         val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                        if (device.deviceId != requestedDevice.deviceId) {
+                            Log.i("PrintService", "[$type] Ignored wrong USB device ${device.serialNumber}")
+                        }
+
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                            Log.i("PrintService", "[$type] Found USB device for $type")
+                            Log.i("PrintService", "[$type] Found USB device ${device.serialNumber}")
                             try {
                                 Log.i("PrintService", "[$type] Starting renderPages")
                                 val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
@@ -421,14 +432,24 @@ open class USBConnection : ConnectionType {
             }
         }
 
+        if (!usbPermissionLock.tryLock(60, TimeUnit.SECONDS)) {
+            throw PrintException("Could not acquire permission lock")
+        }
         val filter = IntentFilter(ACTION_USB_PERMISSION)
         context.registerReceiver(recv, filter)
         val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION),
                 if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
-        manager.requestPermission(devices.values.first(), permissionIntent)
+        manager.requestPermission(requestedDevice, permissionIntent)
         while (!done && err == null && System.currentTimeMillis() - start < 30000) {
-            // Wait for callback to be called
+            if (receiverStarted && usbPermissionLock.isHeldByCurrentThread) {
+                usbPermissionLock.unlock()
+            }
+            // Wait for callback to be complete
             Thread.sleep(50)
+        }
+        if (usbPermissionLock.isHeldByCurrentThread) {
+            // Receiver was never called, let's unlock because of timeout
+            usbPermissionLock.unlock()
         }
         if (err != null) {
             throw err!!
