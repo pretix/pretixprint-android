@@ -378,6 +378,7 @@ open class USBConnection : ConnectionType {
                         val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                         if (device.deviceId != requestedDevice.deviceId) {
                             Log.i("PrintService", "[$type] Ignored wrong USB device ${device.serialNumber}")
+                            return
                         }
 
                         if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
