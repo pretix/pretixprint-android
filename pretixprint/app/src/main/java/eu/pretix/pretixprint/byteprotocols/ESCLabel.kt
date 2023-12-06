@@ -51,22 +51,22 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
         //      Contrary to the documentation, the file name should also contain the extension
 
         // Delete all files volatile memory
-        ostream.write("^XA ^IDR:*.*^FS^XZ".toByteArray())
+        ostream.write("^XA^IDR:*.*^FS^XZ".toByteArray())
 
         // Register image in printer in volatile memory as a PNG
         val stream = ByteArrayOutputStream()
         img.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val imageHexString = stream.toByteArray().toHex()
-        ostream.write("~DYR:IMAGE.PNG,P,P,${imageHexString.length/2},,${imageHexString}".toByteArray())
+        ostream.write("~DYR:IMAGE.PNG,B,P,${stream.size()},0,".toByteArray())
+        stream.writeTo(ostream)
         img.recycle()
 
         // Create label and print previously transferred image
         ostream.write("^XA".toByteArray())
-        ostream.write("^FO0,0^IMR:IMAGE.PNG^FS".toByteArray())
+        ostream.write("^ILR:IMAGE.PNG^FS".toByteArray())
         ostream.write("^XZ".toByteArray())
 
         // Delete the image from the printer again
-        ostream.write("^XA ^IDR:*.*^FS^XZ".toByteArray())
+        ostream.write("^XA^IDR:*.*^FS^XZ".toByteArray())
 
         ostream.flush()
         return ostream.toByteArray()
