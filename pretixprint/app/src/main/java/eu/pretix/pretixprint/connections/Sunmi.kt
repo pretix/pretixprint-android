@@ -3,6 +3,7 @@ package eu.pretix.pretixprint.connections
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.preference.PreferenceManager
 import com.sunmi.peripheral.printer.InnerPrinterCallback
 import com.sunmi.peripheral.printer.InnerPrinterManager
 import com.sunmi.peripheral.printer.InnerResultCallback
@@ -37,6 +38,11 @@ class SunmiInternalConnection : ConnectionType {
 
     override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
+        for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
+            if (!conf.containsKey(entry.key)) {
+                conf[entry.key] = entry.value.toString()
+            }
+        }
 
         val future = CompletableFuture<Void>()
         val baos = ByteArrayOutputStream()
