@@ -184,7 +184,14 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+    override fun send(
+        pages: List<CompletableFuture<ByteArray>>,
+        istream: InputStream,
+        ostream: OutputStream,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         // Invalidate: 200 bytes full of 0x00
         ostream.write(byteArrayOf(0x1B, 'i'.code.toByte(), 'a'.code.toByte(), 0x01) + ByteArray(200)) // Mode: raster
 
@@ -202,7 +209,7 @@ class BrotherRaster : StreamByteProtocol<Bitmap> {
             Log.i("PrintService", "[$type] Page sent")
         }
         Log.i("PrintService", "[$type] Job done, sleep")
-        Thread.sleep(2000)
+        Thread.sleep(waitAfterPage)
     }
 
     override fun createSettingsFragment(): SetupFragment? {

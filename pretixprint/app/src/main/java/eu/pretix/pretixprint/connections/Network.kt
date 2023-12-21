@@ -65,7 +65,8 @@ class NetworkConnection : ConnectionType {
 
                         try {
                             Log.i("PrintService", "[$type] Start proto.send()")
-                            proto.send(futures, istream, ostream, conf, type)
+                            val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000").toLong()
+                            proto.send(futures, istream, ostream, conf, type, wap)
                             Log.i("PrintService", "[$type] Finished proto.send()")
                         } finally {
                             istream.close()

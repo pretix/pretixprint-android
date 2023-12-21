@@ -62,7 +62,8 @@ class SunmiInternalConnection : ConnectionType {
 
                 when (proto) {
                     is StreamByteProtocol<*> -> {
-                        proto.send(futures, bais, baos, conf, type)
+                        val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100").toLong()
+                        proto.send(futures, bais, baos, conf, type, 0L)
                         PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
                             override fun onDefPrinter(printer: PrinterSdk.Printer?) {
                                 if (printer != null) {
@@ -80,6 +81,7 @@ class SunmiInternalConnection : ConnectionType {
 
                         })
                         future.get(60, TimeUnit.SECONDS)
+                        Thread.sleep(wap)
                     }
 
                     is SunmiByteProtocol<*> -> {
