@@ -13,6 +13,7 @@ import com.sunmi.printerx.style.FileStyle
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
@@ -55,53 +56,55 @@ class SunmiInternalConnection : ConnectionType {
         }
 
         try {
-            Log.i("PrintService", "[$type] Starting renderPages")
-            val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
+            lockManager.withLock("sunmi") {
+                Log.i("PrintService", "[$type] Starting renderPages")
+                val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
 
-            when (proto) {
-                is StreamByteProtocol<*> -> {
-                    proto.send(futures, bais, baos, conf, type)
-                    PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
-                        override fun onDefPrinter(printer: PrinterSdk.Printer?) {
-                            if (printer != null) {
-                                try {
-                                    printer.commandApi().sendEscCommand(baos.toByteArray())
-                                    future.complete(null)
-                                } catch (e: Exception) {
-                                    future.completeExceptionally(e)
+                when (proto) {
+                    is StreamByteProtocol<*> -> {
+                        proto.send(futures, bais, baos, conf, type)
+                        PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
+                            override fun onDefPrinter(printer: PrinterSdk.Printer?) {
+                                if (printer != null) {
+                                    try {
+                                        printer.commandApi().sendEscCommand(baos.toByteArray())
+                                        future.complete(null)
+                                    } catch (e: Exception) {
+                                        future.completeExceptionally(e)
+                                    }
                                 }
                             }
-                        }
 
-                        override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
-                        }
+                            override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
+                            }
 
-                    })
-                    future.get(60, TimeUnit.SECONDS)
-                }
+                        })
+                        future.get(60, TimeUnit.SECONDS)
+                    }
 
-                is SunmiByteProtocol<*> -> {
-                    PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
-                        override fun onDefPrinter(printer: PrinterSdk.Printer?) {
-                            if (printer != null) {
-                                try {
-                                    proto.sendSunmi(printer, futures, conf, type)
-                                    future.complete(null)
-                                } catch (e: Exception) {
-                                    future.completeExceptionally(e)
+                    is SunmiByteProtocol<*> -> {
+                        PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
+                            override fun onDefPrinter(printer: PrinterSdk.Printer?) {
+                                if (printer != null) {
+                                    try {
+                                        proto.sendSunmi(printer, futures, conf, type)
+                                        future.complete(null)
+                                    } catch (e: Exception) {
+                                        future.completeExceptionally(e)
+                                    }
                                 }
                             }
-                        }
 
-                        override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
-                        }
+                            override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
+                            }
 
-                    })
-                    future.complete(null)
-                }
+                        })
+                        future.complete(null)
+                    }
 
-                is CustomByteProtocol<*> -> {
-                    throw RuntimeException("Combination not supported")
+                    is CustomByteProtocol<*> -> {
+                        throw RuntimeException("Combination not supported")
+                    }
                 }
             }
         } catch (e: TimeoutException) {
