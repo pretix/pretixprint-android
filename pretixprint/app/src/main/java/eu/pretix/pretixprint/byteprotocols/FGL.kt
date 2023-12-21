@@ -9,6 +9,7 @@ import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.ui.FGLSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
+import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -93,7 +94,14 @@ class FGL : StreamByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<java8.util.concurrent.CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+    override fun send(
+        pages: List<CompletableFuture<ByteArray>>,
+        istream: InputStream,
+        ostream: OutputStream,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         while (istream.available() > 0) {
             // Flush buffer of error codes from previous prints
             istream.read()
@@ -149,7 +157,7 @@ class FGL : StreamByteProtocol<Bitmap> {
             }
         }
         Log.i("PrintService", "[$type] Job done, sleep")
-        Thread.sleep(2000)
+        Thread.sleep(waitAfterPage)
     }
 
     override fun createSettingsFragment(): SetupFragment {

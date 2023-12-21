@@ -27,7 +27,7 @@ sealed interface ByteProtocolInterface<T> {
 }
 
 interface StreamByteProtocol<T> : ByteProtocolInterface<T> {
-    fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String)
+    fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String, waitAfterPage: Long)
 }
 
 interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
