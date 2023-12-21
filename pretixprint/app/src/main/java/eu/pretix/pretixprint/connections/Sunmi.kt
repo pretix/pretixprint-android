@@ -45,8 +45,6 @@ class SunmiInternalConnection : ConnectionType {
         }
 
         val future = CompletableFuture<Void>()
-        val baos = ByteArrayOutputStream()
-        val bais = ByteArrayInputStream(byteArrayOf())
 
         val mode = if (type == "receipt") "ESC/POS" else "PNG"
         val proto = getProtoClass(mode)
@@ -65,29 +63,36 @@ class SunmiInternalConnection : ConnectionType {
             lockManager.withLock("sunmi") {
                 Log.i("PrintService", "[$type] Starting renderPages")
                 val futures = renderPages(proto, tmpfile, dpi, rotation, numPages, conf, type)
+                val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100").toLong()
 
                 when (proto) {
                     is StreamByteProtocol<*> -> {
-                        val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100").toLong()
-                        proto.send(futures, bais, baos, conf, type, 0L)
-                        PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
-                            override fun onDefPrinter(printer: PrinterSdk.Printer?) {
-                                if (printer != null) {
-                                    try {
-                                        printer.commandApi().sendEscCommand(baos.toByteArray())
-                                        future.complete(null)
-                                    } catch (e: Exception) {
-                                        future.completeExceptionally(e)
+                        for (f in futures) {
+                            Log.i("PrintService", "[$type] Waiting for page to be converted")
+                            val page = f.get(60, TimeUnit.SECONDS)
+                            Log.i("PrintService", "[$type] Page ready, sending page")
+
+                            PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
+                                override fun onDefPrinter(printer: PrinterSdk.Printer?) {
+                                    if (printer != null) {
+                                        try {
+                                            printer.commandApi().sendEscCommand(page)
+                                            future.complete(null)
+                                        } catch (e: Exception) {
+                                            future.completeExceptionally(e)
+                                        }
                                     }
                                 }
-                            }
 
-                            override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
-                            }
+                                override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
+                                }
 
-                        })
-                        future.get(60, TimeUnit.SECONDS)
-                        Thread.sleep(wap)
+                            })
+                            future.get(60, TimeUnit.SECONDS)
+                            Log.i("PrintService", "[$type] Page sent, sleep $wap after page")
+                            Thread.sleep(wap)
+                            Log.i("PrintService", "[$type] Sleep done")
+                        }
                     }
 
                     is SunmiByteProtocol<*> -> {
