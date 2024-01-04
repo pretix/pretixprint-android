@@ -122,6 +122,7 @@
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT receipt printer (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
     <string name="protocol_esclabel">ESC/Label color label printers (experimental, e.g. Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
+    <string name="protocol_tspl">TSPL2 (TSC-based printers) Cheap Generic Thermal Label Printers (e.g. Yinleader)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
@@ -141,4 +142,5 @@
     <string name="pin_protection_pin">Set settings PIN</string>
     <string name="pin_protection_description">Lock settings with a custom PIN that must be entered if you want to change printer configuration</string>
     <string name="operation_pin_headline">Enter PIN</string>
+    <string name="title_tplsdk">TPL SDK</string>
 </resources>
