@@ -10,6 +10,7 @@ import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.ConnectionType
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.ESCLabelSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -19,7 +20,7 @@ import java.io.OutputStream
 import java.util.UUID
 
 
-class TSPL : CustomByteProtocol<Bitmap> {
+class TSPL : StreamByteProtocol<Bitmap> {
 
     override val identifier = "TSPL"
     override val nameResource = R.string.protocol_tspl
@@ -36,7 +37,7 @@ class TSPL : CustomByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type is BluetoothConnection // todo: allow usb and network
+        return type is BluetoothConnection || type is USBConnection // todo: allow usb and network
     }
 
     override fun createSettingsFragment(): SetupFragment {
@@ -51,18 +52,10 @@ class TSPL : CustomByteProtocol<Bitmap> {
         return Bitmap::class.java
     }
 
-    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        TODO("Not yet implemented")
-    }
+    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+        Log.i("TSPL Protocol", "printing with TSPL protocol")
 
-    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        TODO("Not yet implemented")
-    }
-
-    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        Log.i("TSPL Protocol", "printing via bluetooth: ${deviceAddress}")
-
-        this.openPort(deviceAddress, 9100) //BT
+        this.outStream = ostream
 
         //TscDll.openport(etText1.getText().toString(), 9100); //NET
 
@@ -88,7 +81,7 @@ class TSPL : CustomByteProtocol<Bitmap> {
         this.sendCommand("TEXT 100,400,\"ROMAN.TTF\",0,12,12,\"TEST FONT\"\r\n")
         this.printLabel()
 
-        this.closePort(5000)
+        //this.closePort(5000)
     }
 
     private fun sendCommand(cmd: String): Boolean {
