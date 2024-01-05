@@ -46,6 +46,7 @@
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
+    <string name="field_label_maxlength">Maximum printing height/length (in mm)</string>
     <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
     <string name="field_label_eposprintxml_deviceid">Device ID (Default: local_printer)</string>
     <string name="field_label_queue">Printer name</string>
@@ -123,7 +124,7 @@
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT receipt printer (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
     <string name="protocol_esclabel">ESC/Label color label printers (experimental, e.g. Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
-    <string name="protocol_tspl">TSPL2 (TSC-based printers) Cheap Generic Thermal Label Printers (e.g. Yinleader)</string>
+    <string name="protocol_tspl">TSPL/TSPL2 (TSC-based printers) Cheap Generic Thermal Label Printers (e.g. Yinleader)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
@@ -138,6 +139,13 @@
     <string name="field_label_dialect">Dialect</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
     <string name="field_label_rotation">Rotation</string>
+    <string name="field_label_speed_tspl">Speed (inch/sec)</string>
+    <string name="field_label_density_tspl">Density 0~15，the greater the number, the darker the printing (for TSPL)</string>
+    <string name="field_label_sensor_tspl">Gap/Mark Sensor</string>
+    <string name="field_label_sensor_size">Height of Sensor Mark (Gap/Black Mark)</string>
+    <string name="field_label_sensor_offset">Sensor (vertical) offset (mm)</string>
+    <string name="label_sensor_gap">gap</string>
+    <string name="label_sensor_mark">black Mark</string>
     <string name="label_two_color">red/black</string>
     <string name="label_continuous">continuous</string>
     <string name="pin_protection_pin">Set settings PIN</string>
