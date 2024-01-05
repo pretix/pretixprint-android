@@ -131,13 +131,13 @@ dependencies {
         transitive = false
     }
 
+    // TSC SDK
+  //  implementation fileTree(dir: 'libs', include: ['*.jar'])
+  //  implementation files('libs/tscsdk.jar')
+
+
     implementation 'com.github.anastaciocintra:escpos-coffee:4.0.2'
     implementation 'com.sunmi:printerlibrary:1.0.13'
-
-    // TSC SDK
-    fullImplementation(project(':tscsdk')) {
-        transitive = true
-    }
 
     // Evolis SDK
     fullImplementation(project(':EvolisSDK')) {
