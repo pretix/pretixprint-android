@@ -28,8 +28,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override val defaultDPI = 203
     val defaultMaxWidth = 57 // mm
     val defaultMaxLength = 100 // mm
-    val defaultSpeed = 2 // inch/sec
-    val defaultDensity = 15 // 1-15 (print temperature)
+    val defaultSpeed = 2 // inch/sec (supported by most TSC printers
+    val defaultDensity = 8 // 1-15 (print temperature)
     val defaultSensor = 0 // 0=vertical gap; 1=black mark
     val defaultSensorSize = 2 // height of gap/mark in mm
     val defaultSensorOffset = 0 // offset after mark
@@ -59,29 +59,40 @@ class TSPL : StreamByteProtocol<Bitmap> {
         return Bitmap::class.java
     }
 
+    private fun config(conf: Map<String, String>, type: String) {
+        // size
+        val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
+        val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt() ?: this.defaultMaxLength
+        this.sendCommand("SIZE ${maxWidth} mm, ${maxLength} mm")
+
+        // speed
+        val speed = conf.get("hardware_${type}printer_speed")?.toInt() ?: this.defaultSpeed
+        if (speed >= 1 && speed <= 15) {
+            this.sendCommand("SPEED ${speed}")
+        } else {
+            this.sendCommand("SPEED ${this.defaultSpeed}")
+        }
+
+        // density
+        val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
+        this.sendCommand("DENSITY ${density}")
+
+        // tear (moves the medium forward to cutter/blade)
+        this.sendCommand("SET TEAR ON\r\n")
+    }
+
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         Log.i("TSPL Protocol", "printing with TSPL protocol")
 
         this.outStream = ostream
 
-        //TscDll.openport(etText1.getText().toString(), 9100); //NET
+        // configuration
+        this.config(conf, type)
 
         //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
-        //TscDll.openport(etText1.getText().toString(), 9100); //NET
-
-        //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
-        this.sendCommand("SIZE 57 mm, 130 mm\r\n")
+        //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
         //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
         //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
-
-        //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
-        //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
-        this.sendCommand("SPEED 4\r\n")
-        this.sendCommand("DENSITY 12\r\n")
-        this.sendCommand("CODEPAGE UTF-8\r\n")
-        this.sendCommand("SET TEAR ON\r\n")
-        this.sendCommand("SET COUNTER @1 1\r\n")
-        this.sendCommand("@1 = \"0001\"\r\n")
 
         this.clearBuffer()
         this.sendCommand("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n")
