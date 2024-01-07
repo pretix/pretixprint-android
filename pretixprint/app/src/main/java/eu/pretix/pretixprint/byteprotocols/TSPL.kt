@@ -25,13 +25,13 @@ import java.util.concurrent.TimeUnit
 class TSPL : StreamByteProtocol<Bitmap> {
     override val identifier = "TSPL"
     override val nameResource = R.string.protocol_tspl
-    override val demopage = "demopage_cr80.pdf"
+    override val demopage = "demopage_8in_3.25in.pdf"
 
     private var outStream: OutputStream? = null
 
     override val defaultDPI: Int = 203
-    val defaultMaxWidth: Double = 203.2 // mm (203.2mm = 8")
-    val defaultMaxLength: Double = 82.55 // mm (82.55mm = 3")
+    val defaultMaxWidth: Double = 82.55 // mm (82.55mm = 3")
+    val defaultMaxLength: Double = 203.2 // mm (203.2mm = 8")
     val defaultSpeed: Int = 2 // inch/sec (2 is supported by most TSC printers)
     val defaultDensity: Int = 8 // 1-15 (density = print temperature)
     val defaultSensor: Int = Sensor.sGap.sensor
@@ -82,14 +82,14 @@ class TSPL : StreamByteProtocol<Bitmap> {
         // byte array of binary b/w image
         val imgStream = ByteArray(widthInBytes * height)
 
-        // set all pixels to black
+        // set all pixels to white
         var y = 0
         while (y < height * widthInBytes) {
-            imgStream[y] = -1
+            imgStream[y] = 0
             ++y
         }
 
-        // set pixels below threshold to white / transparent
+        // set pixels above threshold to white / transparent
         y = 0
         while (y < height) {
             for (x in 0 until width) {
@@ -97,11 +97,18 @@ class TSPL : StreamByteProtocol<Bitmap> {
                 val red = Color.red(pixel)
                 val green = Color.green(pixel)
                 val blue = Color.blue(pixel)
-                val grayScale = (red + green + blue) / 3
+                val alpha = Color.alpha(pixel)
+                val grayScale = (red + green + blue) / 3 * alpha / 255
 
-                if (grayScale < this.defaultGrayScaleThreshold) {
+                if (grayScale > 128) {
                     // set pixel to white/transparent/paper color (1 / true)
-                    imgStream[y * ((width + 7) / 8) + x / 8] = (imgStream[y * ((width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
+                    val byteIndex:Int = y * widthInBytes + (x / 8)
+                    val bitIndex:Int = x % 8
+                    val oldByte = imgStream[byteIndex]
+                    val pixelBitInt = 128 shr bitIndex // 128 = 10000000 shiftRight bit
+                    val newByte: Byte = (oldByte.toInt() xor pixelBitInt).toByte()
+                    imgStream[byteIndex] = newByte
+                    //imgStream[y * ((width + 7) / 8) + x / 8] = (imgStream[y * ((width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
                 }
             }
             ++y
@@ -118,6 +125,9 @@ class TSPL : StreamByteProtocol<Bitmap> {
             stream.write("SET TEAR OFF\r\n".toByteArray())
         }
 
+        // print page
+        stream.write("PRINT 1,1\r\n".toByteArray())
+
         // return byte array
         stream.flush()
         return stream.toByteArray()
@@ -132,7 +142,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
         val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt()
                 ?: this.defaultMaxLength
-        this.sendCommand("SIZE $maxWidth mm, $maxLength mm")
+        this.sendCommand("SIZE $maxWidth mm,$maxLength mm")
 
         // speed
         val speed = conf.get("hardware_${type}printer_speed")?.toInt() ?: this.defaultSpeed
@@ -144,7 +154,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
         // density (print temp)
         val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
-        this.sendCommand("DENSITY ${density}")
+        //this.sendCommand("DENSITY ${density}")
 
         //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
         //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
@@ -159,15 +169,15 @@ class TSPL : StreamByteProtocol<Bitmap> {
                 ?: this.defaultSensorOffset
         when (sensor) {
             Sensor.sContinuous.sensor -> {
-                this.sendCommand("GAP 0, 0\r\n")
+                this.sendCommand("GAP 0,0\r\n")
             }
 
             Sensor.sGap.sensor -> {
-                this.sendCommand("GAP $sensorHeight mm, $sensorOffset\r\n mm")
+                this.sendCommand("GAP $sensorHeight mm,$sensorOffset\r\n mm")
             }
 
             Sensor.sMark.sensor -> {
-                this.sendCommand("BLINE $sensorHeight mm, $sensorOffset\r\n mm")
+                this.sendCommand("BLINE $sensorHeight mm,$sensorOffset\r\n mm")
             }
         }
     }
@@ -175,17 +185,19 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         Log.i("PrintService", "[$type] Using TSPL protocol")
         this.outStream = ostream
+        this.clearBuffer() // clear the printer
         this.configurePrinter(conf, type)
-        this.printTestLabel()
+        //this.printTestLabel()
 
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page ready, sending page")
-            this.clearBuffer()
             ostream.write(page)
             Log.i("PrintService", "[$type] Page sent to printer")
         }
+
+        ostream.flush()
     }
 
     private fun printTestLabel() {

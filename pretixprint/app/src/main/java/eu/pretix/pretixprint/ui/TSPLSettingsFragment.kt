@@ -51,7 +51,7 @@ class TSPLSettingsFragment : SetupFragment() {
         val currentLabelWidth = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_maxwidth"
         ) as String?)
-                ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultMaxWidth.toString())
+                ?: prefs.getString("hardware_${useCase}printer_maxwidth", proto.defaultMaxWidth.toString())
         view.findViewById<TextInputEditText>(R.id.teMaxWidth).setText(currentLabelWidth)
 
         // Max Height/Length Setting
