@@ -49,11 +49,12 @@ class TSPL : StreamByteProtocol<Bitmap> {
     private var inStream: InputStream? = null
 
     override fun allowedForUsecase(type: String): Boolean {
-        return type != "receipt" // allow both
+        return type != "receipt" // allow both ticket and badge printing
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type is BluetoothConnection || type is USBConnection // todo: test network (didn't have one to test with)
+        return type is BluetoothConnection || type is USBConnection
+        // todo: test network (I don't have an ethernet-capable TSPL printer)
     }
 
     override fun createSettingsFragment(): SetupFragment {
@@ -111,12 +112,12 @@ class TSPL : StreamByteProtocol<Bitmap> {
         // size
         val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
         val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt() ?: this.defaultMaxLength
-        this.sendCommand("SIZE ${maxWidth} mm, ${maxLength} mm")
+        this.sendCommand("SIZE $maxWidth mm, $maxLength mm")
 
         // speed
         val speed = conf.get("hardware_${type}printer_speed")?.toInt() ?: this.defaultSpeed
         if (speed >= 1 && speed <= 15) {
-            this.sendCommand("SPEED ${speed}")
+            this.sendCommand("SPEED $speed")
         } else {
             this.sendCommand("SPEED ${this.defaultSpeed}")
         }
