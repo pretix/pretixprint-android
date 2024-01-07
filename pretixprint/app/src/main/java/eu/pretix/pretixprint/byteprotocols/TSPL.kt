@@ -63,17 +63,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val stream = ByteArrayOutputStream()
 
-        // test
-        /*
-        stream.write("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n".toByteArray(US_ASCII))
-        stream.write("TEXT 100,400,\"ROMAN.TTF\",0,12,12,\"page\"\r\n".toByteArray(US_ASCII))
-        //stream.write("BITMAP 10, 20, 5, 5, 0\r\n".toByteArray())
-        stream.write("BAR 80,80,300,100".toByteArray(US_ASCII))
-        stream.write("PRINT 1\r\n".toByteArray(US_ASCII))
-        stream.flush()
-        return stream.toByteArray()
-         */
-
         // width
         val dpi = conf.get("hardware_${type}printer_dpi")?.toInt() ?: this.defaultDPI
         val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
@@ -87,9 +76,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
             img
         }
 
-        // write image to stream
-        // Construct Start Command
-        val mode = Integer.toString(0) // print mode
+        // BITMAP start command
+        val mode = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
         // attention: tspl takes bitmap width in bytes, but height in dots
         val width = ceil(scaledImg.width / 8.0)
         val height = scaledImg.height
@@ -102,9 +90,14 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val binaryStream = this.getBitmapStream(scaledImg)
         // write into result stream
         stream.write(binaryStream)
-
-        // write final command
         stream.write("\r\n".toByteArray())
+
+        // if last page, move forward, otherwise don't
+        if (isLastPage) {
+            stream.write("SET TEAR ON\r\n".toByteArray())
+        } else {
+            stream.write("SET TEAR OFF\r\n".toByteArray())
+        }
 
         // return byte array
         return stream.toByteArray()
@@ -128,13 +121,14 @@ class TSPL : StreamByteProtocol<Bitmap> {
             this.sendCommand("SPEED ${this.defaultSpeed}")
         }
 
-        // density
+        // density (print temp)
         val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
         this.sendCommand("DENSITY ${density}")
 
-        // tear (moves the medium forward to cutter/blade)
-        // is now done -> in convert page to bytes
-    //this.sendCommand("SET TEAR ON\r\n")
+        //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
+        //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
+        //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
+        //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
     }
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
@@ -144,11 +138,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
         // configuration
         this.config(conf, type)
-
-        //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
-        //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
-        //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
-        //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
 
         this.clearBuffer()
         this.sendCommand("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n")
@@ -162,10 +151,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
             this.clearBuffer()
             ostream.write(page)
             Log.i("PrintService", "sent to printer")
-            //this.printLabel()
         }
-
-        //this.closePort(5000)
     }
 
     private fun sendCommand(cmd: String): Boolean {
@@ -208,70 +194,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
         return this.sendCommand(message)
     }
 
-    private fun openPort(address: String, delay: Int): Boolean {
-        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (mBluetoothAdapter.isEnabled) {
-            this.isConnected = true
-            val device = mBluetoothAdapter.getRemoteDevice(address)
-
-            try {
-                val myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-                this.btSocket = device.createRfcommSocketToServiceRecord(myUUID)
-            } catch (var10: IOException) {
-                return false
-            }
-
-            mBluetoothAdapter.cancelDiscovery()
-
-            try {
-                this.btSocket?.connect()
-                this.outStream = this.btSocket!!.outputStream
-                this.inStream = this.btSocket!!.inputStream
-            } catch (var9: IOException) {
-                return false
-            }
-
-            try {
-                Thread.sleep(delay.toLong())
-            } catch (var8: InterruptedException) {
-                var8.printStackTrace()
-            }
-
-            Log.i("TSPL Protocol", "connection established")
-
-            return true
-        } else {
-            Log.i("TSPL Protocol", "connection failed")
-            this.isConnected = false
-            return false
-        }
-    }
-
-    private fun closePort(timeout: Int): Boolean {
-        try {
-            Thread.sleep(timeout.toLong())
-        } catch (var5: InterruptedException) {
-            var5.printStackTrace()
-        }
-
-        if (btSocket!!.isConnected) {
-            try {
-                this.isConnected = false
-                btSocket!!.close()
-            } catch (var4: IOException) {
-                return false
-            }
-            try {
-                Thread.sleep(100L)
-            } catch (var3: InterruptedException) {
-                var3.printStackTrace()
-            }
-            return true
-        } else {
-            return false
-        }
-    }
-
     // this is from the TSC_DLL_EXAMPLE Android SDK
     fun bitmap2Gray(bmSrc: Bitmap): Bitmap {
         val width = bmSrc.width
@@ -300,7 +222,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val Width = binary_bitmap.width
         val Height = binary_bitmap.height
 
-        // set every pixel to black (0 / false / -1)
+        // set every pixel to black (false / -1)
         var y: Int = 0
         while (y < Height * Width_bytes) {
             stream[y] = -1
@@ -318,8 +240,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
                 val total = (colorR + colorG + colorB) / 3
                 // when no color in current pixel
                 if (total == 0) {
-                    // set to white/transparent/paper color (1 / true)
-                    // please don't ask any specifics about this line, I'm just glad it works
+                    // set pixel to white/transparent/paper color (1 / true)
+                    // set bit in byte at current x position to 1
                     stream[y * ((Width + 7) / 8) + x / 8] = (stream[y * ((Width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
                 }
             }
