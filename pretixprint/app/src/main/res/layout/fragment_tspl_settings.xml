@@ -120,6 +120,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                app:helperText="@string/field_helper_speed_tspl"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tilRotation">
@@ -128,7 +129,7 @@
                     android:id="@+id/teSpeed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/field_label_speed_tspl"
+                    android:hint="@string/field_label_speed"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,6 +140,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                app:helperText="@string/field_helper_density_tspl"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tilSpeed">
@@ -147,7 +149,7 @@
                     android:id="@+id/teDensity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/field_label_density_tspl"
+                    android:hint="@string/field_label_density"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -178,6 +180,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                app:helperText="@string/field_helper_sensor_height_tspl"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tilSensor">
@@ -197,6 +200,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                app:helperText="@string/field_helper_sensor_offset_tspl"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tilSensorHeight">
