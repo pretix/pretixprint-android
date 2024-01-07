@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.bluetooth.BluetoothSocket
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,6 +8,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.util.Log
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.Sensor
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.USBConnection
@@ -23,26 +23,21 @@ import java.util.concurrent.TimeUnit
 
 
 class TSPL : StreamByteProtocol<Bitmap> {
-
     override val identifier = "TSPL"
     override val nameResource = R.string.protocol_tspl
-
     override val demopage = "demopage_cr80.pdf"
 
-    override val defaultDPI = 203
-    val defaultMaxWidth = 57 // mm
-    val defaultMaxLength = 20 // mm
-    val defaultSpeed = 2 // inch/sec (supported by most TSC printers
-    val defaultDensity = 8 // 1-15 (print temperature)
-    val defaultSensor = 0 // 0=vertical gap; 1=black mark
-    val defaultSensorSize = 2 // height of gap/mark in mm
-    val defaultSensorOffset = 0 // offset after mark
-    val defaultGrayScaleThreshold = 0 // when should pixels be printed (0-100%)
-
-    private var isConnected = false
-    private var btSocket: BluetoothSocket? = null
     private var outStream: OutputStream? = null
-    private var inStream: InputStream? = null
+
+    override val defaultDPI: Int = 203
+    val defaultMaxWidth: Double = 203.2 // mm (203.2mm = 8")
+    val defaultMaxLength: Double = 82.55 // mm (82.55mm = 3")
+    val defaultSpeed: Int = 2 // inch/sec (2 is supported by most TSC printers)
+    val defaultDensity: Int = 8 // 1-15 (density = print temperature)
+    val defaultSensor: Int = Sensor.sGap.sensor
+    val defaultSensorHeight: Double = 3.0 // height of gap/mark in mm
+    val defaultSensorOffset: Double = 1.5 // offset after mark
+    val defaultGrayScaleThreshold: Int = 0 // when should pixels be printed (0-100%)
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt" // allow both ticket and badge printing
@@ -60,10 +55,11 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val stream = ByteArrayOutputStream()
 
-        // scale if wider than target medium
+        // scale down to fit target medium
         val dpi = conf.get("hardware_${type}printer_dpi")?.toInt() ?: this.defaultDPI
-        val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
-        val targetWidth = (maxWidthMM * 0.0393701 * dpi).toInt() // in dots
+        val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt()
+                ?: this.defaultMaxWidth
+        val targetWidth = (maxWidthMM.toFloat() * 0.0393701 * dpi).toInt() // in dots
         val scaledImg = if (img.width > targetWidth) {
             val targetHeight = (targetWidth.toFloat() / img.width.toFloat() * img.height.toFloat()).toInt()
             Bitmap.createScaledBitmap(img, targetWidth, targetHeight, true)
@@ -78,7 +74,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val mode: String = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
         val width: Int = processedImg.width
         val widthInBytes: Int = (width + 7) / 8
-        val height: Int= processedImg.height
+        val height: Int = processedImg.height
         val xOffset = 0
         val yOffset = 0
         stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but height in dots
@@ -115,7 +111,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         stream.write(imgStream)
         stream.write("\r\n".toByteArray())
 
-        // if last page, move forward, otherwise don't
+        // if last page, move page forward to edge, otherwise don't
         if (isLastPage) {
             stream.write("SET TEAR ON\r\n".toByteArray())
         } else {
@@ -134,7 +130,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     private fun configurePrinter(conf: Map<String, String>, type: String) {
         // size
         val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
-        val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt() ?: this.defaultMaxLength
+        val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt()
+                ?: this.defaultMaxLength
         this.sendCommand("SIZE $maxWidth mm, $maxLength mm")
 
         // speed
@@ -155,7 +152,24 @@ class TSPL : StreamByteProtocol<Bitmap> {
         //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
 
         // todo: gap and blackMark setting
-        this.sendCommand("GAP 2mm, 0mm")
+        val sensor = conf.get("hardware_${type}printer_sensor")?.toInt() ?: this.defaultSensor
+        val sensorHeight = conf.get("hardware_${type}printer_sensor_height")?.toDouble()
+                ?: this.defaultSensorHeight
+        val sensorOffset = conf.get("hardware_${type}printer_sensor_offset")?.toDouble()
+                ?: this.defaultSensorOffset
+        when (sensor) {
+            Sensor.sContinuous.sensor -> {
+                this.sendCommand("GAP 0, 0\r\n")
+            }
+
+            Sensor.sGap.sensor -> {
+                this.sendCommand("GAP $sensorHeight mm, $sensorOffset\r\n mm")
+            }
+
+            Sensor.sMark.sensor -> {
+                this.sendCommand("BLINE $sensorHeight mm, $sensorOffset\r\n mm")
+            }
+        }
     }
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
@@ -164,7 +178,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         this.configurePrinter(conf, type)
         this.printTestLabel()
 
-        for(f in pages) {
+        for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page ready, sending page")

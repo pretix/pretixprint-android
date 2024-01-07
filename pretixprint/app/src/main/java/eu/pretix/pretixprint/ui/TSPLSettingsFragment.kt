@@ -13,6 +13,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
+import eu.pretix.pretixprint.Sensor
 import eu.pretix.pretixprint.byteprotocols.TSPL
 
 class TSPLSettingsFragment : SetupFragment() {
@@ -74,6 +75,32 @@ class TSPLSettingsFragment : SetupFragment() {
                 ?: prefs.getString("hardware_${useCase}printer_density", proto.defaultDensity.toString())
         view.findViewById<TextInputEditText>(R.id.teDensity).setText(currentDensity)
 
+        // Sensor Setting
+        val sensorAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Sensor.values().map {
+            it.toString()
+        })
+        (view.findViewById<TextInputLayout>(R.id.tilSensor).editText as? AutoCompleteTextView)?.setAdapter(sensorAdapter)
+        val chosenSensor = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_sensor"
+        )) ?: prefs.getString("hardware_${useCase}printer_sensor", proto.defaultSensor.toString())
+        if (chosenSensor?.isNotEmpty() == true) {
+            val chosenLabel = Sensor.values().find { it.sensor == Integer.valueOf(chosenSensor) }!!.toString()
+            (view.findViewById<TextInputLayout>(R.id.tilSensor).editText as? AutoCompleteTextView)?.setText(chosenLabel, false)
+        }
+
+        // Sensor Height Setting
+        val currentSensorHeight = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_sensor_height"
+        ) as String?)
+                ?: prefs.getString("hardware_${useCase}printer_sensor_height", proto.defaultSensorHeight.toString())
+        view.findViewById<TextInputEditText>(R.id.teSensorHeight).setText(currentSensorHeight)
+
+        // Sensor Offset Setting
+        val currentSensorOffset = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_sensor_offset"
+        ) as String?)
+                ?: prefs.getString("hardware_${useCase}printer_sensor_offset", proto.defaultSensorOffset.toString())
+        view.findViewById<TextInputEditText>(R.id.teSensorOffset).setText(currentSensorOffset)
 
         // Back Button
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
@@ -86,37 +113,43 @@ class TSPLSettingsFragment : SetupFragment() {
             val maxLength = view.findViewById<TextInputEditText>(R.id.teMaxLength).text.toString()
             val speed = view.findViewById<TextInputEditText>(R.id.teSpeed).text.toString()
             val density = view.findViewById<TextInputEditText>(R.id.teDensity).text.toString()
+            val sensor = view.findViewById<TextInputLayout>(R.id.tilSensor).editText?.text.toString()
+            val sensorHeight = view.findViewById<TextInputEditText>(R.id.teSensorHeight).text.toString()
+            val sensorOffset = view.findViewById<TextInputEditText>(R.id.teSensorOffset).text.toString()
 
+            val doubleRegex = Regex("^(\\d+\\.?\\d*)?\$")
+            val intRegex = Regex("^(\\d+)?\$")
 
             if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
-            } else if (!TextUtils.isDigitsOnly(dpi)) {
+            } else if (!dpi.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_invalid)
             } else if (TextUtils.isEmpty(maxWidth)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_required)
-            } else if (!TextUtils.isDigitsOnly(maxWidth)) {
+            } else if (!maxWidth.matches(doubleRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_invalid)
-            } else if (TextUtils.isEmpty(maxLength)) {
-                view.findViewById<TextInputEditText>(R.id.teMaxLength).error = getString(R.string.err_field_required)
-            } else if (!TextUtils.isDigitsOnly(maxLength)) {
+            } else if (!maxLength.matches(doubleRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxLength).error = getString(R.string.err_field_invalid)
-            } else if (TextUtils.isEmpty(speed)) {
-                view.findViewById<TextInputEditText>(R.id.teSpeed).error = getString(R.string.err_field_required)
-            } else if (!TextUtils.isDigitsOnly(speed)) {
+            } else if (!speed.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teSpeed).error = getString(R.string.err_field_invalid)
-            }  else if (TextUtils.isEmpty(density)) {
-                view.findViewById<TextInputEditText>(R.id.teDensity).error = getString(R.string.err_field_required)
-            } else if (!TextUtils.isDigitsOnly(density)) {
+            } else if (!density.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teDensity).error = getString(R.string.err_field_invalid)
+            } else if (!sensorHeight.matches(doubleRegex)) {
+                view.findViewById<TextInputEditText>(R.id.teSensorHeight).error = getString(R.string.err_field_invalid)
+            } else if (!sensorOffset.matches(doubleRegex)) {
+                view.findViewById<TextInputEditText>(R.id.teSensorOffset).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = null
                 view.findViewById<TextInputEditText>(R.id.teMaxLength).error = null
                 view.findViewById<TextInputEditText>(R.id.teSpeed).error = null
                 view.findViewById<TextInputEditText>(R.id.teDensity).error = null
-
+                view.findViewById<AutoCompleteTextView>(R.id.teSensor).error = null
+                view.findViewById<TextInputEditText>(R.id.teSensorHeight).error = null
+                view.findViewById<TextInputEditText>(R.id.teSensorOffset).error = null
 
                 val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
+                val mappedSensor = Sensor.values().find { it.toString() == sensor }!!.sensor
 
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotation", mappedRotation.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi", dpi)
@@ -124,7 +157,9 @@ class TSPLSettingsFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_maxlength", maxLength)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_speed", speed)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_density", density)
-
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor", mappedSensor.toString())
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor_height", sensorHeight)
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor_offset", sensorOffset)
 
                 (activity as PrinterSetupActivity).startFinalPage()
             }
