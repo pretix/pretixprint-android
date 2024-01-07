@@ -1,9 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
@@ -21,10 +19,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.charset.StandardCharsets.US_ASCII
-import java.util.UUID
 import java.util.concurrent.TimeUnit
-import kotlin.math.ceil
 
 
 class TSPL : StreamByteProtocol<Bitmap> {
@@ -42,6 +37,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
     val defaultSensor = 0 // 0=vertical gap; 1=black mark
     val defaultSensorSize = 2 // height of gap/mark in mm
     val defaultSensorOffset = 0 // offset after mark
+    val defaultGrayScaleThreshold = 0 // when should pixels be printed (0-100%)
 
     private var isConnected = false
     private var btSocket: BluetoothSocket? = null
@@ -64,12 +60,10 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         val stream = ByteArrayOutputStream()
 
-        // width
+        // scale if wider than target medium
         val dpi = conf.get("hardware_${type}printer_dpi")?.toInt() ?: this.defaultDPI
         val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
         val targetWidth = (maxWidthMM * 0.0393701 * dpi).toInt() // in dots
-
-        // scale if wider than target medium
         val scaledImg = if (img.width > targetWidth) {
             val targetHeight = (targetWidth.toFloat() / img.width.toFloat() * img.height.toFloat()).toInt()
             Bitmap.createScaledBitmap(img, targetWidth, targetHeight, true)
@@ -77,20 +71,48 @@ class TSPL : StreamByteProtocol<Bitmap> {
             img
         }
 
-        // BITMAP start command
-        val mode = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
-        // attention: tspl takes bitmap width in bytes, but height in dots
-        val width = ceil(scaledImg.width / 8.0)
-        val height = scaledImg.height
-        val x = 0
-        val y = 0
-        val command = "BITMAP, $x, $y, $width, $height, $mode,"
-        stream.write(command.toByteArray())
+        // preprocess bitmap (e.g. increase contrast for b/w print)
+        val processedImg = this.bitmap2Gray(scaledImg)
 
-        // convert image to 1 bit bitmap
-        val binaryStream = this.getBitmapStream(scaledImg)
+        // BITMAP start command
+        val mode: String = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
+        val width: Int = processedImg.width
+        val widthInBytes: Int = (width + 7) / 8
+        val height: Int= processedImg.height
+        val xOffset = 0
+        val yOffset = 0
+        stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but height in dots
+
+        // byte array of binary b/w image
+        val imgStream = ByteArray(widthInBytes * height)
+
+        // set all pixels to black
+        var y = 0
+        while (y < height * widthInBytes) {
+            imgStream[y] = -1
+            ++y
+        }
+
+        // set pixels below threshold to white / transparent
+        y = 0
+        while (y < height) {
+            for (x in 0 until width) {
+                val pixel = processedImg.getPixel(x, y)
+                val red = Color.red(pixel)
+                val green = Color.green(pixel)
+                val blue = Color.blue(pixel)
+                val grayScale = (red + green + blue) / 3
+
+                if (grayScale < this.defaultGrayScaleThreshold) {
+                    // set pixel to white/transparent/paper color (1 / true)
+                    imgStream[y * ((width + 7) / 8) + x / 8] = (imgStream[y * ((width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
+                }
+            }
+            ++y
+        }
+
         // write into result stream
-        stream.write(binaryStream)
+        stream.write(imgStream)
         stream.write("\r\n".toByteArray())
 
         // if last page, move forward, otherwise don't
@@ -101,6 +123,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         }
 
         // return byte array
+        stream.flush()
         return stream.toByteArray()
     }
 
@@ -108,7 +131,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         return Bitmap::class.java
     }
 
-    private fun config(conf: Map<String, String>, type: String) {
+    private fun configurePrinter(conf: Map<String, String>, type: String) {
         // size
         val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
         val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt() ?: this.defaultMaxLength
@@ -130,20 +153,16 @@ class TSPL : StreamByteProtocol<Bitmap> {
         //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
         //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
         //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
+
+        // todo: gap and blackMark setting
+        this.sendCommand("GAP 2mm, 0mm")
     }
 
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
-        Log.i("TSPL Protocol", "printing with TSPL protocol")
-
+        Log.i("PrintService", "[$type] Using TSPL protocol")
         this.outStream = ostream
-
-        // configuration
-        this.config(conf, type)
-
-        this.clearBuffer()
-        this.sendCommand("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n")
-        this.sendCommand("TEXT 100,400,\"ROMAN.TTF\",0,12,12,\"TEST FONT\"\r\n")
-        this.printLabel()
+        this.configurePrinter(conf, type)
+        this.printTestLabel()
 
         for(f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
@@ -151,8 +170,15 @@ class TSPL : StreamByteProtocol<Bitmap> {
             Log.i("PrintService", "[$type] Page ready, sending page")
             this.clearBuffer()
             ostream.write(page)
-            Log.i("PrintService", "sent to printer")
+            Log.i("PrintService", "[$type] Page sent to printer")
         }
+    }
+
+    private fun printTestLabel() {
+        this.clearBuffer()
+        this.sendCommand("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n")
+        this.sendCommand("TEXT 100,400,\"ROMAN.TTF\",0,12,12,\"TEST FONT\"\r\n")
+        this.printLabel()
     }
 
     private fun sendCommand(cmd: String): Boolean {
@@ -167,20 +193,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
             Log.i("TSPL Protocol", "failed sending command: ${cmd}")
             false
-        }
-    }
-
-
-    fun sendCommand(message: ByteArray?): String? {
-        return if (this.outStream != null && this.inStream != null) {
-            try {
-                this.outStream!!.write(message)
-                "1"
-            } catch (var3: IOException) {
-                "-1"
-            }
-        } else {
-            "-1"
         }
     }
 
@@ -209,86 +221,5 @@ class TSPL : StreamByteProtocol<Bitmap> {
         paint.setColorFilter(f)
         c.drawBitmap(bmSrc, 0.0f, 0.0f, paint)
         return bmpGray
-    }
-
-
-    fun getBitmapStream(original_bitmap: Bitmap): ByteArray {
-        val options = BitmapFactory.Options()
-        options.inPurgeable = true
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888
-        val gray_bitmap = this.bitmap2Gray(original_bitmap)
-        val binary_bitmap = this.gray2Binary(gray_bitmap)
-        val stream = ByteArray((binary_bitmap.width + 7) / 8 * binary_bitmap.height)
-        val Width_bytes = (binary_bitmap.width + 7) / 8
-        val Width = binary_bitmap.width
-        val Height = binary_bitmap.height
-
-        // set every pixel to black (false / -1)
-        var y: Int = 0
-        while (y < Height * Width_bytes) {
-            stream[y] = -1
-            ++y
-        }
-
-        // set white pixels to white
-        y = 0
-        while (y < Height) {
-            for (x in 0 until Width) {
-                val pixelColor = binary_bitmap.getPixel(x, y)
-                val colorR = Color.red(pixelColor)
-                val colorG = Color.green(pixelColor)
-                val colorB = Color.blue(pixelColor)
-                val total = (colorR + colorG + colorB) / 3
-                // when no color in current pixel
-                if (total == 0) {
-                    // set pixel to white/transparent/paper color (1 / true)
-                    // set bit in byte at current x position to 1
-                    stream[y * ((Width + 7) / 8) + x / 8] = (stream[y * ((Width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
-                }
-            }
-            ++y
-        }
-        return stream
-    }
-
-    fun getBlackStream(width: Int, height: Int): ByteArray {
-        val options = BitmapFactory.Options()
-        options.inPurgeable = true
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888
-        val stream = ByteArray((width + 7) / 8 * height)
-        val Width_bytes = (width + 7) / 8
-        var y: Int
-        y = 0
-        while (y < height * Width_bytes) {
-            stream[y] = 0
-            ++y
-        }
-        return stream
-    }
-
-    fun gray2Binary(graymap: Bitmap): Bitmap {
-        val width = graymap.width
-        val height = graymap.height
-        var binarymap: Bitmap? = null
-        binarymap = graymap.copy(Bitmap.Config.ARGB_8888, true)
-        for (i in 0 until width) {
-            for (j in 0 until height) {
-                val col = binarymap.getPixel(i, j)
-                val alpha = col and -16777216
-                val red = col and 16711680 shr 16
-                val green = col and '\uff00'.code shr 8
-                val blue = col and 255
-                val gray = (red.toFloat().toDouble() * 0.3 + green.toFloat().toDouble() * 0.59 + blue.toFloat().toDouble() * 0.11).toInt()
-                var shortGray: Short
-                shortGray = if (gray <= 127) {
-                    0
-                } else {
-                    255
-                }
-                val newColor = alpha or (gray.toInt() shl 16) or (gray.toInt() shl 8) or gray.toInt()
-                binarymap.setPixel(i, j, newColor)
-            }
-        }
-        return binarymap
     }
 }
