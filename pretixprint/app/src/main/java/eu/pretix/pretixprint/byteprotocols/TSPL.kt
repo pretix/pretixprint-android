@@ -1,11 +1,7 @@
 package eu.pretix.pretixprint.byteprotocols
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
-import android.graphics.Paint
 import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Sensor
@@ -37,7 +33,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     val defaultSensor: Int = Sensor.sGap.sensor
     val defaultSensorHeight: Double = 3.0 // height of gap/mark in mm
     val defaultSensorOffset: Double = 1.5 // offset after mark
-    val defaultGrayScaleThreshold: Int = 0 // when should pixels be printed (0-100%)
+
+    val ditheringThreshold: Int = 128
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt" // allow both ticket and badge printing
@@ -50,6 +47,10 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
     override fun createSettingsFragment(): SetupFragment {
         return TSPLSettingsFragment()
+    }
+
+    override fun inputClass(): Class<Bitmap> {
+        return Bitmap::class.java
     }
 
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
@@ -67,40 +68,47 @@ class TSPL : StreamByteProtocol<Bitmap> {
             img
         }
 
-        // preprocess bitmap (e.g. increase contrast for b/w print)
-        val processedImg = this.bitmap2Gray(scaledImg)
-
         // BITMAP start command
         val mode: String = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
-        val width: Int = processedImg.width
+        val width: Int = scaledImg.width
         val widthInBytes: Int = (width + 7) / 8
-        val height: Int = processedImg.height
+        val height: Int = scaledImg.height
         val xOffset = 0
         val yOffset = 0
-        stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but height in dots
+        stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but byte-height equates to dot-height
 
         // byte array of binary b/w image
         val imgStream = ByteArray(widthInBytes * height)
+        // array storing errors for dithering
+        val quantizationErrors = Array(width) { IntArray(height) }
 
-        // set all pixels to white
+        // set all pixels to black
         var y = 0
         while (y < height * widthInBytes) {
             imgStream[y] = 0
             ++y
         }
 
-        // set pixels above threshold to white / transparent
-        y = 0
-        while (y < height) {
+        // iterate all pixels and convert into binary
+        // applies floyd-steinberg dithering
+        for (y in 0 until height) {
             for (x in 0 until width) {
-                val pixel = processedImg.getPixel(x, y)
+                val pixel = scaledImg.getPixel(x, y)
                 val red = Color.red(pixel)
                 val green = Color.green(pixel)
                 val blue = Color.blue(pixel)
                 val alpha = Color.alpha(pixel)
-                val grayScale = (red + green + blue) / 3 * alpha / 255
+                // convert pixel to grayscale with luminosity method and apply alpha channel
+                val grayScale = ((0.21 * red.toDouble() + 0.72 * green.toDouble() + 0.07 * blue.toDouble()) * alpha.toDouble() / 255).toInt()
 
-                if (grayScale > 128) {
+                // apply errors from previous pixels
+                val oldPixel = grayScale + quantizationErrors[x][y]
+
+                // decide whether this pixel is black or white
+                var newPixel = 0 // BLACK by default
+                if (oldPixel >= this.ditheringThreshold) {
+                    // WHITE new pixel
+                    newPixel = 255
                     // set pixel to white/transparent/paper color (1 / true)
                     val byteIndex:Int = y * widthInBytes + (x / 8)
                     val bitIndex:Int = x % 8
@@ -108,17 +116,36 @@ class TSPL : StreamByteProtocol<Bitmap> {
                     val pixelBitInt = 128 shr bitIndex // 128 = 10000000 shiftRight bit
                     val newByte: Byte = (oldByte.toInt() xor pixelBitInt).toByte()
                     imgStream[byteIndex] = newByte
-                    //imgStream[y * ((width + 7) / 8) + x / 8] = (imgStream[y * ((width + 7) / 8) + x / 8].toInt() xor (128 shr x % 8).toByte().toInt()).toByte()
+                }
+
+                // error = effect on neighboring (following) pixels
+                val pixelError = oldPixel - newPixel
+
+                // add errors to next pixels
+                // right pixel
+                if (x < width - 1) {
+                    quantizationErrors[x + 1][y] += pixelError * 7 / 16
+                }
+                // bottom left pixel
+                if (x > 0 && y < height - 1) {
+                    quantizationErrors[x - 1][y + 1] += pixelError * 3 / 16
+                }
+                // bottom pixel
+                if (y < height - 1) {
+                    quantizationErrors[x][y + 1] += pixelError * 5 / 16
+                }
+                // bottom right pixel
+                if (x < width - 1 && y < height - 1) {
+                    quantizationErrors[x + 1][y + 1] += pixelError * 1 / 16
                 }
             }
-            ++y
         }
 
         // write into result stream
         stream.write(imgStream)
         stream.write("\r\n".toByteArray())
 
-        // if last page, move page forward to edge, otherwise don't
+        // move page forward to edge/blade if it's the last one
         if (isLastPage) {
             stream.write("SET TEAR ON\r\n".toByteArray())
         } else {
@@ -131,10 +158,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
         // return byte array
         stream.flush()
         return stream.toByteArray()
-    }
-
-    override fun inputClass(): Class<Bitmap> {
-        return Bitmap::class.java
     }
 
     private fun configurePrinter(conf: Map<String, String>, type: String) {
@@ -156,12 +179,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
         this.sendCommand("DENSITY ${density}\r\n")
 
-        //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
-        //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
-        //this.sendCommand("GAP 2 mm, 0 mm\r\n");//Gap media
-        //this.sendCommand("BLINE 2 mm, 0 mm\r\n");//blackmark media
-
-        // todo: gap and blackMark setting
+        // sensor type
         val sensor = conf.get("hardware_${type}printer_sensor")?.toInt() ?: this.defaultSensor
         val sensorHeight = conf.get("hardware_${type}printer_sensor_height")?.toDouble()
                 ?: this.defaultSensorHeight
@@ -185,9 +203,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
         Log.i("PrintService", "[$type] Using TSPL protocol")
         this.outStream = ostream
-        this.clearBuffer() // clear the printer
+        this.clearBuffer() // clear the printer's RAM
         this.configurePrinter(conf, type)
-        //this.printTestLabel()
 
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
@@ -199,13 +216,6 @@ class TSPL : StreamByteProtocol<Bitmap> {
         }
 
         ostream.flush()
-    }
-
-    private fun printTestLabel() {
-        this.clearBuffer()
-        this.sendCommand("TEXT 100,300,\"ROMAN.TTF\",0,12,12,@1\r\n")
-        this.sendCommand("TEXT 100,400,\"ROMAN.TTF\",0,12,12,\"TEST FONT\"\r\n")
-        this.printLabel()
     }
 
     private fun sendCommand(cmd: String): Boolean {
@@ -225,28 +235,5 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
     private fun clearBuffer(): Boolean {
         return this.sendCommand("CLS\r\n")
-    }
-
-    private fun printLabel(): Boolean {
-        val quantity = 1
-        val copy = 1
-        val message = "PRINT $quantity, $copy\r\n"
-        return this.sendCommand(message)
-    }
-
-    // this is from the TSC_DLL_EXAMPLE Android SDK
-    fun bitmap2Gray(bmSrc: Bitmap): Bitmap {
-        val width = bmSrc.width
-        val height = bmSrc.height
-        var bmpGray: Bitmap? = null
-        bmpGray = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-        val c = Canvas(bmpGray)
-        val paint = Paint()
-        val cm = ColorMatrix()
-        cm.setSaturation(0.0f)
-        val f = ColorMatrixColorFilter(cm)
-        paint.setColorFilter(f)
-        c.drawBitmap(bmSrc, 0.0f, 0.0f, paint)
-        return bmpGray
     }
 }
