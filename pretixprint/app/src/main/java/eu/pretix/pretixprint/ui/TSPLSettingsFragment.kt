@@ -126,9 +126,9 @@ class TSPLSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_invalid)
             } else if (TextUtils.isEmpty(maxWidth)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_required)
-            } else if (!maxWidth.matches(doubleRegex)) {
+            } else if (!maxWidth.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_invalid)
-            } else if (!maxLength.matches(doubleRegex)) {
+            } else if (!maxLength.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxLength).error = getString(R.string.err_field_invalid)
             } else if (!speed.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teSpeed).error = getString(R.string.err_field_invalid)

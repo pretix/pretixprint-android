@@ -27,8 +27,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     private var outStream: OutputStream? = null
 
     override val defaultDPI: Int = 203
-    val defaultMaxWidth: Double = 82.55 // mm (82.55mm = 3")
-    val defaultMaxLength: Double = 203.2 // mm (203.2mm = 8")
+    val defaultMaxWidth: Int = 82 // mm (82.55mm = 3")
+    val defaultMaxLength: Int = 203 // mm (203.2mm = 8")
     val defaultSpeed: Int = 2 // inch/sec (2 is supported by most TSC printers)
     val defaultDensity: Int = 8 // 1-15 (density = print temperature)
     val defaultSensor: Int = Sensor.sGap.sensor
@@ -88,7 +88,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         for (y in 0 until height) {
             // set all pixels to black
             for (xByte in 0 until widthInBytes) {
-                imgStream[y*widthInBytes + xByte] = 0
+                imgStream[y * widthInBytes + xByte] = 0
             }
 
             // now fill with color
