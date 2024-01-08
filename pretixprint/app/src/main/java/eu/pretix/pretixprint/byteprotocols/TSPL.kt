@@ -61,7 +61,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val dpi = conf.get("hardware_${type}printer_dpi")?.toInt() ?: this.defaultDPI
         val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt()
                 ?: this.defaultMaxWidth
-        val targetWidth = (maxWidthMM.toFloat() * 0.0393701 * dpi).toInt() // in dots
+        val targetWidth = ceil(maxWidthMM.toFloat() * 0.0393701 * dpi).toInt() // in dots
         val scaledImg = if (img.width > targetWidth) {
             val targetHeight = (targetWidth.toFloat() / img.width.toFloat() * img.height.toFloat()).toInt()
             Bitmap.createScaledBitmap(img, targetWidth, targetHeight, true)
