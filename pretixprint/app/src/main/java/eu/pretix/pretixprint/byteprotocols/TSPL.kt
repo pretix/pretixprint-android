@@ -119,7 +119,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
                     imgStream[byteIndex] = (imgStream[byteIndex].toInt() xor (128 shr bitIndex)).toByte()
                 }
 
-                // perform dithering only around non full-black pixels, avoid bleeding of text
+                // perform dithering only around non full-black pixels, avoids text bleeding
                 if (grayScale < 255) {
                     // error = effect on neighboring (following) pixels
                     val pixelError = oldPixel - newPixel
