@@ -16,6 +16,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.ceil
 
 
 class TSPL : StreamByteProtocol<Bitmap> {
@@ -99,44 +100,45 @@ class TSPL : StreamByteProtocol<Bitmap> {
                 val blue = Color.blue(pixel)
                 val alpha = Color.alpha(pixel)
                 // convert pixel to grayscale with luminosity method and apply alpha channel
-                val grayScale = ((0.21 * red.toDouble() + 0.72 * green.toDouble() + 0.07 * blue.toDouble()) * alpha.toDouble() / 255).toInt()
+                // Use ceil to counter rounding error
+                val grayScale = ceil((0.21 * red.toDouble() + 0.72 * green.toDouble() + 0.07 * blue.toDouble()) * alpha.toDouble() / 255).toInt()
 
                 // apply errors from previous pixels
                 val oldPixel = grayScale + quantizationErrors[x][y]
 
                 // decide whether this pixel is black or white
-                var newPixel = 0 // BLACK by default
+                var newPixel : Int = 0 // BLACK by default
                 if (oldPixel >= this.ditheringThreshold) {
                     // WHITE new pixel
                     newPixel = 255
                     // set pixel to white/transparent/paper color (1 / true)
-                    val byteIndex: Int = y * widthInBytes + (x / 8)
-                    val bitIndex: Int = x % 8
-                    val oldByte = imgStream[byteIndex]
-                    val pixelBitInt = 128 shr bitIndex // 128 = 10000000 shiftRight bit
-                    val newByte: Byte = (oldByte.toInt() xor pixelBitInt).toByte()
-                    imgStream[byteIndex] = newByte
+                    val byteIndex = y * widthInBytes + (x / 8)
+                    val bitIndex = x % 8
+                    imgStream[byteIndex] = (imgStream[byteIndex].toInt() xor (128 shr bitIndex)).toByte()
                 }
 
-                // error = effect on neighboring (following) pixels
-                val pixelError = oldPixel - newPixel
+                // perform dithering only around non full-black pixels, avoid bleeding of text
+                if (grayScale < 255) {
+                    // error = effect on neighboring (following) pixels
+                    val pixelError = oldPixel - newPixel
 
-                // add errors to next pixels
-                // right pixel
-                if (x < width - 1) {
-                    quantizationErrors[x + 1][y] += pixelError * 7 / 16
-                }
-                // bottom left pixel
-                if (x > 0 && y < height - 1) {
-                    quantizationErrors[x - 1][y + 1] += pixelError * 3 / 16
-                }
-                // bottom pixel
-                if (y < height - 1) {
-                    quantizationErrors[x][y + 1] += pixelError * 5 / 16
-                }
-                // bottom right pixel
-                if (x < width - 1 && y < height - 1) {
-                    quantizationErrors[x + 1][y + 1] += pixelError * 1 / 16
+                    // add errors to next pixels
+                    // right pixel
+                    if (x < width - 1) {
+                        quantizationErrors[x + 1][y] += pixelError * 7 / 16
+                    }
+                    // bottom left pixel
+                    if (x > 0 && y < height - 1) {
+                        quantizationErrors[x - 1][y + 1] += pixelError * 3 / 16
+                    }
+                    // bottom pixel
+                    if (y < height - 1) {
+                        quantizationErrors[x][y + 1] += pixelError * 5 / 16
+                    }
+                    // bottom right pixel
+                    if (x < width - 1 && y < height - 1) {
+                        quantizationErrors[x + 1][y + 1] += pixelError * 1 / 16
+                    }
                 }
             }
         }
