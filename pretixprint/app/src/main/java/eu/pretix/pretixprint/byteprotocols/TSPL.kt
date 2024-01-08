@@ -142,19 +142,19 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
         val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt()
                 ?: this.defaultMaxLength
-        this.sendCommand("SIZE $maxWidth mm,$maxLength mm")
+        this.sendCommand("SIZE $maxWidth mm,$maxLength mm\r\n")
 
         // speed
         val speed = conf.get("hardware_${type}printer_speed")?.toInt() ?: this.defaultSpeed
         if (speed >= 1 && speed <= 15) {
-            this.sendCommand("SPEED $speed")
+            this.sendCommand("SPEED $speed\r\n")
         } else {
-            this.sendCommand("SPEED ${this.defaultSpeed}")
+            this.sendCommand("SPEED ${this.defaultSpeed}\r\n")
         }
 
         // density (print temp)
         val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
-        //this.sendCommand("DENSITY ${density}")
+        this.sendCommand("DENSITY ${density}\r\n")
 
         //TscDll.setup(paper_width, paper_height, speed, density, sensor, sensor_distance, sensor_offset);
         //this.sendCommand("SIZE 57 mm, 130 mm\r\n")
@@ -173,11 +173,11 @@ class TSPL : StreamByteProtocol<Bitmap> {
             }
 
             Sensor.sGap.sensor -> {
-                this.sendCommand("GAP $sensorHeight mm,$sensorOffset\r\n mm")
+                this.sendCommand("GAP $sensorHeight mm,$sensorOffset mm\r\n")
             }
 
             Sensor.sMark.sensor -> {
-                this.sendCommand("BLINE $sensorHeight mm,$sensorOffset\r\n mm")
+                this.sendCommand("BLINE $sensorHeight mm,$sensorOffset mm\r\n")
             }
         }
     }
@@ -194,6 +194,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
             val page = f.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page ready, sending page")
             ostream.write(page)
+            this.clearBuffer()
             Log.i("PrintService", "[$type] Page sent to printer")
         }
 
