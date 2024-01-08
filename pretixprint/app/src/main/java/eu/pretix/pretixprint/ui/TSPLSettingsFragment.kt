@@ -61,6 +61,13 @@ class TSPLSettingsFragment : SetupFragment() {
                 ?: prefs.getString("hardware_${useCase}printer_maxlength", proto.defaultMaxLength.toString())
         view.findViewById<TextInputEditText>(R.id.teMaxLength).setText(currentMaxLength)
 
+        // Page Offset Setting
+        val currentVerticalOffset = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_verticaloffset"
+        ) as String?)
+                ?: prefs.getString("hardware_${useCase}printer_verticaloffset", proto.defaultVerticalOffset.toString())
+        view.findViewById<TextInputEditText>(R.id.teVerticalOffset).setText(currentVerticalOffset)
+
         // Speed Setting
         val currentSpeed = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_speed"
@@ -111,6 +118,7 @@ class TSPLSettingsFragment : SetupFragment() {
             val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
             val maxWidth = view.findViewById<TextInputEditText>(R.id.teMaxWidth).text.toString()
             val maxLength = view.findViewById<TextInputEditText>(R.id.teMaxLength).text.toString()
+            val verticalOffset = view.findViewById<TextInputEditText>(R.id.teVerticalOffset).text.toString()
             val speed = view.findViewById<TextInputEditText>(R.id.teSpeed).text.toString()
             val density = view.findViewById<TextInputEditText>(R.id.teDensity).text.toString()
             val sensor = view.findViewById<TextInputLayout>(R.id.tilSensor).editText?.text.toString()
@@ -119,6 +127,7 @@ class TSPLSettingsFragment : SetupFragment() {
 
             val doubleRegex = Regex("^(\\d+\\.?\\d*)?\$")
             val intRegex = Regex("^(\\d+)?\$")
+            val signedIntRegex = Regex("^-?(\\d+)?\$")
 
             if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
@@ -130,7 +139,9 @@ class TSPLSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.teMaxWidth).error = getString(R.string.err_field_invalid)
             } else if (!maxLength.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teMaxLength).error = getString(R.string.err_field_invalid)
-            } else if (!speed.matches(intRegex)) {
+            } else if (!verticalOffset.matches(signedIntRegex)) {
+                view.findViewById<TextInputEditText>(R.id.teVerticalOffset).error = getString(R.string.err_field_invalid)
+            }else if (!speed.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teSpeed).error = getString(R.string.err_field_invalid)
             } else if (!density.matches(intRegex)) {
                 view.findViewById<TextInputEditText>(R.id.teDensity).error = getString(R.string.err_field_invalid)

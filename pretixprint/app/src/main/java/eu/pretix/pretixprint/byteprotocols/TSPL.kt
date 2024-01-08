@@ -16,6 +16,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -29,6 +30,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
     override val defaultDPI: Int = 203
     val defaultMaxWidth: Int = 82 // mm (82.55mm = 3")
     val defaultMaxLength: Int = 203 // mm (203.2mm = 8")
+    val defaultVerticalOffset: Int = 0 // mm
     val defaultSpeed: Int = 2 // inch/sec (2 is supported by most TSC printers)
     val defaultDensity: Int = 8 // 1-15 (density = print temperature)
     val defaultSensor: Int = Sensor.sGap.sensor
@@ -74,7 +76,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val width: Int = scaledImg.width
         val widthInBytes: Int = (width + 7) / 8
         val height: Int = scaledImg.height
-        val xOffset = 0
+        val verticalOffset: Int = conf["hardware_${type}printer_verticaloffset"]?.toInt() ?: this.defaultVerticalOffset
+        val xOffset = if (verticalOffset > 0) verticalOffset else 0
         val yOffset = 0
         stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but byte-height equates to dot-height
 
@@ -164,9 +167,11 @@ class TSPL : StreamByteProtocol<Bitmap> {
     private fun configurePrinter(conf: Map<String, String>, type: String) {
         // size
         val maxWidth = conf["hardware_${type}printer_maxwidth"]?.toInt() ?: this.defaultMaxWidth
+        val pageOffset = conf["hardware_${type}printer_offset"]?.toInt() ?: this.defaultVerticalOffset
+        val useWidth = maxWidth + 2 * abs(pageOffset)
         val maxLength = conf["hardware_${type}printer_maxlength"]?.toInt()
                 ?: this.defaultMaxLength
-        this.sendCommand("SIZE $maxWidth mm,$maxLength mm\r\n")
+        this.sendCommand("SIZE $useWidth mm,$maxLength mm\r\n")
 
         // speed
         val speed = conf["hardware_${type}printer_speed"]?.toInt() ?: this.defaultSpeed
