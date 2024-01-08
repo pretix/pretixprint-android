@@ -42,7 +42,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
         return type is BluetoothConnection || type is USBConnection
-        // todo: test network (I don't have an ethernet-capable TSPL printer)
+        // in theory this should work for network, too. However, I don't have a wifi/ethernet TSPL-printer to test
     }
 
     override fun createSettingsFragment(): SetupFragment {
