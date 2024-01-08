@@ -130,6 +130,7 @@ dependencies {
     implementation(project(':libpretixprint')) {
         transitive = false
     }
+
     
     implementation 'com.github.anastaciocintra:escpos-coffee:4.0.2'
     implementation 'com.sunmi:printerlibrary:1.0.13'
