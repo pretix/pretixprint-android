@@ -110,8 +110,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
                     // WHITE new pixel
                     newPixel = 255
                     // set pixel to white/transparent/paper color (1 / true)
-                    val byteIndex:Int = y * widthInBytes + (x / 8)
-                    val bitIndex:Int = x % 8
+                    val byteIndex: Int = y * widthInBytes + (x / 8)
+                    val bitIndex: Int = x % 8
                     val oldByte = imgStream[byteIndex]
                     val pixelBitInt = 128 shr bitIndex // 128 = 10000000 shiftRight bit
                     val newByte: Byte = (oldByte.toInt() xor pixelBitInt).toByte()
