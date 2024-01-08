@@ -35,7 +35,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
     val defaultSensorHeight: Double = 3.0 // height of gap/mark in mm
     val defaultSensorOffset: Double = 1.5 // offset after mark
 
-    val ditheringThreshold: Int = 128
+    private val ditheringThreshold: Int = 128
 
     override fun allowedForUsecase(type: String): Boolean {
         return type != "receipt" // allow both ticket and badge printing
@@ -58,8 +58,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val stream = ByteArrayOutputStream()
 
         // scale down to fit target medium
-        val dpi = conf.get("hardware_${type}printer_dpi")?.toInt() ?: this.defaultDPI
-        val maxWidthMM = conf.get("hardware_${type}printer_maxwidth")?.toInt()
+        val dpi = conf["hardware_${type}printer_dpi"]?.toInt() ?: this.defaultDPI
+        val maxWidthMM = conf["hardware_${type}printer_maxwidth"]?.toInt()
                 ?: this.defaultMaxWidth
         val targetWidth = ceil(maxWidthMM.toFloat() * 0.0393701 * dpi).toInt() // in dots
         val scaledImg = if (img.width > targetWidth) {
@@ -70,7 +70,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         }
 
         // BITMAP start command
-        val mode: String = Integer.toString(0) // print mode (0 = override pixel, 1 = OR, 1 = XOR)
+        val mode: String = 0.toString() // print mode (0 = override pixel, 1 = OR, 1 = XOR)
         val width: Int = scaledImg.width
         val widthInBytes: Int = (width + 7) / 8
         val height: Int = scaledImg.height
@@ -83,16 +83,15 @@ class TSPL : StreamByteProtocol<Bitmap> {
         // array storing errors for dithering
         val quantizationErrors = Array(width) { IntArray(height) }
 
-        // set all pixels to black
-        var y = 0
-        while (y < height * widthInBytes) {
-            imgStream[y] = 0
-            ++y
-        }
-
         // iterate all pixels and convert into binary
         // applies floyd-steinberg dithering
         for (y in 0 until height) {
+            // set all pixels to black
+            for (xByte in 0 until widthInBytes) {
+                imgStream[y*widthInBytes + xByte] = 0
+            }
+
+            // now fill with color
             for (x in 0 until width) {
                 val pixel = scaledImg.getPixel(x, y)
                 val red = Color.red(pixel)
@@ -107,7 +106,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
                 val oldPixel = grayScale + quantizationErrors[x][y]
 
                 // decide whether this pixel is black or white
-                var newPixel : Int = 0 // BLACK by default
+                var newPixel = 0 // BLACK by default
                 if (oldPixel >= this.ditheringThreshold) {
                     // WHITE new pixel
                     newPixel = 255
@@ -164,28 +163,28 @@ class TSPL : StreamByteProtocol<Bitmap> {
 
     private fun configurePrinter(conf: Map<String, String>, type: String) {
         // size
-        val maxWidth = conf.get("hardware_${type}printer_maxwidth")?.toInt() ?: this.defaultMaxWidth
-        val maxLength = conf.get("hardware_${type}printer_maxlength")?.toInt()
+        val maxWidth = conf["hardware_${type}printer_maxwidth"]?.toInt() ?: this.defaultMaxWidth
+        val maxLength = conf["hardware_${type}printer_maxlength"]?.toInt()
                 ?: this.defaultMaxLength
         this.sendCommand("SIZE $maxWidth mm,$maxLength mm\r\n")
 
         // speed
-        val speed = conf.get("hardware_${type}printer_speed")?.toInt() ?: this.defaultSpeed
-        if (speed >= 1 && speed <= 15) {
+        val speed = conf["hardware_${type}printer_speed"]?.toInt() ?: this.defaultSpeed
+        if (speed in 1..15) {
             this.sendCommand("SPEED $speed\r\n")
         } else {
             this.sendCommand("SPEED ${this.defaultSpeed}\r\n")
         }
 
         // density (print temp)
-        val density = conf.get("hardware_${type}printer_density")?.toInt() ?: this.defaultDensity
+        val density = conf["hardware_${type}printer_density"]?.toInt() ?: this.defaultDensity
         this.sendCommand("DENSITY ${density}\r\n")
 
         // sensor type
-        val sensor = conf.get("hardware_${type}printer_sensor")?.toInt() ?: this.defaultSensor
-        val sensorHeight = conf.get("hardware_${type}printer_sensor_height")?.toDouble()
+        val sensor = conf["hardware_${type}printer_sensor"]?.toInt() ?: this.defaultSensor
+        val sensorHeight = conf["hardware_${type}printer_sensor_height"]?.toDouble()
                 ?: this.defaultSensorHeight
-        val sensorOffset = conf.get("hardware_${type}printer_sensor_offset")?.toDouble()
+        val sensorOffset = conf["hardware_${type}printer_sensor_offset"]?.toDouble()
                 ?: this.defaultSensorOffset
         when (sensor) {
             Sensor.sContinuous.sensor -> {
@@ -226,11 +225,11 @@ class TSPL : StreamByteProtocol<Bitmap> {
         return try {
             this.outStream!!.write(msgBuffer)
 
-            Log.i("TSPL Protocol", "sent command: ${cmd}")
+            Log.i("TSPL Protocol", "sent command: $cmd")
             true
         } catch (var4: IOException) {
 
-            Log.i("TSPL Protocol", "failed sending command: ${cmd}")
+            Log.i("TSPL Protocol", "failed sending command: $cmd")
             false
         }
     }
