@@ -76,8 +76,7 @@ class TSPL : StreamByteProtocol<Bitmap> {
         val width: Int = scaledImg.width
         val widthInBytes: Int = (width + 7) / 8
         val height: Int = scaledImg.height
-        val verticalOffset: Int = conf["hardware_${type}printer_verticaloffset"]?.toInt() ?: this.defaultVerticalOffset
-        val xOffset = if (verticalOffset > 0) verticalOffset else 0
+        val xOffset = 0
         val yOffset = 0
         stream.write("BITMAP, $xOffset, $yOffset, $widthInBytes, $height, $mode,".toByteArray()) // as tspl takes binary bitmap, width is in bytes, but byte-height equates to dot-height
 
@@ -167,7 +166,8 @@ class TSPL : StreamByteProtocol<Bitmap> {
     private fun configurePrinter(conf: Map<String, String>, type: String) {
         // size
         val maxWidth = conf["hardware_${type}printer_maxwidth"]?.toInt() ?: this.defaultMaxWidth
-        val pageOffset = conf["hardware_${type}printer_offset"]?.toInt() ?: this.defaultVerticalOffset
+        val pageOffset = conf["hardware_${type}printer_verticaloffset"]?.toInt()
+                ?: this.defaultVerticalOffset
         val useWidth = maxWidth + 2 * abs(pageOffset)
         val maxLength = conf["hardware_${type}printer_maxlength"]?.toInt()
                 ?: this.defaultMaxLength
