@@ -160,6 +160,7 @@ class TSPLSettingsFragment : SetupFragment() {
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_density", density)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor", mappedSensor.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor_height", sensorHeight)
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_sensor_offset", sensorOffset)
 
                 (activity as PrinterSetupActivity).startFinalPage()
             }
