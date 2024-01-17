@@ -47,8 +47,6 @@
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
     <string name="field_label_maxlength">Maximum printing height/length (in mm)</string>
-    <string name="field_label_verticaloffset">Vertical page offset (in mm +/-)</string>
-    <string name="field_helper_verticaloffset">If your printer is not printing centered, you can define an offset.</string>
     <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
     <string name="field_label_eposprintxml_deviceid">Device ID (Default: local_printer)</string>
     <string name="field_label_queue">Printer name</string>
@@ -105,7 +103,6 @@
     <string name="setup_connection_type_headline">How is your printer connected?</string>
     <string name="connection_type_network">Network (LAN/WLAN)</string>
     <string name="connection_type_bluetooth">Bluetooth</string>
-    <string name="connection_type_bluetoothle">Bluetooth LE (Low Energy)</string>
     <string name="connection_type_usb">USB (experimental, works on some devices)</string>
     <string name="connection_type_cups">CUPS (Linux server)</string>
     <string name="connection_type_system">Android Print Service</string>
@@ -145,7 +142,7 @@
     <string name="field_helper_speed_tspl">The printing speed of your printer (1-18 inch/sec), most models only support 2-5. Consider data sheet. Wrong values can lead to printer refusing to work.</string>
     <string name="field_label_density">Print Density/Intensity</string>
     <string name="field_helper_density_tspl">The saturation of prints. 0 (lightest) - 15 (darkest). Controls print head temperature.</string>
-    <string name="field_label_sensor">Sensor Type</string>
+    <string name="field_label_sensor_type">Sensor Type</string>
     <string name="field_label_sensor_height">Sensor Height (in mm)</string>
     <string name="field_helper_sensor_height_tspl">The height of your gap between pages or vertical size of the black mark. 2.54 - 25.4mm. Ignored when continuous.</string>
     <string name="field_label_sensor_offset">Sensor Offset, vertical (in mm)</string>
@@ -157,5 +154,4 @@
     <string name="pin_protection_pin">Set settings PIN</string>
     <string name="pin_protection_description">Lock settings with a custom PIN that must be entered if you want to change printer configuration</string>
     <string name="operation_pin_headline">Enter PIN</string>
-    <string name="title_tplsdk">TPL SDK</string>
 </resources>
