@@ -29,7 +29,7 @@ class TSPLSettingsFragment : SetupFragment() {
         // DPI Setting
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_dpi", proto.defaultDPI.toString())
         view.findViewById<TextInputEditText>(R.id.teDPI).setText(currentDPI)
 
@@ -50,28 +50,28 @@ class TSPLSettingsFragment : SetupFragment() {
         // Max Width Setting
         val currentLabelWidth = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_maxwidth"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_maxwidth", proto.defaultMaxWidth.toString())
         view.findViewById<TextInputEditText>(R.id.teMaxWidth).setText(currentLabelWidth)
 
         // Max Height/Length Setting
         val currentMaxLength = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_maxlength"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_maxlength", proto.defaultMaxLength.toString())
         view.findViewById<TextInputEditText>(R.id.teMaxLength).setText(currentMaxLength)
 
         // Speed Setting
         val currentSpeed = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_speed"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_speed", proto.defaultSpeed.toString())
         view.findViewById<TextInputEditText>(R.id.teSpeed).setText(currentSpeed)
 
         // Density Setting
         val currentDensity = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_density"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_density", proto.defaultDensity.toString())
         view.findViewById<TextInputEditText>(R.id.teDensity).setText(currentDensity)
 
@@ -91,14 +91,14 @@ class TSPLSettingsFragment : SetupFragment() {
         // Sensor Height Setting
         val currentSensorHeight = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_sensor_height"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_sensor_height", proto.defaultSensorHeight.toString())
         view.findViewById<TextInputEditText>(R.id.teSensorHeight).setText(currentSensorHeight)
 
         // Sensor Offset Setting
         val currentSensorOffset = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_sensor_offset"
-        ) as String?)
+        ))
                 ?: prefs.getString("hardware_${useCase}printer_sensor_offset", proto.defaultSensorOffset.toString())
         view.findViewById<TextInputEditText>(R.id.teSensorOffset).setText(currentSensorOffset)
 
@@ -119,7 +119,6 @@ class TSPLSettingsFragment : SetupFragment() {
 
             val doubleRegex = Regex("^(\\d+\\.?\\d*)?\$")
             val intRegex = Regex("^(\\d+)?\$")
-            val signedIntRegex = Regex("^-?(\\d+)?\$")
 
             if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
