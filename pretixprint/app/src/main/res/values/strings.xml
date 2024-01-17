@@ -139,14 +139,14 @@
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
     <string name="field_label_rotation">Rotation</string>
     <string name="field_label_speed">Speed (in inch/sec)</string>
-    <string name="field_helper_speed_tspl">The printing speed of your printer (1-18 inch/sec), most models only support 2-5. Consider data sheet. Wrong values can lead to printer refusing to work.</string>
+    <string name="field_helper_speed_tspl">The printing speed of your printer (1–18 inch/sec), most models only support 2–5. Consider data sheet. Wrong values can lead to printer refusing to work.</string>
     <string name="field_label_density">Print Density/Intensity</string>
     <string name="field_helper_density_tspl">The saturation of prints. 0 (lightest) - 15 (darkest). Controls print head temperature.</string>
     <string name="field_label_sensor_type">Sensor Type</string>
     <string name="field_label_sensor_height">Sensor Height (in mm)</string>
-    <string name="field_helper_sensor_height_tspl">The height of your gap between pages or vertical size of the black mark. 2.54 - 25.4mm. Ignored when continuous.</string>
+    <string name="field_helper_sensor_height_tspl">The height of your gap between pages or vertical size of the black mark. 2.54 – 25.4mm. Ignored when continuous.</string>
     <string name="field_label_sensor_offset">Sensor Offset, vertical (in mm)</string>
-    <string name="field_helper_sensor_offset_tspl">The offset of your gap or black mark. Either 0 or 2.54 - 25.4mm. Assumes, that gaps end after the page starts. If not using black mark or tickets with cut out gaps, set to 0.</string>
+    <string name="field_helper_sensor_offset_tspl">The offset of your gap or black mark. Either 0 or 2.54 – 25.4mm. Assumes, that gaps end after the page starts. If not using black mark or tickets with cut out gaps, set to 0.</string>
     <string name="label_gap">Gap</string>
     <string name="label_mark">Black Mark</string>
     <string name="label_two_color">red/black</string>
