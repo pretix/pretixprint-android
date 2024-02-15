@@ -32,6 +32,10 @@
     <string name="welcome_tutorial1">pretixPRINT erlaubt anderen pretix-Apps, z.B. der Kassensoftware pretixPOS, Tickets, Badges oder Bons auf Druckern im Netzwerk zu drucken.</string>
     <string name="welcome_tutorial2">Aktuell kann pretixPRINT mit Druckern kommunizieren, die IPP oder CUPS unterstützen, d.h. alle Drucker, die von einem Mac- oder Linux-Computer freigegeben wurden sowie die meisten aktuellen Drucker mit eigenem Netzwerkanschluss.</string>
     <string name="action_configure">Beginne Druckereinrichtung</string>
+    <string name="notification_permission_denied">Die Berechtigung für Benachrichtigungen wurde abgelehnt. Die App wird nicht in der Lage sein, verlässlich zu drucken, wenn sie im Hintergrund ist.</string>
+    <string name="notification_permission_denied_understood">Verstanden</string>
+    <string name="notification_permission_required">Die App hat keine Berechtigung für Benachrichtigungen. Dies wird verhindern, dass Druckaufträge verlässlich ausgeführt werden.</string>
+    <string name="notification_permission_required_summary">Klicken Sie hier, um die Berechtigung zu erteilen. Wenn kein Berechtigungsdialog erscheint, müssen Sie die Berechtigung manuell in den Systemeinstellungen unter Apps → pretixPRINT → Berechtigungen erteilen.</string>
     <string name="headline_found_network_printers">Gefundene Netzwerkdrucker</string>
     <string name="headline_found_bluetooth_printers">Gefundene Bluetoothdrucker</string>
     <string name="headline_add_printer">Drucker konfigurieren</string>

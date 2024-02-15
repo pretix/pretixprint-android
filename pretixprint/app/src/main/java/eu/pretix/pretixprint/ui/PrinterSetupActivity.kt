@@ -11,20 +11,24 @@ import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
+import org.spongycastle.util.Pack
 import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
     companion object {
         val EXTRA_USECASE = "TYPE"
+        val REQUEST_CODE_NOTIFICATIONS_AND_SAVE = 19567
     }
 
     var settingsStagingArea = mutableMapOf<String, String>()
@@ -213,6 +217,48 @@ class PrinterSetupActivity : AppCompatActivity() {
         fragment.useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
         fragmentTransaction.replace(R.id.frame, fragment)
         fragmentTransaction.commit()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_NOTIFICATIONS_AND_SAVE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                save()
+                finish()
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                MaterialAlertDialogBuilder(this)
+                    .setMessage(R.string.notification_permission_denied)
+                    .setPositiveButton(R.string.notification_permission_denied_understood) { _, _ ->
+                        save()
+                        finish()
+                    }
+                    .create()
+                    .show()
+            }
+        }
+    }
+
+    fun finalize() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    REQUEST_CODE_NOTIFICATIONS_AND_SAVE
+                )
+            }
+        } else {
+            save()
+            finish()
+        }
     }
 
     fun save() {
