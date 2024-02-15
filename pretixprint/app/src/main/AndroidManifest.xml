@@ -3,19 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"  android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
-        <package android:name="woyou.aidlservice.jiuiv5"/>  <!-- Sunmi -->
+        <package android:name="woyou.aidlservice.jiuiv5" />  <!-- Sunmi -->
     </queries>
 
     <uses-feature
@@ -86,7 +93,8 @@
         <service
             android:name=".print.PrintService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_TICKET" />
                 <action android:name="eu.pretix.pretixpos.print.PRINT_BADGE" />
@@ -96,7 +104,8 @@
         <service
             android:name=".print.TicketPrintService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_TICKET" />
             </intent-filter>
@@ -104,7 +113,8 @@
         <service
             android:name=".print.BadgePrintService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_BADGE" />
             </intent-filter>
@@ -112,7 +122,8 @@
         <service
             android:name=".print.ReceiptPrintService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice">
             <intent-filter>
                 <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
             </intent-filter>
