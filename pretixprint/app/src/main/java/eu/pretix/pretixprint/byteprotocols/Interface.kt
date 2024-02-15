@@ -4,6 +4,8 @@ import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.sunmi.peripheral.printer.SunmiPrinterService
+import com.sunmi.printerx.PrinterSdk
+import com.sunmi.printerx.PrinterSdk.Printer
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -25,7 +27,7 @@ sealed interface ByteProtocolInterface<T> {
 }
 
 interface StreamByteProtocol<T> : ByteProtocolInterface<T> {
-    fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String)
+    fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String, waitAfterPage: Long)
 }
 
 interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
@@ -35,7 +37,7 @@ interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
 }
 
 interface SunmiByteProtocol<T> : ByteProtocolInterface<T> {
-    fun sendSunmi(printerService: SunmiPrinterService, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String)
+    fun sendSunmi(printer: PrinterSdk.Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String)
 }
 
 fun getProtoClass(proto: String): ByteProtocolInterface<Any> {

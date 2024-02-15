@@ -29,7 +29,14 @@ open class ESCPOS : StreamByteProtocol<ByteArray> {
         return img
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+    override fun send(
+        pages: List<CompletableFuture<ByteArray>>,
+        istream: InputStream,
+        ostream: OutputStream,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
@@ -37,8 +44,7 @@ open class ESCPOS : StreamByteProtocol<ByteArray> {
             ostream.write(page)
             ostream.flush()
             Log.i("PrintService", "[$type] Page sent, sleep after page")
-            val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "100")
-            Thread.sleep(wap.toLong())
+            Thread.sleep(waitAfterPage)
         }
    }
 

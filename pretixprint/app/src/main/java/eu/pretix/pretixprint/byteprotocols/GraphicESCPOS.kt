@@ -109,7 +109,14 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+    override fun send(
+        pages: List<CompletableFuture<ByteArray>>,
+        istream: InputStream,
+        ostream: OutputStream,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
@@ -119,8 +126,7 @@ class GraphicESCPOS : StreamByteProtocol<Bitmap> {
             Log.i("PrintService", "[$type] Page sent")
         }
         Log.i("PrintService", "[$type] Job done, sleep")
-        val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000")
-        Thread.sleep(wap.toLong())
+        Thread.sleep(waitAfterPage)
     }
 
     override fun createSettingsFragment(): SetupFragment? {

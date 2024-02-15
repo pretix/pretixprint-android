@@ -1,28 +1,23 @@
 package eu.pretix.pretixprint.byteprotocols
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.util.Log
-import com.github.anastaciocintra.escpos.EscPos
-import com.github.anastaciocintra.escpos.EscPosConst
-import com.github.anastaciocintra.escpos.image.BitonalThreshold
-import com.github.anastaciocintra.escpos.image.CoffeeImage
-import com.github.anastaciocintra.escpos.image.EscPosImage
-import com.github.anastaciocintra.escpos.image.GraphicsImageWrapper
 import com.sunmi.peripheral.printer.InnerResultCallback
 import com.sunmi.peripheral.printer.SunmiPrinterService
+import com.sunmi.printerx.PrinterSdk.Printer
+import com.sunmi.printerx.api.PrintResult
+import com.sunmi.printerx.enums.DividingLine
+import com.sunmi.printerx.style.BitmapStyle
+import com.sunmi.printerx.style.TextStyle
+import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
-import eu.pretix.pretixprint.ui.GraphicESCPOSSettingsFragment
 import eu.pretix.pretixprint.ui.PNGSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 
 
@@ -48,44 +43,30 @@ class PNG : SunmiByteProtocol<Bitmap> {
         return byteArray
     }
 
-    override fun sendSunmi(printerService: SunmiPrinterService, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String) {
+    override fun sendSunmi(printer: Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String) {
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page ready, sending page")
             val future = CompletableFuture<Void>()
             val bmp = BitmapFactory.decodeByteArray(page, 0, page.size)
-            printerService.enterPrinterBuffer(true)
-            printerService.printBitmap(bmp, null)
-            printerService.lineWrap(3, null)
-            try {
-                printerService.cutPaper(null)
-            } catch (e: java.lang.Exception) {
-                // not supported by all models
-            }
-            printerService.commitPrinterBufferWithCallback(object : InnerResultCallback() {
-                override fun onRunResult(p0: Boolean) {
-                    Log.i("PrintService", "[$type] PrinterService onRunResult: $p0")
-                    future.complete(null)
-                }
 
-                override fun onReturnString(p0: String?) {
-                    Log.i("PrintService", "[$type] PrinterService onReturnString: $p0")
-                }
-
-                override fun onRaiseException(code: Int, msg: String?) {
-                    future.completeExceptionally(Exception("[$code] $msg"))
-                }
-
-                override fun onPrintResult(p0: Int, p1: String?) {
-                    Log.i("PrintService", "[$type] PrinterService onPrintResult: $p0 $p1")
-                    if (p0 == 0) { // Transaction print successful
+            val api = printer.lineApi()
+            api.enableTransMode(true)
+            api.printBitmap(bmp, BitmapStyle.getStyle())
+            api.printDividingLine(DividingLine.EMPTY, 100)
+            api.printTrans(object: PrintResult() {
+                override fun onResult(resultCode: Int, message: String?) {
+                    if (resultCode == 0) {
                         future.complete(null)
+                    } else {
+                        future.completeExceptionally(PrintException("Sunmi error: [$resultCode] $message"))
                     }
                 }
+
             })
-            printerService.exitPrinterBuffer(true)
-            future.get()
+            api.enableTransMode(false)
+            future.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page sent")
         }
     }

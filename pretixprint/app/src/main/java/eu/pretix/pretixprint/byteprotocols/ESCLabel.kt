@@ -76,7 +76,14 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
         return Bitmap::class.java
     }
 
-    override fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String) {
+    override fun send(
+        pages: List<CompletableFuture<ByteArray>>,
+        istream: InputStream,
+        ostream: OutputStream,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
@@ -86,7 +93,7 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
             Log.i("PrintService", "[$type] Page sent")
         }
         Log.i("PrintService", "[$type] Job done, sleep")
-        Thread.sleep(2000)
+        Thread.sleep(waitAfterPage)
     }
 
     fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02X".format(eachByte) }
