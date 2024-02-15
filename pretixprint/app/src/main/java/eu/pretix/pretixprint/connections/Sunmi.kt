@@ -4,13 +4,8 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.sunmi.peripheral.printer.InnerPrinterCallback
-import com.sunmi.peripheral.printer.InnerPrinterManager
-import com.sunmi.peripheral.printer.InnerResultCallback
-import com.sunmi.peripheral.printer.SunmiPrinterService
 import com.sunmi.printerx.PrinterSdk
 import com.sunmi.printerx.PrinterSdk.PrinterListen
-import com.sunmi.printerx.style.FileStyle
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
@@ -18,8 +13,6 @@ import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
 import java8.util.concurrent.CompletableFuture
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ExecutionException
