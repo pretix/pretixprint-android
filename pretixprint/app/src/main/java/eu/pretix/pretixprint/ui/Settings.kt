@@ -47,7 +47,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var defaultSharedPreferences: SharedPreferences
     val types = listOf("ticket", "badge", "receipt")
     var pendingPinAction: ((pin: String) -> Unit)? = null
-    val REQUEST_CODE_NOTIFICATIONS = 19567
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
