@@ -65,6 +65,7 @@ class PNG : SunmiByteProtocol<Bitmap> {
                 }
 
             })
+            api.enableTransMode(false)
             future.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page sent")
         }
