@@ -1,11 +1,13 @@
 package eu.pretix.pretixprint.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.content.RestrictionsManager
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +17,8 @@ import android.view.View.VISIBLE
 import android.webkit.WebView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -25,14 +29,14 @@ import com.google.android.material.snackbar.Snackbar
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.connections.IMinInternalConnection
+import eu.pretix.pretixprint.connections.SunmiInternalConnection
+import eu.pretix.pretixprint.connections.SystemConnection
 import eu.pretix.pretixprint.print.testPrint
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import eu.pretix.pretixprint.connections.IMinInternalConnection
-import eu.pretix.pretixprint.connections.SunmiInternalConnection
-import eu.pretix.pretixprint.connections.SystemConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
@@ -119,16 +123,35 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onResume() {
         super.onResume()
+        var anyVisible = false
         for (type in types) {
             findPreference<PrinterPreference>("hardware_${type}printer_find")?.apply {
                 if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
                     moreVisibility = VISIBLE
+                    anyVisible = true
                     summary = printerSummary(type)
                 } else {
                     moreVisibility = GONE
                     summary = ""
                 }
             }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            findPreference<Preference>("notification_permission")?.isVisible = anyVisible && ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+            findPreference<Preference>("notification_permission")?.setOnPreferenceClickListener {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    SettingsActivity.REQUEST_CODE_NOTIFICATIONS
+                )
+                true
+            }
+        } else {
+            findPreference<Preference>("notification_permission")?.isVisible = false
         }
 
         val cpl = findPreference<ListPreference>("hardware_receiptprinter_cpl")
@@ -303,6 +326,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 }
 
 class SettingsActivity : AppCompatActivity() {
+    companion object {
+        val REQUEST_CODE_NOTIFICATIONS = 19467
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -324,6 +350,17 @@ class SettingsActivity : AppCompatActivity() {
             .beginTransaction()
             .replace(R.id.content, SettingsFragment())
             .commit()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_NOTIFICATIONS) {
+            supportFragmentManager.fragments.forEach { it.onResume() }
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

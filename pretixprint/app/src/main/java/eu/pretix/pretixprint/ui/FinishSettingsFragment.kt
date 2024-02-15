@@ -1,10 +1,15 @@
 package eu.pretix.pretixprint.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.github.razir.progressbutton.attachTextChangeAnimator
 import com.github.razir.progressbutton.bindProgressButton
 import com.github.razir.progressbutton.hideProgress
@@ -75,8 +80,7 @@ class FinishSettingsFragment : SetupFragment() {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
-            activity.save()
-            activity.finish()
+            activity.finalize()
         }
 
         return view

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
+    <eu.pretix.pretixprint.ui.WarningPreference
+        android:key="notification_permission"
+        android:title="@string/notification_permission_required"
+        android:summary="@string/notification_permission_required_summary"
+        />
 
     <PreferenceCategory android:title="@string/settings_label_ticketprinter">
         <eu.pretix.pretixprint.ui.PrinterPreference

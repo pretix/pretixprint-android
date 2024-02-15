@@ -34,6 +34,10 @@
     <string name="welcome_tutorial1">pretixPRINT allows other pretix apps, e.g. the ticket selling app pretixPOS, to print tickets, badges, and receipts using suitable printers on your network.</string>
     <string name="welcome_tutorial2">Currently, pretixPRINT knows how to talk to printers supporting IPP or shared with CUPS, i.e. all printers shared by a macOS or Linux computer and most modern printers with a network interface.</string>
     <string name="action_configure">Start finding a printer</string>
+    <string name="notification_permission_denied">Notification permission was denied. The app will not be able to print reliably when it is in the background.</string>
+    <string name="notification_permission_denied_understood">Understood</string>
+    <string name="notification_permission_required">The app is not granted permission to send notifications. This will prevent reliable printing.</string>
+    <string name="notification_permission_required_summary">Click here to grant the permission. If no permission dialog shows, you need to grant the permission manually in system settings at Apps → pretixPRINT → Permissions.</string>
     <string name="headline_found_network_printers">Found network printers</string>
     <string name="headline_found_usb_devices">Found USB devices</string>
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
