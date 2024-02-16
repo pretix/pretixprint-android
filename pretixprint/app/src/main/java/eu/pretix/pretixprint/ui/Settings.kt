@@ -9,8 +9,11 @@ import android.content.RestrictionsManager
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.text.TextUtils
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -152,6 +155,24 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         } else {
             findPreference<Preference>("notification_permission")?.isVisible = false
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+            val isIgnoringBatteryOptimizations = pm.isIgnoringBatteryOptimizations(
+                requireContext().applicationContext.packageName
+            )
+            findPreference<Preference>("battery_optimizations")?.isVisible = anyVisible && !isIgnoringBatteryOptimizations
+            findPreference<Preference>("battery_optimizations")?.setOnPreferenceClickListener {
+                val intent = Intent()
+                intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+                // ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS would be nicer but is restricted in play store
+                // intent.data = Uri.parse("package:${requireContext().applicationContext.packageName}")
+                startActivity(intent)
+                true
+            }
+        } else {
+            findPreference<Preference>("battery_optimizations")?.isVisible = false
         }
 
         val cpl = findPreference<ListPreference>("hardware_receiptprinter_cpl")

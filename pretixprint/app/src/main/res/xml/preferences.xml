@@ -7,6 +7,12 @@
         android:summary="@string/notification_permission_required_summary"
         />
 
+    <eu.pretix.pretixprint.ui.WarningPreference
+        android:key="battery_optimizations"
+        android:title="@string/battery_optimizations_required"
+        android:summary="@string/battery_optimizations_required_summary"
+        />
+
     <PreferenceCategory android:title="@string/settings_label_ticketprinter">
         <eu.pretix.pretixprint.ui.PrinterPreference
             android:key="hardware_ticketprinter_find"

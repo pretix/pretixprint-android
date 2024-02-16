@@ -38,6 +38,8 @@
     <string name="notification_permission_denied_understood">Understood</string>
     <string name="notification_permission_required">The app is not granted permission to send notifications. This will prevent reliable printing.</string>
     <string name="notification_permission_required_summary">Click here to grant the permission. If no permission dialog shows, you need to grant the permission manually in system settings at Apps → pretixPRINT → Permissions.</string>
+    <string name="battery_optimizations_required">Please allow unrestricted background usage for this app.</string>
+    <string name="battery_optimizations_required_summary">Printing only works reliably if battery optimizations are turned off for this app. Please click here, then select "All Apps", find pretixPRINT and turn off battery optimizations or restrictions.</string>
     <string name="headline_found_network_printers">Found network printers</string>
     <string name="headline_found_usb_devices">Found USB devices</string>
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>
