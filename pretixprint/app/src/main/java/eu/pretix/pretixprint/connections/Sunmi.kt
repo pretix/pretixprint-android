@@ -93,7 +93,7 @@ class SunmiInternalConnection : ConnectionType {
                             override fun onDefPrinter(printer: PrinterSdk.Printer?) {
                                 if (printer != null) {
                                     try {
-                                        proto.sendSunmi(printer, futures, conf, type)
+                                        proto.sendSunmi(printer, futures, conf, type, wap)
                                         future.complete(null)
                                     } catch (e: Exception) {
                                         future.completeExceptionally(e)

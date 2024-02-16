@@ -26,6 +26,11 @@ class PNGSettingsFragment : SetupFragment() {
         val view = inflater.inflate(R.layout.fragment_png_settings, container, false)
         val proto = PNG()
 
+        val currentWaitAfterPage = (activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_waitafterpage"
+        ) ?: prefs.getString("hardware_${useCase}printer_waitafterpage", "100")
+        view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
+
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?)
@@ -50,14 +55,22 @@ class PNGSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
             val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
+            val wap = view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).text.toString()
             if (TextUtils.isEmpty(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(dpi)) {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = getString(R.string.err_field_invalid)
+            } else if (TextUtils.isEmpty(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_required)
+            } else if (!TextUtils.isDigitsOnly(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = null
                 val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
 
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_waitafterpage",
+                    wap)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_rotation", mappedRotation.toString())
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_dpi",
                         dpi)

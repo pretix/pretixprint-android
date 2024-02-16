@@ -43,7 +43,13 @@ class PNG : SunmiByteProtocol<Bitmap> {
         return byteArray
     }
 
-    override fun sendSunmi(printer: Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String) {
+    override fun sendSunmi(
+        printer: Printer,
+        pages: List<CompletableFuture<ByteArray>>,
+        conf: Map<String, String>,
+        type: String,
+        waitAfterPage: Long
+    ) {
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
             val page = f.get(60, TimeUnit.SECONDS)
@@ -68,6 +74,8 @@ class PNG : SunmiByteProtocol<Bitmap> {
             api.enableTransMode(false)
             future.get(60, TimeUnit.SECONDS)
             Log.i("PrintService", "[$type] Page sent")
+            Log.i("PrintService", "[$type] Job done, sleep")
+            Thread.sleep(waitAfterPage)
         }
     }
 

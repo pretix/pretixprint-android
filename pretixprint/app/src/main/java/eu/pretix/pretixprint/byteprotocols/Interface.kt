@@ -37,7 +37,7 @@ interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
 }
 
 interface SunmiByteProtocol<T> : ByteProtocolInterface<T> {
-    fun sendSunmi(printer: PrinterSdk.Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String)
+    fun sendSunmi(printer: PrinterSdk.Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, waitAfterPage: Long)
 }
 
 fun getProtoClass(proto: String): ByteProtocolInterface<Any> {
