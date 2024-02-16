@@ -254,6 +254,9 @@ class PrinterSetupActivity : AppCompatActivity() {
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     REQUEST_CODE_NOTIFICATIONS_AND_SAVE
                 )
+            } else {
+                save()
+                finish()
             }
         } else {
             save()
