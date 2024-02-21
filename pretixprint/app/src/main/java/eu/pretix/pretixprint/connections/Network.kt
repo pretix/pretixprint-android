@@ -25,7 +25,7 @@ class NetworkConnection : ConnectionType {
         return true
     }
 
-    override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
         for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
             if (!conf.containsKey(entry.key)) {
@@ -66,7 +66,7 @@ class NetworkConnection : ConnectionType {
                         try {
                             Log.i("PrintService", "[$type] Start proto.send()")
                             val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000").toLong()
-                            proto.send(futures, istream, ostream, conf, type, wap)
+                            proto.send(futures, pagegroups, istream, ostream, conf, type, wap)
                             Log.i("PrintService", "[$type] Finished proto.send()")
                         } finally {
                             istream.close()
@@ -77,7 +77,7 @@ class NetworkConnection : ConnectionType {
 
                     is CustomByteProtocol<*> -> {
                         Log.i("PrintService", "[$type] Start proto.sendNetwork()")
-                        proto.sendNetwork(serverAddr.hostAddress, port, futures, conf, type, context)
+                        proto.sendNetwork(serverAddr.hostAddress, port, futures, pagegroups, conf, type, context)
                         Log.i("PrintService", "[$type] Finished proto.sendNetwork()")
                     }
                     is SunmiByteProtocol -> {

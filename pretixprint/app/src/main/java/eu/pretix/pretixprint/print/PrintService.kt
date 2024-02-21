@@ -124,6 +124,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val pages = emptyList<CompletableFuture<File?>>().toMutableList()
         var tmpfile: File?
         var pagenum = 0
+        var pagegroups = emptyList<Int>().toMutableList()
 
         val dataInputStream = applicationContext.contentResolver.openInputStream(intent.clipData!!.getItemAt(0).uri)
         val jsonData = JSONObject(dataInputStream!!.bufferedReader().use { it.readText() })
@@ -147,6 +148,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 // Unfortunately, we also cannot make the @array/receipt_cpl a integer-array, String-entries and Integer-values are not supported by the Preference-Model, either.
                 tmpfile.writeBytes(ESCPOSRenderer(dialect, jsonData, prefs.getString("hardware_receiptprinter_cpl", "32")!!.toInt(), this).render())
                 pagenum = 1
+                pagegroups.add(1)
             }
             else -> {
                 try {
@@ -211,6 +213,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                             copy.addPage(copy.getImportedPage(pagedoc, i + 1))
                         }
                         pagenum += pagedoc.numberOfPages
+                        pagegroups.add(pagedoc.numberOfPages)
                         pf.deleteOnExit()
                         pagedoc.close()
                     }
@@ -246,6 +249,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
+            //dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGEGROUPS, pagegroups)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
             val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT or if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
@@ -259,7 +263,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
             startForeground(ONGOING_NOTIFICATION_ID, notification)
         } else {
-            conn.print(tmpfile, pagenum, this, type, null)
+            conn.print(tmpfile, pagenum, pagegroups, this, type, null)
         }
 
         Log.i("PrintService", "[$type] Cleaning up old files")

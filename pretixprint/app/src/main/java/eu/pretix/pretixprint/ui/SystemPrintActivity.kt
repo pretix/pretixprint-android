@@ -16,6 +16,7 @@ class SystemPrintActivity : AppCompatActivity() {
         const val INTENT_EXTRA_CALLER = "caller"
         const val INTENT_EXTRA_FILE = "tmpfile"
         const val INTENT_EXTRA_PAGENUM = "pagenum"
+        const val INTENT_EXTRA_PAGEGROUPS = "pagegroups"
         const val INTENT_EXTRA_TYPE = "type"
     }
 
@@ -32,9 +33,10 @@ class SystemPrintActivity : AppCompatActivity() {
 
         val tmpfile = intent.extras?.get(INTENT_EXTRA_FILE) as File
         val pagenum = intent.extras?.get(INTENT_EXTRA_PAGENUM) as Int
+        val pagegroups = intent.extras?.get(INTENT_EXTRA_PAGEGROUPS) as List<Int>
         val type = intent.extras?.get(INTENT_EXTRA_TYPE) as String
 
-        SystemConnection().print(tmpfile, pagenum, this, type, null)
+        SystemConnection().print(tmpfile, pagenum, pagegroups, this, type, null)
         hadLaunchedPrint = true
     }
 

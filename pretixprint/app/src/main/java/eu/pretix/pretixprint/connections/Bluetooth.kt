@@ -31,7 +31,7 @@ class BluetoothConnection : ConnectionType {
         return true
     }
 
-    override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         this.context = context
 
         val conf = settings?.toMutableMap() ?: mutableMapOf()
@@ -105,7 +105,7 @@ class BluetoothConnection : ConnectionType {
                         try {
                             Log.i("PrintService", "[$type] Start proto.send()")
                             val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000").toLong()
-                            proto.send(futures, istream, ostream, conf, type, wap)
+                            proto.send(futures, pagegroups, istream, ostream, conf, type, wap)
                             Log.i("PrintService", "[$type] Finished proto.send()")
                         } finally {
                             socket.close()
@@ -114,7 +114,7 @@ class BluetoothConnection : ConnectionType {
 
                     is CustomByteProtocol<*> -> {
                         Log.i("PrintService", "[$type] Start proto.sendBluetooth()")
-                        proto.sendBluetooth(device.address, futures, conf, type, context)
+                        proto.sendBluetooth(device.address, futures, pagegroups, conf, type, context)
                         Log.i("PrintService", "[$type] Finished proto.sendBluetooth()")
                     }
                     is SunmiByteProtocol -> {

@@ -31,6 +31,7 @@ open class ESCPOS : StreamByteProtocol<ByteArray> {
 
     override fun send(
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         istream: InputStream,
         ostream: OutputStream,
         conf: Map<String, String>,

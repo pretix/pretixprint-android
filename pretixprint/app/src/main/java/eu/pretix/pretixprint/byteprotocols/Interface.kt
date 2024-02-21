@@ -27,17 +27,17 @@ sealed interface ByteProtocolInterface<T> {
 }
 
 interface StreamByteProtocol<T> : ByteProtocolInterface<T> {
-    fun send(pages: List<CompletableFuture<ByteArray>>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String, waitAfterPage: Long)
+    fun send(pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, istream: InputStream, ostream: OutputStream, conf: Map<String, String>, type: String, waitAfterPage: Long)
 }
 
 interface CustomByteProtocol<T> : ByteProtocolInterface<T> {
-    fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
-    fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
-    fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context)
+    fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context)
+    fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context)
+    fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context)
 }
 
 interface SunmiByteProtocol<T> : ByteProtocolInterface<T> {
-    fun sendSunmi(printer: PrinterSdk.Printer, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, waitAfterPage: Long)
+    fun sendSunmi(printer: PrinterSdk.Printer, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, waitAfterPage: Long)
 }
 
 fun getProtoClass(proto: String): ByteProtocolInterface<Any> {

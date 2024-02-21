@@ -66,33 +66,33 @@ fun testPrint(context: Context, protoName: String, mode: String, useCase: String
 
     when (mode) {
         NetworkConnection().identifier -> {
-            NetworkConnection().print(file, 1, context, useCase, settings)
+            NetworkConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         BluetoothConnection().identifier -> {
-            BluetoothConnection().print(file, 1, context, useCase, settings)
+            BluetoothConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         CUPSConnection().identifier -> {
-            CUPSConnection().print(file, 1, context, useCase, settings)
+            CUPSConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         SunmiInternalConnection().identifier -> {
-            SunmiInternalConnection().print(file, 1, context, useCase, settings)
+            SunmiInternalConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         IMinInternalConnection().identifier -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                IMinInternalConnection().print(file, 1, context, useCase, settings)
+                IMinInternalConnection().print(file, 1, listOf(1), context, useCase, settings)
             } else {
                 throw Exception("iMin USB not supported on this Android version.")
             }
         }
         USBConnection().identifier -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                USBConnection().print(file, 1, context, useCase, settings)
+                USBConnection().print(file, 1, listOf(1), context, useCase, settings)
             } else {
                 throw Exception("USB not supported on this Android version.")
             }
         }
         SystemConnection().identifier -> {
-            SystemConnection().print(file, 1, context, useCase, settings)
+            SystemConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
     }
 }

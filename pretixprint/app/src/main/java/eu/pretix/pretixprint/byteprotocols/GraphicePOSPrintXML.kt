@@ -34,16 +34,16 @@ class GraphicePOSPrintXML : CustomByteProtocol<Bitmap> {
         return Bitmap::class.java
     }
 
-    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        ePOSPrintXML().sendNetwork(host, port, pages, conf, type, context)
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
+        ePOSPrintXML().sendNetwork(host, port, pages, pagegroups, conf, type, context)
     }
 
-    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        ePOSPrintXML().sendUSB(usbManager, usbDevice, pages, conf, type, context)
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
+        ePOSPrintXML().sendUSB(usbManager, usbDevice, pages, pagegroups, conf, type, context)
     }
 
-    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
-        ePOSPrintXML().sendBluetooth(deviceAddress, pages, conf, type, context)
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
+        ePOSPrintXML().sendBluetooth(deviceAddress, pages, pagegroups, conf, type, context)
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
