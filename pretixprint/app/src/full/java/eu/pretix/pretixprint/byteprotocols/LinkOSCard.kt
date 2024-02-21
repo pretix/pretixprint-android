@@ -108,23 +108,23 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
                 var printJobs = mutableListOf<List<GraphicsInfo>>()
                 var pageoffset = 0
-                for (pagegroup in pagegroups) {
+                for (groupsize in pagegroups) {
                     if (forceDoubleSided) {
                         // User requested to print everything double sided, so we will - no matter what.
                         // A 2-page document will in this case yield 2 cards:
                         // - card 1: page 1 + page 1
                         // - card 2: page 2 + page 2
-                        for (i in 0 until pagegroup) {
+                        for (i in 0 until groupsize) {
                             printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front, CardSide.Back), context))
                         }
-                    } else if (canDoubleSided && pagegroup > 1) {
+                    } else if (canDoubleSided && groupsize > 1) {
                         // User did not requested everything to be printer double sided, but the printer
                         // is still capable printing on both sides and the current group of pages is actually
                         // more than one page. In this case, we print page 1 and 2 on one card.
                         // Even remainders of the pagegroup will be processed as double sided prints,
                         // any remainder will be printed on a single-sided card.
-                        for (i in 0 until pagegroup) {
-                            if (i % 2 == 0 && i == pagegroup-1) {
+                        for (i in 0 until groupsize) {
+                            if (i % 2 == 0 && i == groupsize-1) {
                                 // Even page (0, 2, 4, ...) and at last page of the group
                                 // --> Last page to print onto a single sided card
                                 printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front), context))
@@ -140,11 +140,11 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
                         }
                     } else {
                         // One page goes on one side of one card.
-                        for (i in 0 until pagegroup) {
+                        for (i in 0 until groupsize) {
                             printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front), context))
                         }
                     }
-                    pageoffset += pagegroup
+                    pageoffset += groupsize
                 }
 
                 for (job in printJobs) {
