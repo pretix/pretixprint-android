@@ -54,37 +54,37 @@ class LinkOS : CustomByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = UsbConnection(usbManager, usbDevice)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = TcpConnection(host, port)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = BluetoothConnectionInsecure(deviceAddress)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    private fun send(pages: List<CompletableFuture<ByteArray>>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
+    private fun send(pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
             return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }

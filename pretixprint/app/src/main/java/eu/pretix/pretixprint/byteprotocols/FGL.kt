@@ -96,6 +96,7 @@ class FGL : StreamByteProtocol<Bitmap> {
 
     override fun send(
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         istream: InputStream,
         ostream: OutputStream,
         conf: Map<String, String>,

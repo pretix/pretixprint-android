@@ -30,6 +30,7 @@ class SystemConnection : ConnectionType {
     override fun print(
         tmpfile: File,
         numPages: Int,
+        pagegroups: List<Int>,
         context: Context,
         useCase: String,
         settings: Map<String, String>?

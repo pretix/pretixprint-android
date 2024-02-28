@@ -21,7 +21,7 @@ class CUPSConnection : ConnectionType {
         return type != "receipt"
     }
 
-    override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings ?: emptyMap()
         fun getSetting(key: String, def: String): String {
             return conf!![key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!

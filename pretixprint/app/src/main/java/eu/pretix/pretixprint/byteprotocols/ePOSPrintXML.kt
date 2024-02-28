@@ -39,7 +39,7 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
         return ByteArray::class.java
     }
 
-    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
             return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
@@ -77,11 +77,11 @@ class ePOSPrintXML : CustomByteProtocol<ByteArray> {
         }
     }
 
-    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         TODO("Not yet implemented")
     }
 
-    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         TODO("Not yet implemented")
     }
 

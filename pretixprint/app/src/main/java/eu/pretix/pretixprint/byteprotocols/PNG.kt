@@ -46,6 +46,7 @@ class PNG : SunmiByteProtocol<Bitmap> {
     override fun sendSunmi(
         printer: Printer,
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         conf: Map<String, String>,
         type: String,
         waitAfterPage: Long

@@ -54,37 +54,37 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendUSB(usbManager: UsbManager, usbDevice: UsbDevice, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = UsbConnection(usbManager, usbDevice)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendNetwork(host: String, port: Int, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = TcpConnection(host, port)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, conf: Map<String, String>, type: String, context: Context) {
+    override fun sendBluetooth(deviceAddress: String, pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, conf: Map<String, String>, type: String, context: Context) {
         val connection = BluetoothConnectionInsecure(deviceAddress)
         try {
             connection.open()
-            send(pages, connection, conf, type, context)
+            send(pages, pagegroups, connection, conf, type, context)
         } finally {
             connection.close()
         }
     }
 
-    private fun send(pages: List<CompletableFuture<ByteArray>>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
+    private fun send(pages: List<CompletableFuture<ByteArray>>, pagegroups: List<Int>, connection: Connection, conf: Map<String, String>, type: String, context: Context) {
         fun getSetting(key: String, def: String): String {
             return conf[key] ?: PreferenceManager.getDefaultSharedPreferences(context).getString(key, def)!!
         }
@@ -95,45 +95,88 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
             var zebraCardPrinter: ZebraCardPrinter? = null
 
             try {
-                var doubleSided = getSetting("hardware_${type}printer_doublesided", "false").toBoolean()
+                var forceDoubleSided = getSetting("hardware_${type}printer_doublesided", "false").toBoolean()
+                var canDoubleSided = false
                 val cardSource = getSetting("hardware_${type}printer_cardsource", "AutoDetect")
                 val cardDestination = getSetting("hardware_${type}printer_carddestination", "Eject")
 
                 zebraCardPrinter = ZebraCardPrinterFactory.getInstance(connection)
 
-                doubleSided = (zebraCardPrinter.printCapability == TransferType.DualSided && doubleSided)
+                canDoubleSided = zebraCardPrinter.printCapability == TransferType.DualSided
+                forceDoubleSided = (canDoubleSided && forceDoubleSided)
 
-                for (f in pages) {
-                    zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
-                    zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
-                    zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.DELETE_AFTER, "yes")
 
-                    val graphicsData = drawGraphics(zebraCardPrinter, f.get(60, TimeUnit.SECONDS), doubleSided, context)
-
-                    val jobId = zebraCardPrinter.print(1, graphicsData)
-
-                    // Zebra Card printers only have a limited Job Buffer - in the case of the ZC-Series, it's
-                    // 4 print jobs.
-                    // This infinite loop is on purpose, as having a page-local timeout could lead to lost
-                    // pages on giant print jobs and a global timeout could lead to prematurely aborted
-                    // print jobs missing pages at the end.
-                    // However: We are polling for with a jobId and are checking if the printer is
-                    // readyForNextJob, which offers two ways out of a stuck print job and by extension,
-                    // an infinite loop:
-                    // - Either the blocking condition (empty ribbon, no more cards, stuck cards...) is
-                    //   resolved and the printer reverts to being readyForNextJob and the job is completed
-                    //   as intended, breaking the loop.
-                    // - Or the printer is power-cycled, leading to requesting the jobStatus with a
-                    //   specific jobId to throw an exception. In this case the loop is still broken and
-                    //   the print job spooling prematurely ended.
-                    while (true) {
-                        val jobStatusInfo = zebraCardPrinter.getJobStatus(jobId)
-                        if (jobStatusInfo.readyForNextJob) {
-                            break
-                        } else {
-                            Thread.sleep(2000)
+                var printJobs = mutableListOf<List<GraphicsInfo>>()
+                var pageoffset = 0
+                for (groupsize in pagegroups) {
+                    if (forceDoubleSided) {
+                        // User requested to print everything double sided, so we will - no matter what.
+                        // A 2-page document will in this case yield 2 cards:
+                        // - card 1: page 1 + page 1
+                        // - card 2: page 2 + page 2
+                        for (i in 0 until groupsize) {
+                            printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front, CardSide.Back), context))
+                        }
+                    } else if (canDoubleSided && groupsize > 1) {
+                        // User did not requested everything to be printer double sided, but the printer
+                        // is still capable printing on both sides and the current group of pages is actually
+                        // more than one page. In this case, we print page 1 and 2 on one card.
+                        // Even remainders of the pagegroup will be processed as double sided prints,
+                        // any remainder will be printed on a single-sided card.
+                        for (i in 0 until groupsize) {
+                            if (i % 2 == 0 && i == groupsize-1) {
+                                // Even page (0, 2, 4, ...) and at last page of the group
+                                // --> Last page to print onto a single sided card
+                                printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front), context))
+                            } else if (i % 2 == 0) {
+                                // Even page (0, 2, 4, ...) but not last page of the group
+                                // --> CardSide.Front of a double sided card.
+                                printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front), context))
+                            } else {
+                                // Uneven page (1, 3, 5, ...)
+                                // --> CardSide.Back of a double sided card.
+                                printJobs[printJobs.lastIndex] = printJobs[printJobs.lastIndex] + drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Back), context)
+                            }
+                        }
+                    } else {
+                        // One page goes on one side of one card.
+                        for (i in 0 until groupsize) {
+                            printJobs.add(drawGraphics(zebraCardPrinter, pages[pageoffset + i].get(60, TimeUnit.SECONDS), listOf(CardSide.Front), context))
                         }
                     }
+                    pageoffset += groupsize
+
+                    for (job in printJobs) {
+                        zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_SOURCE, cardSource)
+                        zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.CARD_DESTINATION, cardDestination)
+                        zebraCardPrinter.setJobSetting(ZebraCardJobSettingNames.DELETE_AFTER, "yes")
+
+                        val jobId = zebraCardPrinter.print(1, job)
+
+                        // Zebra Card printers only have a limited Job Buffer - in the case of the ZC-Series, it's
+                        // 4 print jobs.
+                        // This infinite loop is on purpose, as having a page-local timeout could lead to lost
+                        // pages on giant print jobs and a global timeout could lead to prematurely aborted
+                        // print jobs missing pages at the end.
+                        // However: We are polling for with a jobId and are checking if the printer is
+                        // readyForNextJob, which offers two ways out of a stuck print job and by extension,
+                        // an infinite loop:
+                        // - Either the blocking condition (empty ribbon, no more cards, stuck cards...) is
+                        //   resolved and the printer reverts to being readyForNextJob and the job is completed
+                        //   as intended, breaking the loop.
+                        // - Or the printer is power-cycled, leading to requesting the jobStatus with a
+                        //   specific jobId to throw an exception. In this case the loop is still broken and
+                        //   the print job spooling prematurely ended.
+                        while (true) {
+                            val jobStatusInfo = zebraCardPrinter.getJobStatus(jobId)
+                            if (jobStatusInfo.readyForNextJob) {
+                                break
+                            } else {
+                                Thread.sleep(2000)
+                            }
+                        }
+                    }
+                    printJobs.clear()
                 }
                 Thread.sleep(2000)
             } finally {
@@ -152,7 +195,7 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
         }
     }
 
-    private fun drawGraphics(zebraCardPrinter: ZebraCardPrinter, imageData: ByteArray, doubleSided: Boolean, context: Context) : List<GraphicsInfo> {
+    private fun drawGraphics(zebraCardPrinter: ZebraCardPrinter, imageData: ByteArray, cardSides: List<CardSide>, context: Context) : List<GraphicsInfo> {
         val graphicsData = ArrayList<GraphicsInfo>()
         var graphics: ZebraGraphics? = null
         try {
@@ -166,26 +209,18 @@ class LinkOSCard : CustomByteProtocol<Bitmap> {
 
             // This is grossly simplifying - in reality there are more options than just Color or MonoK - GrayDye for example
             val printType = if (installedRibbon.contains(COLOR_OPTION, true)) { PrintType.Color } else { PrintType.MonoK }
-            // Front Side
-            val zebraCardImage = drawImage(graphics, printType, imageData, 0, 0, 0, 0, context)
-            graphicsData.add(addImage(CardSide.Front, printType, 0, 0, -1, zebraCardImage))
 
-            // Front Side Overlay
-            if (isPrintTypeSupported(installedRibbon, OVERLAY_RIBBON_OPTIONS)) {
-                graphicsData.add(addImage(CardSide.Front, PrintType.Overlay, 0, 0, 1, null))
-            }
+            for (cardSide in cardSides) {
+                // Image
+                val zebraCardImage = drawImage(graphics, printType, imageData, 0, 0, 0, 0, context)
+                graphicsData.add(addImage(cardSide, printType, 0, 0, -1, zebraCardImage))
 
-            if (doubleSided) {
-                // Back Side
-                // If we are introducing native double-sided cards, we would load a new page here
-                graphicsData.add(addImage(CardSide.Back, printType, 0, 0, -1, zebraCardImage))
-
-                // Back Side Overlay
+                // Overlay
                 if (isPrintTypeSupported(installedRibbon, OVERLAY_RIBBON_OPTIONS)) {
-                    graphicsData.add(addImage(CardSide.Back, PrintType.Overlay, 0, 0, 1, null))
+                    graphicsData.add(addImage(cardSide, PrintType.Overlay, 0, 0, 1, null))
                 }
+
             }
-            // If we are introducing native double-sided cards, this needs to be placed after the front side
             graphics.clear()
         } finally {
             graphics?.close()

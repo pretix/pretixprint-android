@@ -76,6 +76,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
         usbManager: UsbManager,
         usbDevice: UsbDevice,
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         conf: Map<String, String>,
         type: String,
         context: Context
@@ -85,24 +86,26 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
         }
         val parts = usbDevice.productName!!.trim().split(" ", limit = 2)
         val printer = EvolisPrinter(context, parts[0], parts[1])
-        send(pages, printer, conf, type, context)
+        send(pages, pagegroups, printer, conf, type, context)
     }
 
     override fun sendNetwork(
         host: String,
         port: Int,
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         conf: Map<String, String>,
         type: String,
         context: Context
     ) {
         val printer = EvolisPrinter(context, host)
-        send(pages, printer, conf, type, context)
+        send(pages, pagegroups, printer, conf, type, context)
     }
 
     override fun sendBluetooth(
         deviceAddress: String,
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         conf: Map<String, String>,
         type: String,
         context: Context
@@ -112,6 +115,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
 
     private fun send(
         pages: List<CompletableFuture<ByteArray>>,
+        pagegroups: List<Int>,
         printer: EvolisPrinter,
         conf: Map<String, String>,
         type: String,

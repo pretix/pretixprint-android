@@ -24,7 +24,7 @@ class IMinInternalConnection : USBConnection() {
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun print(tmpfile: File, numPages: Int, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         var iNeostraInterfaces: INeostraInterfaces? = null
         val conn = object : ServiceConnection {
             override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -69,7 +69,7 @@ class IMinInternalConnection : USBConnection() {
             iNeostraInterfaces?.openCashbox()
         }
 
-        super.print(tmpfile, numPages, context, type, settings)
+        super.print(tmpfile, numPages, pagegroups, context, type, settings)
     }
 
 }
