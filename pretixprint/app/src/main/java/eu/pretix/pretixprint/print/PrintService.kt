@@ -249,7 +249,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_CALLER, this::class.java)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_FILE, tmpfile)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
-            //dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGEGROUPS, pagegroups)
+            dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGEGROUPS, pagegroups.toIntArray())
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
             val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT or if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
