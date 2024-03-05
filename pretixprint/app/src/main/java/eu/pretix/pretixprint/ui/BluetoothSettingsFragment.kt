@@ -29,6 +29,18 @@ import eu.pretix.pretixprint.ui.BluetoothDevicePicker.Companion.FILTER_TYPE_ALL
 
 
 class BluetoothSettingsFragment : SetupFragment() {
+    companion object {
+        /**
+         * https://stackoverflow.com/q/71552331
+         * some manufacturers butchered the upgrade from A11 to A12
+         * where the pure BLUETOOTH permission should be no longer needed
+         * well, not for those:
+         */
+        val BROKEN_PERMISSION_MANUFACTURERS = listOf(
+            "xiaomi", "oppo"
+        )
+    }
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -84,7 +96,14 @@ class BluetoothSettingsFragment : SetupFragment() {
             }
 
         val perms = mutableListOf<String>()
-        var perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        var perm : String?
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R || Build.MANUFACTURER.lowercase() in BROKEN_PERMISSION_MANUFACTURERS) {
+            perm = Manifest.permission.BLUETOOTH
+            if (ContextCompat.checkSelfPermission(requireContext(), perm) != PackageManager.PERMISSION_GRANTED) {
+                perms.add(perm)
+            }
+        }
+        perm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 Manifest.permission.BLUETOOTH_CONNECT
             } else {
                 Manifest.permission.BLUETOOTH_ADMIN
