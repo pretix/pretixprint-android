@@ -91,6 +91,9 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
             return startProtocolChoice()
         }
+        val oldPrefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val connectionChanged = oldPrefs.getString("hardware_${useCase}printer_connection", "") != connection
+
         if (connection == IMinInternalConnection().identifier) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val manager = getSystemService(Context.USB_SERVICE) as UsbManager
@@ -108,15 +111,20 @@ class PrinterSetupActivity : AppCompatActivity() {
             } else {
                 settingsStagingArea.put("hardware_${useCase}printer_mode", GraphicESCPOS().identifier)
                 settingsStagingArea.put("hardware_${useCase}printer_graphicescposcompat", "true")
-                settingsStagingArea.put("hardware_${useCase}printer_rotation", "90")
-                settingsStagingArea.put("hardware_${useCase}printer_maxwidth", "72")
-                settingsStagingArea.put("hardware_${useCase}printer_dpi", "203")
+
+                if (connectionChanged) {
+                    settingsStagingArea.put("hardware_${useCase}printer_rotation", "90")
+                    settingsStagingArea.put("hardware_${useCase}printer_maxwidth", "72")
+                    settingsStagingArea.put("hardware_${useCase}printer_dpi", "203")
+                }
             }
             settingsStagingArea.put("hardware_${useCase}printer_usbcompat", "true")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "519:2013")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
-            settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
             settingsStagingArea.put("hardware_${useCase}printer_dialect", ESCPOSRenderer.Companion.Dialect.IMin.name)
+            if (connectionChanged) {
+                settingsStagingArea.put("hardware_${useCase}printer_waitafterpage", "100")
+            }
             if (useCase == "receipt") {
                 return startFinalPage()
             } else {
