@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <queries>
         <package android:name="woyou.aidlservice.jiuiv5" />  <!-- Sunmi -->
@@ -124,6 +125,17 @@
                 <action android:name="eu.pretix.pretixpos.print.PRINT_RECEIPT" />
             </intent-filter>
         </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
 
         <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_DSN}" />
         <meta-data android:name="io.sentry.auto-session-tracking.enable" android:value="false" />

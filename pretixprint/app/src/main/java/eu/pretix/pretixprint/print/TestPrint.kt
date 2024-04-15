@@ -8,6 +8,7 @@ import eu.pretix.pretixprint.byteprotocols.ePOSPrintXML
 import eu.pretix.pretixprint.byteprotocols.getProtoClass
 import eu.pretix.pretixprint.connections.BluetoothConnection
 import eu.pretix.pretixprint.connections.CUPSConnection
+import eu.pretix.pretixprint.connections.EFTTerminalConnection
 import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.NetworkConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
@@ -93,6 +94,9 @@ fun testPrint(context: Context, protoName: String, mode: String, useCase: String
         }
         SystemConnection().identifier -> {
             SystemConnection().print(file, 1, listOf(1), context, useCase, settings)
+        }
+        EFTTerminalConnection().identifier -> {
+            EFTTerminalConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
     }
 }

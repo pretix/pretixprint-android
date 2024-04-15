@@ -113,6 +113,7 @@
     <string name="connection_type_system">Android Druckdienst</string>
     <string name="connection_type_sunmi">Eingebauter Drucker (Sunmi)</string>
     <string name="connection_type_imin">Eingebauter Drucker (iMin)</string>
+    <string name="connection_type_eftterminal">Zahlungsverkehr-Terminal</string>
     <string name="error_no_choice">Bitte wählen Sie eine Option</string>
     <string name="btn_next">WEITER</string>
     <string name="setup_network_settings">Wie ist Ihr Drucker im Netzwerk erreichbar?</string>

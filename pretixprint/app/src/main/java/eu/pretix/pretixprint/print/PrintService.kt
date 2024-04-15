@@ -115,6 +115,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             "sunmi" -> SunmiInternalConnection()
             "imin" -> IMinInternalConnection()
             "system" -> SystemConnection()
+            "eftterminal" -> EFTTerminalConnection()
             else -> null
         }
         if (conn == null || !conn.isConfiguredFor(this, type)) {
@@ -267,7 +268,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
 
         Log.i("PrintService", "[$type] Cleaning up old files")
-        cleanupOldFiles()
+        //cleanupOldFiles()
         Log.i("PrintService", "[$type] Job done")
     }
 

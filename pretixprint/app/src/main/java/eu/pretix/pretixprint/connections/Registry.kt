@@ -8,4 +8,5 @@ val connectionTypes = listOf<ConnectionType>(
         USBConnection(),
         CUPSConnection(),
         SystemConnection(),
+        EFTTerminalConnection(),
 )

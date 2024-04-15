@@ -142,6 +142,10 @@ class PrinterSetupActivity : AppCompatActivity() {
             }
             return startFinalPage()
         }
+        if (connection == EFTTerminalConnection().identifier) {
+            settingsStagingArea.put("hardware_${useCase}printer_mode", ESCPOS().identifier)
+            return startFinalPage()
+        }
         fragment = when (connection) {
             NetworkConnection().identifier -> NetworkSettingsFragment()
             BluetoothConnection().identifier -> BluetoothSettingsFragment()
