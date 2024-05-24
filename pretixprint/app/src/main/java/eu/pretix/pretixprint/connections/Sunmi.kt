@@ -9,6 +9,7 @@ import com.sunmi.printerx.PrinterSdk.PrinterListen
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.byteprotocols.*
+import eu.pretix.pretixprint.print.ESCPOSRenderer
 import eu.pretix.pretixprint.print.lockManager
 import eu.pretix.pretixprint.renderers.renderPages
 import io.sentry.Sentry
@@ -132,6 +133,44 @@ class SunmiInternalConnection : ConnectionType {
         } catch (e: Exception) {
             e.printStackTrace()
             throw PrintError(e.message ?: e.toString())
+        }
+
+        if (type == "receipt") {
+            var shouldOpenCashDrawer = false
+            val reader = tmpfile.reader()
+            while (true) {
+                try {
+                    val char = reader.read()
+                    if (char == -1) {
+                        break
+                    }
+                    if (char.toByte() == ESCPOSRenderer.ESC) {
+                        if (reader.read().toChar() == 'p') {
+                            // that's a openCashDrawer command
+                            shouldOpenCashDrawer = true
+                            break
+                        }
+                    }
+                } catch (e: IOException) {
+                    break
+                }
+            }
+            if (shouldOpenCashDrawer) {
+                lockManager.withLock("sunmi") {
+                    PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
+                        override fun onDefPrinter(printer: PrinterSdk.Printer?) {
+                            try {
+                                printer?.cashDrawerApi()?.open(null)
+                            } catch (_: Exception) {
+                                // ignore cash drawer opening failure
+                            }
+                        }
+
+                        override fun onPrinters(printers: MutableList<PrinterSdk.Printer>?) {
+                        }
+                    })
+                }
+            }
         }
     }
 
