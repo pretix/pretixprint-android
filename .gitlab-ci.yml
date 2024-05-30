@@ -15,13 +15,14 @@ test:
 release:
   stage: release
   script:
-    - ln -s /keys/release.keystore release.keystore
-    - cp /keys/ZSDK_ANDROID_API.jar pretixprint/ZSDK/
-    - cp /keys/ZSDK_CARD_ANDROID_API.jar pretixprint/ZSDK/
-    - cp /keys/snmp6_1z.jar pretixprint/ZSDK/
-    - cp /keys/libevolis-release.aar pretixprint/EvolisSDK/
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - cat $KSTORE | base64 -d > release.keystore
+    - cp .secure_files/ZSDK_ANDROID_API.jar pretixprint/ZSDK/
+    - cp .secure_files/ZSDK_CARD_ANDROID_API.jar pretixprint/ZSDK/
+    - cp .secure_files/snmp6_1z.jar pretixprint/ZSDK/
+    - cp .secure_files/libevolis-release.aar pretixprint/EvolisSDK/
     - cd pretixprint
-    - cat /keys/local.properties > local.properties
+    - cat $LOCALPROP > local.properties
     - git submodule init
     - git submodule update
     - GRADLE_USER_HOME=/cache ANDROID_HOME=/android-sdk-linux ./gradlew --no-daemon -Dmaven.repo.local=$(pwd)/repo assembleFullRelease --stacktrace
@@ -31,7 +32,5 @@ release:
     expire_in: '6 weeks'
   only:
     - '/^.*\..*$/'
-  tags:
-    - release
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
