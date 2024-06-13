@@ -1,2 +1,6 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
 include ':app', ':libpretixprint', ':cups4j', ':ZSDK', ':EvolisSDK'
 project(':libpretixprint').projectDir = new File('libpretixprint-repo/libpretixprint')
