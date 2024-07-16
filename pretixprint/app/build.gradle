@@ -1,9 +1,14 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'com.jaredsburrows.license'
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "org.jetbrains.kotlin.kapt"
+    id "com.jaredsburrows.license"
+    id "io.sentry.android.gradle"
+}
 
 android {
+    namespace 'eu.pretix.pretixprint'
+
     compileSdkVersion 33
 
     defaultConfig {
@@ -16,13 +21,16 @@ android {
         multiDexEnabled true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
 
     buildFeatures {
-        viewBinding true
+        buildConfig = true
+        viewBinding = true
+        dataBinding = true
     }
 
     dataBinding {
@@ -67,6 +75,22 @@ android {
         }
     }
 
+    sentry {
+        uploadNativeSymbols = false
+        includeNativeSources = false
+        includeProguardMapping = false
+        autoUploadProguardMapping = false
+        telemetry = false
+
+        tracingInstrumentation {
+            enabled = false
+        }
+
+        autoInstallation {
+            enabled = false
+        }
+    }
+
     flavorDimensions "edition"
     productFlavors {
         foss {
@@ -97,7 +121,6 @@ android {
         abortOnError false
         disable 'InvalidPackage', 'MissingTranslation'
     }
-    namespace 'eu.pretix.pretixprint'
 }
 
 dependencies {
@@ -154,10 +177,10 @@ dependencies {
     fullImplementation 'com.fasterxml.jackson.core:jackson-core:2.12.4' // 2.2.3
     fullImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4' // 2.2.3
     fullImplementation 'jaxen:jaxen:1.2.0' // 1.1-beta-6
-    fullImplementation 'org.simpleframework:simple-xml:2.7.1' // 2.7.1
+    // fullImplementation 'org.simpleframework:simple-xml:2.7.1' // 2.7.1; depends on xpp3, fails with DuplicatePlatformClasses
     fullImplementation 'org.snmp4j:snmp4j:3.4.4' // 2.3.0
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4"
@@ -176,7 +199,4 @@ repositories {
     jcenter()
     maven { url "https://jitpack.io" }
     maven { url "https://maven.andob.info/repository/open_source" }
-}
-kapt {
-    generateStubs = true
 }
