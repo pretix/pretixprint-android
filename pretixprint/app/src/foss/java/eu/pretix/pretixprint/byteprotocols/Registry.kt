@@ -11,4 +11,5 @@ val protocols = listOf<ByteProtocolInterface<*>>(
         BrotherRaster(),
         PNG(),
         ESCLabel(),
+        TSPL(),
 )
