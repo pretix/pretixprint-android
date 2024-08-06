@@ -55,6 +55,7 @@
     <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
     <string name="field_label_eposprintxml_deviceid">Device ID (Default: local_printer)</string>
     <string name="field_label_queue">Printer name</string>
+    <string name="field_helper_serial">Press the pin to only connect with this exact printer by matching the printers serial number.</string>
     <string name="resolving">Resolving…</string>
     <string name="testing">Testing…</string>
     <string name="testing_printer">Printing test page on %s…</string>
@@ -81,6 +82,7 @@
     <string name="err_usb_connection">USB connection failed</string>
     <string name="field_label_macaddress">MAC address</string>
     <string name="field_label_serial">Serial number</string>
+    <string name="field_label_identifier">Device identifier</string>
     <string name="field_label_usbcompat">Compatibility mode (needed e.g. for Boca printers on HP devices)</string>
     <string name="field_label_graphicescposcompat">Use old image printing mode (no longer supported on modern Epson printers, but maybe required on other printers)</string>
     <string name="err_not_supported">Not supported</string>

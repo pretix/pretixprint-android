@@ -343,7 +343,12 @@ open class USBConnection : ConnectionType {
 
         manager.deviceList.forEach {
             try {
-                if ("${Integer.toHexString(it.value.vendorId)}:${Integer.toHexString(it.value.productId)}" == serial) {
+                if (it.value.serialNumber == serial) {
+                    devices[it.key] = it.value
+                } else if ("${String.format("%04x", it.value.vendorId)}:${String.format("%04x", it.value.productId)}" == serial) {
+                    devices[it.key] = it.value
+                } else if ("${Integer.toHexString(it.value.vendorId)}:${Integer.toHexString(it.value.productId)}" == serial) {
+                    // Missing leading zeros - No longer used, but keep for backwards compatibility
                     devices[it.key] = it.value
                 } else if (it.value.deviceName == serial) {
                     // No longer used, but keep for backwards compatibility
