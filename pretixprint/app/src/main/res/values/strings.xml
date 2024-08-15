@@ -139,6 +139,10 @@
     <string name="field_label_card_destination">Card Destination</string>
     <string name="field_label_label">Label size</string>
     <string name="field_label_ticketpath_fgl">Ticket path (Lemur-2 only)</string>
+    <string name="field_label_cutmode">Cutting</string>
+    <string name="field_label_cutmode_job">Cut after every print job</string>
+    <string name="field_label_cutmode_ticket">Cut after every ticket</string>
+    <string name="field_label_cutmode_never">Cut never</string>
     <string name="field_label_dialect">Dialect</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
     <string name="field_label_rotation">Rotation</string>

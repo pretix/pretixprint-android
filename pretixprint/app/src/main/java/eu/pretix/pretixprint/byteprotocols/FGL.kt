@@ -31,6 +31,12 @@ class FGL : StreamByteProtocol<Bitmap> {
         return (type !is SunmiInternalConnection) && (type !is IMinInternalConnection)
     }
 
+    enum class CutMode(val id: String, val stringId: Int) {
+        AfterJob("job", R.string.field_label_cutmode_job),
+        EveryTicket("ticket", R.string.field_label_cutmode_ticket),
+        Never("never", R.string.field_label_cutmode_never),
+    }
+
     enum class Ticketpath(val id: Int) {
         Path1(1),
         Path2(2)
@@ -53,6 +59,7 @@ class FGL : StreamByteProtocol<Bitmap> {
         }
 
         val path = conf.get("hardware_${type}printer_path") ?: "1"
+        val cutmode = CutMode.entries.find { it.id == (conf.get("hardware_${type}printer_cutmode") ?: CutMode.AfterJob.id) }
         ostream.write("<P$path>".toByteArray())
 
         for (yoffset in 0 until h step 8) {
@@ -84,12 +91,20 @@ class FGL : StreamByteProtocol<Bitmap> {
                 }
             }
         }
-        if (isLastPage) {
-            ostream.write("<z>\n".toByteArray())
+        if (isLastPage && (cutmode == CutMode.AfterJob || cutmode == CutMode.EveryTicket)) {
+            ostream.write("<z>\n".toByteArray())  // PRINT TICKET AND EJECT
         } else if (diffRendering) {
-            ostream.write("<r>\n".toByteArray())
+            if (cutmode == CutMode.EveryTicket) {
+                ostream.write("<h>\n".toByteArray())  // PRINT / CUT (HOLD TICKET IMAGE)
+            } else if (cutmode == CutMode.AfterJob) {
+                ostream.write("<r>\n".toByteArray())  // PRINT / NO CUT (HOLD TICKET IMAGE)
+            }
         } else {
-            ostream.write("<q>\n".toByteArray())
+            if (cutmode == CutMode.EveryTicket) {
+                ostream.write("<z>\n".toByteArray())  // PRINT TICKET AND EJECT
+            } else {
+                ostream.write("<q>\n".toByteArray())  // PRINT / NO CUT TICKET
+            }
         }
         return ostream.toByteArray()
     }
