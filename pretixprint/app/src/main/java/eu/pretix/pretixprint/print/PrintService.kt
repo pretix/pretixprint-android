@@ -107,11 +107,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 }
             "cups" -> CUPSConnection()
             "bluetooth_printer" -> BluetoothConnection()
-            "usb" -> if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    USBConnection()
-                } else {
-                    throw PrintException("USB print is not supported on this Android version.")
-                }
+            "usb" -> USBConnection()
             "sunmi" -> SunmiInternalConnection()
             "imin" -> IMinInternalConnection()
             "system" -> SystemConnection()

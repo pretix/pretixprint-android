@@ -384,11 +384,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     fun applyRestrictions(ctx: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            return
-        }
         val restrictionsMgr = ctx.getSystemService(Context.RESTRICTIONS_SERVICE) as RestrictionsManager?
             ?: return
         val restrictions = restrictionsMgr.applicationRestrictions

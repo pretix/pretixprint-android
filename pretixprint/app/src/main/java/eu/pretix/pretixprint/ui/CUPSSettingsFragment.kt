@@ -46,14 +46,12 @@ class CUPSSettingsFragment : SetupFragment() {
                 Log.d(TAG, "Service resolved. Service: $service")
                 view?.findViewById<TextInputEditText>(R.id.teIP)?.setText(service?.host?.hostAddress)
                 view?.findViewById<TextInputEditText>(R.id.tePort)?.setText(service?.port.toString())
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    if (service?.attributes?.containsKey("rp") == true) {
-                        var rp = String(service.attributes!!["rp"]!!)
-                        if (rp.indexOf("printers/") === 0) {
-                            rp = rp.substring(9)
-                        }
-                        view?.findViewById<TextInputEditText>(R.id.teQueue)?.setText(rp)
+                if (service?.attributes?.containsKey("rp") == true) {
+                    var rp = String(service.attributes!!["rp"]!!)
+                    if (rp.indexOf("printers/") === 0) {
+                        rp = rp.substring(9)
                     }
+                    view?.findViewById<TextInputEditText>(R.id.teQueue)?.setText(rp)
                 }
             }
         }

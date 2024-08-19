@@ -71,7 +71,6 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
         return ostream.toByteArray()
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun sendUSB(
         usbManager: UsbManager,
         usbDevice: UsbDevice,
