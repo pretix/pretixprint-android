@@ -22,7 +22,6 @@ import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
-import org.spongycastle.util.Pack
 import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
