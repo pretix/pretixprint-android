@@ -131,7 +131,7 @@ dependencies {
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.tom-roush:pdfbox-android:1.8.10.0'
+    implementation 'com.tom-roush:pdfbox-android:1.8.10.3'
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.fragment:fragment-ktx:1.5.5"
     implementation "androidx.preference:preference-ktx:1.2.0"
