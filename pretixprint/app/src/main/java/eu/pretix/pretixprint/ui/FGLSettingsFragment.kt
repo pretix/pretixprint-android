@@ -39,6 +39,18 @@ class FGLSettingsFragment : SetupFragment() {
             (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setText(chosenPath, false)
         }
 
+        val cutModeAdapter = ArrayAdapter(requireContext(), R.layout.list_item, FGL.CutMode.values().map {
+            getString(it.stringId)
+        })
+        (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setAdapter(cutModeAdapter)
+        val chosenCutModeId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_cutmode"
+        )) ?: prefs.getString("hardware_${useCase}printer_cutmode", "job")
+        if (chosenCutModeId?.isNotEmpty() == true) {
+            val chosenCutMode = getString(FGL.CutMode.values().find { it.id == chosenCutModeId }!!.stringId)
+            (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setText(chosenCutMode, false)
+        }
+
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {
             it.toString()
         })
@@ -61,6 +73,7 @@ class FGLSettingsFragment : SetupFragment() {
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
             val path = view.findViewById<TextInputLayout>(R.id.tilPath).editText?.text.toString()
+            val cutmode = view.findViewById<TextInputLayout>(R.id.tilCutMode).editText?.text.toString()
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
             val rotation = view.findViewById<TextInputLayout>(R.id.tilRotation).editText?.text.toString()
             if (TextUtils.isEmpty(dpi)) {
@@ -71,6 +84,8 @@ class FGLSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(path)) {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_invalid)
+            } else if (!FGL.CutMode.values().any { getString(it.stringId) == cutmode }) {
+                view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_invalid)
             } else {
                 view.findViewById<TextInputEditText>(R.id.teDPI).error = null
                 val mappedRotation = Rotation.values().find { it.toString() == rotation }!!.degrees
@@ -80,6 +95,8 @@ class FGLSettingsFragment : SetupFragment() {
                         dpi)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_path",
                         path)
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_cutmode",
+                        FGL.CutMode.values().find { getString(it.stringId) == cutmode }!!.id)
                 (activity as PrinterSetupActivity).startFinalPage()
             }
         }

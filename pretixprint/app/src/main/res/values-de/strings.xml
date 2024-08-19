@@ -139,6 +139,10 @@
     <string name="field_label_card_destination">Kartenausgabe</string>
     <string name="field_label_label">Papiergröße</string>
     <string name="field_label_ticketpath_fgl">Ticketpfad (nur Lemur-2)</string>
+    <string name="field_label_cutmode">Abschnitt</string>
+    <string name="field_label_cutmode_job">Abschnitt nach jedem Druckauftrag</string>
+    <string name="field_label_cutmode_ticket">Abschnitt nach jedem Ticket</string>
+    <string name="field_label_cutmode_never">Kein Abschnitt</string>
     <string name="field_label_quality">Druckqualität erhöhen (etwas langsamer)</string>
     <string name="field_label_rotation">Drehung</string>
     <string name="label_two_color">rot/schwarz</string>
