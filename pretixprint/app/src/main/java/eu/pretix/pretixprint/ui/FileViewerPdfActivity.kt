@@ -4,12 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.pdf.PdfRenderer
-import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import androidx.appcompat.app.AppCompatActivity
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.rendering.PDFRenderer
 import eu.pretix.pretixprint.databinding.ActivityFileViewerPdfBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +38,6 @@ class FileViewerPdfActivity : AppCompatActivity() {
         pageIndex = page
         val file = File(intent.getStringExtra(EXTRA_PATH))
         bgScope.launch {
-            if (Build.VERSION.SDK_INT >= 21) {
                 val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
                 val renderer = android.graphics.pdf.PdfRenderer(fd)
                 val page = renderer.openPage(page)
@@ -60,17 +56,6 @@ class FileViewerPdfActivity : AppCompatActivity() {
                 page.close()
                 renderer.close()
                 fd.close()
-            } else {
-                val doc = PDDocument.load(file.inputStream())
-                val renderer = PDFRenderer(doc)
-                val img = renderer.renderImageWithDPI(page, renderDpi)
-                img.eraseColor(Color.WHITE)
-                runOnUiThread {
-                    binding.tvPdfInfo.text = "page ${page + 1} of ${doc.numberOfPages}"
-                }
-                numPages = doc.numberOfPages
-                draw(img)
-            }
         }
     }
 

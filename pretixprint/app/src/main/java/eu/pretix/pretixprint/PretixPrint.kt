@@ -5,7 +5,6 @@ import androidx.preference.PreferenceManager
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.core.FlipperClient
 import com.facebook.soloader.SoLoader
-import com.tom_roush.pdfbox.util.PDFBoxResourceLoader
 import eu.pretix.pretixprint.print.WYSIWYGRenderer
 
 class PretixPrint : MultiDexApplication() {
@@ -13,7 +12,6 @@ class PretixPrint : MultiDexApplication() {
         super.onCreate()
 
         WYSIWYGRenderer.registerFonts(this)
-        PDFBoxResourceLoader.init(getApplicationContext())
 
         SoLoader.init(this, false)
         if (BuildConfig.DEBUG && FlipperInitializer.active(this)) {

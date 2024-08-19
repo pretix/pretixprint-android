@@ -23,7 +23,6 @@ class IMinInternalConnection : USBConnection() {
         return Build.BRAND.uppercase() == "IMIN"
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         var iNeostraInterfaces: INeostraInterfaces? = null
         val conn = object : ServiceConnection {

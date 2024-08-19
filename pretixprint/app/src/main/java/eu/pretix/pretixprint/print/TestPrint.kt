@@ -78,18 +78,10 @@ fun testPrint(context: Context, protoName: String, mode: String, useCase: String
             SunmiInternalConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         IMinInternalConnection().identifier -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                IMinInternalConnection().print(file, 1, listOf(1), context, useCase, settings)
-            } else {
-                throw Exception("iMin USB not supported on this Android version.")
-            }
+            IMinInternalConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         USBConnection().identifier -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                USBConnection().print(file, 1, listOf(1), context, useCase, settings)
-            } else {
-                throw Exception("USB not supported on this Android version.")
-            }
+            USBConnection().print(file, 1, listOf(1), context, useCase, settings)
         }
         SystemConnection().identifier -> {
             SystemConnection().print(file, 1, listOf(1), context, useCase, settings)

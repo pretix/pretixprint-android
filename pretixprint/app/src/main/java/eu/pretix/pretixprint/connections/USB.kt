@@ -305,13 +305,9 @@ open class USBConnection : ConnectionType {
     private val ACTION_USB_PERMISSION = "eu.pretix.pretixprint.connections.USB_PERMISSION"
 
     override fun allowedForUsecase(type: String): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            return false
-        }
         return true
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
         for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
