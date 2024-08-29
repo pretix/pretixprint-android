@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.connections
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,8 @@ import android.content.IntentFilter
 import android.hardware.usb.*
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
@@ -22,7 +22,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.math.min
@@ -434,9 +433,10 @@ open class USBConnection : ConnectionType {
             throw PrintException("Could not acquire permission lock")
         }
         val filter = IntentFilter(ACTION_USB_PERMISSION)
-        context.registerReceiver(recv, filter)
-        val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(ACTION_USB_PERMISSION),
-                if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
+        ContextCompat.registerReceiver(context, recv, filter, ContextCompat.RECEIVER_EXPORTED)
+        val intent = Intent(ACTION_USB_PERMISSION)
+        intent.setPackage(context.packageName)
+        val permissionIntent = PendingIntentCompat.getBroadcast(context, 0, intent, 0, true)
         manager.requestPermission(requestedDevice, permissionIntent)
         while (!done && err == null && System.currentTimeMillis() - start < 30000) {
             if (receiverStarted && usbPermissionLock.isHeldByCurrentThread) {

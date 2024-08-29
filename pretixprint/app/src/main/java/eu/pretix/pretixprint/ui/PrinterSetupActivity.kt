@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -99,9 +99,7 @@ class PrinterSetupActivity : AppCompatActivity() {
                 val iminPrinter = manager.deviceList.values.find { it.vendorId == 0x0519 && it.productId == 0x2013 }
                 if (iminPrinter != null && !manager.hasPermission(iminPrinter)) {
                     // result is not relevant, print calls also try to acquire permission again
-                    val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(),
-                        if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 }
-                    )
+                    val permissionIntent = PendingIntentCompat.getBroadcast(this, 0, Intent(), 0, true)
                     manager.requestPermission(iminPrinter, permissionIntent)
                 }
             }
