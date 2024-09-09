@@ -173,6 +173,50 @@ class BluetoothSettingsFragment : SetupFragment() {
                 teMAC.error = null
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
                     mac)
+
+                // try to reach device:
+                val device = bluetoothAdapter.getRemoteDevice(mac)
+                if (device.uuids == null) {
+                    device.fetchUuidsWithSdp()
+                }
+                var instantGoToNextStep = true
+                if (device.bondState == BluetoothDevice.BOND_NONE) {
+                    val btBondReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            if (activity == null) {
+                                return
+                            }
+                            if (intent.action != BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                                return
+                            }
+                            val dev = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                            if (dev?.address != device.address) {
+                                // ignore broadcasts if device is not the selected
+                                return
+                            }
+                            val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
+                            // always forward to next step, ignore progress updates
+                            when (state) {
+                                BluetoothDevice.ERROR,
+                                BluetoothDevice.BOND_NONE,
+                                BluetoothDevice.BOND_BONDED -> {
+                                    (activity as PrinterSetupActivity).startProtocolChoice()
+                                }
+                                BluetoothDevice.BOND_BONDING -> {
+                                    // ignore, we hopefully get another update
+                                }
+                            }
+                        }
+                    }
+                    ContextCompat.registerReceiver(requireContext(), btBondReceiver, IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED), ContextCompat.RECEIVER_EXPORTED)
+                    val launched = device.createBond()
+                    if (launched) {
+                        instantGoToNextStep = false
+                    }
+                }
+                if (instantGoToNextStep) {
+                    (activity as PrinterSetupActivity).startProtocolChoice()
+                }
                 (activity as PrinterSetupActivity).startProtocolChoice()
             }
         }
