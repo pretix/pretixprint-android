@@ -151,4 +151,7 @@
     <string name="pin_protection_pin">Set settings PIN</string>
     <string name="pin_protection_description">Lock settings with a custom PIN that must be entered if you want to change printer configuration</string>
     <string name="operation_pin_headline">Enter PIN</string>
+    <string name="warning_bluetooth_disabled_title">Bluetooth is turned off on this device</string>
+    <string name="warning_bluetooth_disabled_summary">Bluetooth must be active in order to communicate with printers</string>
+    <string name="warning_bluetooth_disabled_turn_on">Turn on</string>
 </resources>

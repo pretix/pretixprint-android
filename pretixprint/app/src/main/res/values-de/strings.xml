@@ -151,4 +151,7 @@
     <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
     <string name="pin_protection_description">Einstellungen mit einer selbstgewählten PIN sperren, die zum Ändern der Drucker-Konfiguration eingegeben werden muss</string>
     <string name="operation_pin_headline">PIN eingeben</string>
+    <string name="warning_bluetooth_disabled_title">Bluetooth ist auf diesem Gerät ausgeschaltet</string>
+    <string name="warning_bluetooth_disabled_summary">Bluetooth muss aktiv sein, um mit Druckern kommunizieren zu können</string>
+    <string name="warning_bluetooth_disabled_turn_on">Einschalten</string>
 </resources>

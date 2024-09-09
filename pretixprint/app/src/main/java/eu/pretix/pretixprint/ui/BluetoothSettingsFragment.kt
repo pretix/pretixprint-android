@@ -1,7 +1,9 @@
 package eu.pretix.pretixprint.ui
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,8 +17,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
@@ -40,6 +44,8 @@ class BluetoothSettingsFragment : SetupFragment() {
             "xiaomi", "oppo"
         )
     }
+
+    private var bluetoothEnablingLauncher: ActivityResultLauncher<Intent>? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -76,23 +82,22 @@ class BluetoothSettingsFragment : SetupFragment() {
         view.findViewById<Button>(R.id.btnPrev).setOnClickListener {
             back()
         }
-        view.findViewById<Button>(R.id.btnNext).setOnClickListener {
-            val mac = teMAC.text.toString()
-            if (TextUtils.isEmpty(mac)) {
-                teMAC.error = getString(R.string.err_field_required)
-            } else {
-                teMAC.error = null
-                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
-                        mac)
-                (activity as PrinterSetupActivity).startProtocolChoice()
-            }
+        // gets enabled by onCreateViewWithBtPermission after we got bluetooth permissions
+        view.findViewById<Button>(R.id.btnNext).isEnabled = false
+
+        bluetoothEnablingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+            val bluetoothManager = requireActivity().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            view.findViewById<View>(R.id.warningBluetoothOff).visibility = if (bluetoothAdapter.isEnabled) View.GONE else View.VISIBLE
         }
 
         val requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { isGranted: Map<String, Boolean> ->
                 if (isGranted.values.contains(false)) {
                     back()
+                    return@registerForActivityResult
                 }
+                onCreateViewWithBtPermission(view)
             }
 
         val perms = mutableListOf<String>()
@@ -119,9 +124,59 @@ class BluetoothSettingsFragment : SetupFragment() {
         }
         if (perms.isNotEmpty()) {
             requestPermissionLauncher.launch(perms.toTypedArray())
+        } else {
+            onCreateViewWithBtPermission(view)
         }
 
         return view
+    }
+
+    fun onCreateViewWithBtPermission(view: View) {
+        val teMAC = view.findViewById<TextInputEditText>(R.id.teMAC)
+
+        val bluetoothManager = requireActivity().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+
+        view.findViewById<View>(R.id.warningBluetoothOff).visibility = if (bluetoothAdapter.isEnabled) View.GONE else View.VISIBLE
+        view.findViewById<Button>(R.id.btnBluetoothActivate).setOnClickListener {
+            if (!bluetoothAdapter.isEnabled) {
+                Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE).apply {
+                    bluetoothEnablingLauncher?.launch(this)
+                }
+            }
+        }
+
+        val btStateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) {
+                    return
+                }
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                view.findViewById<View>(R.id.warningBluetoothOff).visibility = when (state) {
+                    BluetoothAdapter.STATE_ON,
+                    BluetoothAdapter.STATE_TURNING_ON -> View.GONE
+                    BluetoothAdapter.STATE_OFF,
+                    BluetoothAdapter.STATE_TURNING_OFF -> View.VISIBLE
+                    else -> View.VISIBLE
+                }
+            }
+        }
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        ContextCompat.registerReceiver(requireContext(), btStateReceiver, filter, ContextCompat.RECEIVER_EXPORTED)
+
+        val next = view.findViewById<Button>(R.id.btnNext)
+        next.setOnClickListener {
+            val mac = teMAC.text.toString()
+            if (TextUtils.isEmpty(mac)) {
+                teMAC.error = getString(R.string.err_field_required)
+            } else {
+                teMAC.error = null
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_ip",
+                    mac)
+                (activity as PrinterSetupActivity).startProtocolChoice()
+            }
+        }
+        next.isEnabled = true
     }
 
     override fun back() {
