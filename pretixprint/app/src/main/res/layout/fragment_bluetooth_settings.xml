@@ -81,13 +81,14 @@
                         android:text="@string/warning_bluetooth_disabled_summary"
                         android:textColor="?android:attr/textColorSecondary" />
                 </LinearLayout>
-                <!-- Preference should place its actual preference widget here. -->
+
                 <Button
                     android:id="@+id/btnBluetoothActivate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="end|center_vertical"
                     android:orientation="vertical"
+                    android:layout_marginStart="16dp"
                     android:text="@string/warning_bluetooth_disabled_turn_on" />
             </LinearLayout>
 
