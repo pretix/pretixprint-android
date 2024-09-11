@@ -217,7 +217,6 @@ class BluetoothSettingsFragment : SetupFragment() {
                 if (instantGoToNextStep) {
                     (activity as PrinterSetupActivity).startProtocolChoice()
                 }
-                (activity as PrinterSetupActivity).startProtocolChoice()
             }
         }
         next.isEnabled = true
