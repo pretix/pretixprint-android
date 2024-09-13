@@ -69,6 +69,7 @@
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">Die Auflösung des Druckers, normalerweise zwischen 150 und 300, im Datenblatt des Druckers beschrieben. Ein falscher Wert kann zu übergroßem oder zu kleinem Druckbild führen.</string>
     <string name="field_label_maxwidth">Maximale Druckbreite (in mm)</string>
+    <string name="field_label_maxlength">Maximale Druckhöhe/-länge (in mm +/-)</string>
     <string name="field_label_waitafterpage">Wartezeit nach Seite (in Millisekunden)</string>
     <string name="field_label_graphicescposcompat">Alten Bilder-Druckmodus verwenden (von modernen Epson-Druckern nicht mehr unterstützt, aber bei anderen Druckern ggf. notwendig)</string>
     <string name="field_label_dialect">Dialekt</string>
@@ -128,6 +129,7 @@
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent-Bondrucker (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT-Bondrucker (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
     <string name="protocol_esclabel">ESC/Label-Farblabeldrucker (experimentell, z.B. Epson Colorworks Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
+    <string name="protocol_tspl">TSPL generische Etikettendrucker (experimentell, u.a. TSC, Yinleader, Vretti, Vevor, Phomemo, …)</string>
     <string name="setup_protocol">Welches Protokoll spricht Ihr Drucker?</string>
     <string name="setup_protocol_settings">Wir brauchen noch ein paar Einstellungen, dann kann es losgehen:</string>
     <string name="setup_done">Alles klar, das war\'s!</string>
@@ -145,10 +147,21 @@
     <string name="field_label_cutmode_never">Kein Abschnitt</string>
     <string name="field_label_quality">Druckqualität erhöhen (etwas langsamer)</string>
     <string name="field_label_rotation">Drehung</string>
+    <string name="field_label_speed">Druckgeschwindigkeit (Zoll/Sek)</string>
+    <string name="field_helper_speed_tspl">Die Geschwindigkeit, mit der gedruckt wird (1–18 Zoll/Sek), die meisten Modelle unterstützen 2–5. Auf Datenblatt achten! Bei falschen Werten kann der Drucker den Dienst verweigern.</string>
+    <string name="field_label_density">Druck Dichte/Intensität</string>
+    <string name="field_label_sensor_height">Sensorlänge (in mm)</string>
+    <string name="field_helper_sensor_height_tspl">Die Länge der Lücke zwischen zwei Seiten oder die Länge der schwarzen Markierung. 2.54 – 25.4mm. Wird ignoriert, wenn Sensor im Modus \"continuous\" ist.</string>
+    <string name="field_label_sensor_offset">Sensorversatz, vertikal (in mm)</string>
+    <string name="field_helper_sensor_offset_tspl">Der Versatz der Lücke oder schwarzen Markierung. Entweder 0 oder 2.54 – 25.4mm. Geht davon aus, dass die Lücke endet, nachdem die Seite angefangen hat. Falls weder schwarze Markierungen oder Lücken verwendet werden, auf 0 setzen.</string>
+    <string name="label_gap">Lücke</string>
+    <string name="label_mark">Schwarze Markierung</string>
     <string name="label_two_color">rot/schwarz</string>
     <string name="label_continuous">endlos</string>
     <string name="print_now_notification">Druck bereit. Antippen um Druckdialog zu öffnen.</string>
     <string name="pin_protection_pin">Einstellungen-PIN setzen</string>
     <string name="pin_protection_description">Einstellungen mit einer selbstgewählten PIN sperren, die zum Ändern der Drucker-Konfiguration eingegeben werden muss</string>
     <string name="operation_pin_headline">PIN eingeben</string>
+    <string name="field_label_sensor_type">Sensortyp</string>
+    <string name="field_helper_density_tspl">Drucksättigung. 0 (hell) - 15 (dunkel). Bestimmt die Druckkopftemperatur.</string>
 </resources>

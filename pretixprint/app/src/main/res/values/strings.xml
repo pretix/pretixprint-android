@@ -52,6 +52,7 @@
     <string name="field_label_dpi">DPI</string>
     <string name="field_helper_dpi">The print resolution of your printer, usually between 150 and 300. Can be found in the printer\'s data sheet. A wrong value might lead to printing wrong sizes.</string>
     <string name="field_label_maxwidth">Maximum printing width (in mm)</string>
+    <string name="field_label_maxlength">Maximum printing height/length (in mm)</string>
     <string name="field_label_waitafterpage">Wait time after page (in milliseconds)</string>
     <string name="field_label_eposprintxml_deviceid">Device ID (Default: local_printer)</string>
     <string name="field_label_queue">Printer name</string>
@@ -128,6 +129,7 @@
     <string name="protocol_eposprintxml">ePOS-Print XML/TM-Intelligent receipt printer (Epson TM-Txx-i, TM-Txx-iHub)</string>
     <string name="protocol_starprnt">StarPRNT receipt printer (mC-Print2/3, mPOP, SM-L/-S Series, TSP100IV, …)</string>
     <string name="protocol_esclabel">ESC/Label color label printers (experimental, e.g. Epson Colorworks CW-C4000, CW-C6000, CW-C6500)</string>
+    <string name="protocol_tspl">TSPL generic label printer (experimental, e.g. TSC, Yinleader, Vretti, Vevor, Phomemo, …)</string>
     <string name="setup_protocol">What protocol does your printer support?</string>
     <string name="setup_protocol_settings">We need a few more parameters, then we\'re good to go:</string>
     <string name="setup_done">Okay, we\'ve got everything!</string>
@@ -146,6 +148,17 @@
     <string name="field_label_dialect">Dialect</string>
     <string name="field_label_quality">Priority given to print quality (a bit slower)</string>
     <string name="field_label_rotation">Rotation</string>
+    <string name="field_label_speed">Speed (in inch/sec)</string>
+    <string name="field_helper_speed_tspl">The printing speed of your printer (1–18 inch/sec), most models only support 2–5. Consider data sheet. Wrong values can lead to printer refusing to work.</string>
+    <string name="field_label_density">Print Density/Intensity</string>
+    <string name="field_helper_density_tspl">The saturation of prints. 0 (lightest) - 15 (darkest). Controls print head temperature.</string>
+    <string name="field_label_sensor_type">Sensor Type</string>
+    <string name="field_label_sensor_height">Sensor Height (in mm)</string>
+    <string name="field_helper_sensor_height_tspl">The height of your gap between pages or vertical size of the black mark. 2.54 – 25.4mm. Ignored when continuous.</string>
+    <string name="field_label_sensor_offset">Sensor Offset, vertical (in mm)</string>
+    <string name="field_helper_sensor_offset_tspl">The offset of your gap or black mark. Either 0 or 2.54 – 25.4mm. Assumes, that gaps end after the page starts. If not using black mark or tickets with cut out gaps, set to 0.</string>
+    <string name="label_gap">Gap</string>
+    <string name="label_mark">Black Mark</string>
     <string name="label_two_color">red/black</string>
     <string name="label_continuous">continuous</string>
     <string name="pin_protection_pin">Set settings PIN</string>
