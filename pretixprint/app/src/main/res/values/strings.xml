@@ -154,4 +154,5 @@
     <string name="warning_bluetooth_disabled_title">Bluetooth is turned off on this device</string>
     <string name="warning_bluetooth_disabled_summary">Bluetooth must be active in order to communicate with printers</string>
     <string name="warning_bluetooth_disabled_turn_on">Turn on</string>
+    <string name="pairing">Pairing…</string>
 </resources>

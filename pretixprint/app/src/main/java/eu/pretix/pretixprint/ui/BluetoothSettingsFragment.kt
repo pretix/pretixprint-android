@@ -22,6 +22,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.preference.PreferenceManager
+import com.github.razir.progressbutton.attachTextChangeAnimator
+import com.github.razir.progressbutton.bindProgressButton
+import com.github.razir.progressbutton.hideProgress
+import com.github.razir.progressbutton.showProgress
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.ui.BluetoothDeviceManager.BluetoothDevicePickResultHandler
@@ -165,6 +169,8 @@ class BluetoothSettingsFragment : SetupFragment() {
         ContextCompat.registerReceiver(requireContext(), btStateReceiver, filter, ContextCompat.RECEIVER_EXPORTED)
 
         val next = view.findViewById<Button>(R.id.btnNext)
+        this.bindProgressButton(next)
+        next.attachTextChangeAnimator()
         next.setOnClickListener {
             val mac = teMAC.text.toString()
             if (TextUtils.isEmpty(mac)) {
@@ -200,6 +206,7 @@ class BluetoothSettingsFragment : SetupFragment() {
                                 BluetoothDevice.ERROR,
                                 BluetoothDevice.BOND_NONE,
                                 BluetoothDevice.BOND_BONDED -> {
+                                    next.hideProgress(R.string.btn_next)
                                     (activity as PrinterSetupActivity).startProtocolChoice()
                                 }
                                 BluetoothDevice.BOND_BONDING -> {
@@ -212,6 +219,10 @@ class BluetoothSettingsFragment : SetupFragment() {
                     val launched = device.createBond()
                     if (launched) {
                         instantGoToNextStep = false
+                        next.showProgress {
+                            buttonTextRes = R.string.pairing
+                            progressColorRes = R.color.white
+                        }
                     }
                 }
                 if (instantGoToNextStep) {
@@ -245,7 +256,7 @@ class BluetoothDeviceManager(context: Context) : BluetoothDevicePicker {
     private class BluetoothDeviceManagerReceiver(private val handler: BluetoothDevicePickResultHandler) : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             context.unregisterReceiver(this)
-            val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+            val device = IntentCompat.getParcelableExtra(intent, BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
             handler.onDevicePicked(device)
         }
 

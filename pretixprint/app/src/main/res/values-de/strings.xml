@@ -154,4 +154,5 @@
     <string name="warning_bluetooth_disabled_title">Bluetooth ist auf diesem Gerät ausgeschaltet</string>
     <string name="warning_bluetooth_disabled_summary">Bluetooth muss aktiv sein, um mit Druckern kommunizieren zu können</string>
     <string name="warning_bluetooth_disabled_turn_on">Einschalten</string>
+    <string name="pairing">Koppeln…</string>
 </resources>
