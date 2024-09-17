@@ -12,6 +12,7 @@ import android.os.ResultReceiver
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.PendingIntentCompat
 import androidx.preference.PreferenceManager
 import com.lowagie.text.Document
 import com.lowagie.text.pdf.PdfCopy
@@ -54,8 +55,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     private fun startForegroundNotification() {
         createNotificationChannel()
         val notificationIntent = Intent(this, SettingsActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
+        val pendingIntent = PendingIntentCompat.getActivity(this, 0, notificationIntent, 0, false)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle(getText(R.string.print_notification))
                     .setContentIntent(pendingIntent)
@@ -247,9 +247,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGENUM, pagenum)
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_PAGEGROUPS, pagegroups.toIntArray())
             dialogIntent.putExtra(SystemPrintActivity.INTENT_EXTRA_TYPE, type)
-            val pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT or if (Build.VERSION.SDK_INT >= 23) { PendingIntent.FLAG_IMMUTABLE } else { 0 })
-
+            val pendingIntent = PendingIntentCompat.getActivity(this, 0, dialogIntent, PendingIntent.FLAG_CANCEL_CURRENT, false)
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle(getText(R.string.print_now_notification))
                     .setSmallIcon(R.drawable.ic_stat_print)

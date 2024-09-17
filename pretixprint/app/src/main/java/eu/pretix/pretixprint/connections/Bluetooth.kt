@@ -72,6 +72,9 @@ class BluetoothConnection : ConnectionType {
                             // Hardcoded UUID for virtual bluetooth interface of built-in printer in iMin Falcon 1
                             device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
                         } else {
+                            if (device.uuids == null) {
+                                throw PrintException(context.applicationContext.getString(R.string.err_job_io, "Bluetooth UUIDs are missing"))
+                            }
                             device.createInsecureRfcommSocketToServiceRecord(device.uuids.first().uuid)
                         }
                         val clazz = socket.remoteDevice.javaClass

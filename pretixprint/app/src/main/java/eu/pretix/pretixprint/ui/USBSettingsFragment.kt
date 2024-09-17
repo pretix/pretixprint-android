@@ -1,20 +1,20 @@
 package eu.pretix.pretixprint.ui
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.RequiresApi
+import androidx.core.app.PendingIntentCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -80,14 +80,15 @@ class USBSettingsFragment : SetupFragment() {
             }
         }
         view.findViewById<Button>(R.id.btnAuto).setOnClickListener {
-            val manager = activity!!.getSystemService(Context.USB_SERVICE) as UsbManager
+            val manager = requireActivity().getSystemService(Context.USB_SERVICE) as UsbManager
             val deviceList = manager.deviceList.values.toList()
             val deviceNames = deviceList.map { "${it.manufacturerName} ${it.productName} (${String.format("%04x", it.vendorId)}:${String.format("%04x", it.productId)})" }
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.headline_found_usb_devices)
                 .setItems(deviceNames.toTypedArray()) { _, i ->
-                    val permissionIntent = PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION),
-                        if (Build.VERSION.SDK_INT >= 31) { PendingIntent.FLAG_MUTABLE } else { 0 })
+                    val intent = Intent(ACTION_USB_PERMISSION)
+                    intent.setPackage(requireContext().packageName)
+                    val permissionIntent = PendingIntentCompat.getBroadcast(requireContext(), 0, intent, 0, true)
                     manager.requestPermission(deviceList[i], permissionIntent)
                 }
                 .create()
@@ -100,7 +101,7 @@ class USBSettingsFragment : SetupFragment() {
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter(ACTION_USB_PERMISSION)
-        context?.registerReceiver(usbReceiver, filter)
+        ContextCompat.registerReceiver(requireContext(), usbReceiver, filter, RECEIVER_EXPORTED)
     }
 
     override fun onPause() {
