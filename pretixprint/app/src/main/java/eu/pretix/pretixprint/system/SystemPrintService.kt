@@ -154,5 +154,6 @@ class SystemPrintService : PrintService() {
             )
         }
         future.get()
+        printJob.complete()
     }
 }
