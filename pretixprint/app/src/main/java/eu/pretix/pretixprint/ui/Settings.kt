@@ -127,12 +127,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         var anyVisible = false
+        var usesSystemPrinter = false
         for (type in types) {
             findPreference<PrinterPreference>("hardware_${type}printer_find")?.apply {
-                if (!TextUtils.isEmpty(defaultSharedPreferences.getString("hardware_${type}printer_connection", ""))) {
+                val connection = defaultSharedPreferences.getString("hardware_${type}printer_connection", "")
+                if (!TextUtils.isEmpty(connection)) {
                     moreVisibility = VISIBLE
                     anyVisible = true
                     summary = printerSummary(type)
+                    if (connection == SystemConnection().identifier) {
+                        usesSystemPrinter = true
+                    }
                 } else {
                     moreVisibility = GONE
                     summary = ""
@@ -155,6 +160,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         } else {
             findPreference<Preference>("notification_permission")?.isVisible = false
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && usesSystemPrinter) {
+            findPreference<Preference>("fullscreen_permission")?.isVisible = ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.USE_FULL_SCREEN_INTENT
+            ) != PackageManager.PERMISSION_GRANTED
+            findPreference<Preference>("fullscreen_permission")?.setOnPreferenceClickListener {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.USE_FULL_SCREEN_INTENT),
+                    SettingsActivity.REQUEST_CODE_NOTIFICATIONS
+                )
+                true
+            }
+        } else {
+            findPreference<Preference>("fullscreen_permission")?.isVisible = false
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

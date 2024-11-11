@@ -33,7 +33,7 @@ class PrinterSetupActivity : AppCompatActivity() {
     var settingsStagingArea = mutableMapOf<String, String>()
     val fragmentManager = supportFragmentManager
     lateinit var fragment: SetupFragment
-    lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    lateinit var requestPermissionLauncher: ActivityResultLauncher<Array<String>>
     lateinit var useCase: String
 
     fun mode(): String {
@@ -58,8 +58,8 @@ class PrinterSetupActivity : AppCompatActivity() {
         }
 
         requestPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-                if (isGranted) {
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grantMap: Map<String, Boolean> ->
+                if (!grantMap.containsValue(false)) {
                     startConnectionSettings()
                 }
             }
@@ -132,9 +132,17 @@ class PrinterSetupActivity : AppCompatActivity() {
             settingsStagingArea.put("hardware_${useCase}printer_mode", "")
             settingsStagingArea.put("hardware_${useCase}printer_ip", "")
             settingsStagingArea.put("hardware_${useCase}printer_printername", "")
+            val perms = mutableListOf<String>()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(
                     applicationContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                perms.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && ContextCompat.checkSelfPermission(
+                    applicationContext, Manifest.permission.USE_FULL_SCREEN_INTENT) != PackageManager.PERMISSION_GRANTED) {
+                perms.add(Manifest.permission.USE_FULL_SCREEN_INTENT)
+            }
+            if (perms.isNotEmpty()) {
+                requestPermissionLauncher.launch(perms.toTypedArray())
                 return
             }
             return startFinalPage()

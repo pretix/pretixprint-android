@@ -40,6 +40,8 @@
     <string name="notification_permission_required_summary">Click here to grant the permission. If no permission dialog shows, you need to grant the permission manually in system settings at Apps → pretixPRINT → Permissions.</string>
     <string name="battery_optimizations_required">Please allow unrestricted background usage for this app.</string>
     <string name="battery_optimizations_required_summary">Printing only works reliably if battery optimizations are turned off for this app. Please click here, then select "All Apps", find pretixPRINT and turn off battery optimizations or restrictions.</string>
+    <string name="fullscreen_permission_required">The app is not granted permission to open in full screen. This will prevent printing with the Android System printer.</string>
+    <string name="fullscreen_permission_required_summary">Click here to grant the permission. If no permission dialog shows, you need to grant the permission manually in system settings at Apps → pretixPRINT → Permissions.</string>
     <string name="headline_found_network_printers">Found network printers</string>
     <string name="headline_found_usb_devices">Found USB devices</string>
     <string name="headline_found_bluetooth_printers">Found bluetooth printers</string>

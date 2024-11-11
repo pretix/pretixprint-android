@@ -8,6 +8,12 @@
         />
 
     <eu.pretix.pretixprint.ui.WarningPreference
+        android:key="fullscreen_permission"
+        android:title="@string/fullscreen_permission_required"
+        android:summary="@string/fullscreen_permission_required_summary"
+        />
+
+    <eu.pretix.pretixprint.ui.WarningPreference
         android:key="battery_optimizations"
         android:title="@string/battery_optimizations_required"
         android:summary="@string/battery_optimizations_required_summary"
