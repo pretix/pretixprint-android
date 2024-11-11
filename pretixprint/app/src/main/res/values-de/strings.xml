@@ -38,6 +38,8 @@
     <string name="notification_permission_required_summary">Klicken Sie hier, um die Berechtigung zu erteilen. Wenn kein Berechtigungsdialog erscheint, müssen Sie die Berechtigung manuell in den Systemeinstellungen unter Apps → pretixPRINT → Berechtigungen erteilen.</string>
     <string name="battery_optimizations_required">Bitte erlauben Sie die Hintergrundnutzung dieser App.</string>
     <string name="battery_optimizations_required_summary">Drucken funktioniert nur verlässlich, wenn die Akku-Optimierungen für diese App ausgeschaltet sind. Klicken Sie hier, wählen Sie dann "Alle Apps", suchen Sie pretixPRINT and stellen Sie Akku-Optimierungen oder -Einschränkungen für die App ab.</string>
+    <string name="fullscreen_permission_required">Die App fehlt die Berechtigung für Vollbild-Dialoge. Dies verhindert Drucken über das Android-Drucksystem.</string>
+    <string name="fullscreen_permission_required_summary">Klicken Sie hier, um die Berechtigung zu erteilen. Wenn kein Berechtigungsdialog erscheint, müssen Sie die Berechtigung manuell in den Systemeinstellungen unter Apps → pretixPRINT → Berechtigungen erteilen.</string>
     <string name="headline_found_network_printers">Gefundene Netzwerkdrucker</string>
     <string name="headline_found_bluetooth_printers">Gefundene Bluetoothdrucker</string>
     <string name="headline_add_printer">Drucker konfigurieren</string>
