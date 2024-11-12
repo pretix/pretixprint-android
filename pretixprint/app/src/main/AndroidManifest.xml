@@ -24,6 +24,12 @@
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="false" />
+    <!-- The following are added as "required" by the permissions, but we want them to be optional -->
+    <!-- See https://developer.android.com/guide/topics/manifest/uses-feature-element#permissions -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+
     <uses-sdk tools:overrideLibrary="com.evolis.libevolis" />
 
     <application
