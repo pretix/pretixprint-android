@@ -35,6 +35,7 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.IMinInternalConnection
 import eu.pretix.pretixprint.connections.SunmiInternalConnection
 import eu.pretix.pretixprint.connections.SystemConnection
+import eu.pretix.pretixprint.print.KeepaliveService
 import eu.pretix.pretixprint.print.testPrint
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
@@ -393,6 +394,14 @@ class SettingsActivity : AppCompatActivity() {
             .beginTransaction()
             .replace(R.id.content, SettingsFragment())
             .commit()
+
+        if (prefs.getBoolean("keepalive_service", false)) {
+            try {
+                KeepaliveService.start(this)
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
