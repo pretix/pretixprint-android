@@ -94,7 +94,7 @@ inline fun <reified T> renderPages(protocol: ByteProtocolInterface<T>, file: Fil
                 try {
                     Log.i("PrintService", "[$type] renderPages: Start convertPageToBytes for page $pageIndex")
                     byteFuture.complete(protocol.convertPageToBytes(it, pageIndex == numPages - 1, null, conf, type))
-                    Log.i("PrintService", "[$type] renderPages: Start convertPageToBytes for page $pageIndex")
+                    Log.i("PrintService", "[$type] renderPages: Completed convertPageToBytes for page $pageIndex")
                 } catch (e: Throwable) {
                     e.printStackTrace()
                     byteFuture.completeExceptionally(e)
