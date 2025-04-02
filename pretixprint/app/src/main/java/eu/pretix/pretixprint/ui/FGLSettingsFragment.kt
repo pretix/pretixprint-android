@@ -26,6 +26,11 @@ class FGLSettingsFragment : SetupFragment() {
         val view = inflater.inflate(R.layout.fragment_fgl_settings, container, false)
         val proto = FGL()
 
+        val currentWaitAfterPage = (activity as PrinterSetupActivity).settingsStagingArea.get(
+            "hardware_${useCase}printer_waitafterpage"
+        ) ?: prefs.getString("hardware_${useCase}printer_waitafterpage", "2000")
+        view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).setText(currentWaitAfterPage)
+
         val pathAdapter = ArrayAdapter(requireContext(), R.layout.list_item, FGL.Ticketpath.values().map {
             it.id.toString()
         })
@@ -72,6 +77,7 @@ class FGLSettingsFragment : SetupFragment() {
             back()
         }
         view.findViewById<Button>(R.id.btnNext).setOnClickListener {
+            val wap = view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).text.toString()
             val path = view.findViewById<TextInputLayout>(R.id.tilPath).editText?.text.toString()
             val cutmode = view.findViewById<TextInputLayout>(R.id.tilCutMode).editText?.text.toString()
             val dpi = view.findViewById<TextInputEditText>(R.id.teDPI).text.toString()
@@ -84,6 +90,10 @@ class FGLSettingsFragment : SetupFragment() {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_required)
             } else if (!TextUtils.isDigitsOnly(path)) {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_invalid)
+            } else if (TextUtils.isEmpty(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_required)
+            } else if (!TextUtils.isDigitsOnly(wap)) {
+                view.findViewById<TextInputEditText>(R.id.teWaitAfterPage).error = getString(R.string.err_field_invalid)
             } else if (!FGL.CutMode.values().any { getString(it.stringId) == cutmode }) {
                 view.findViewById<TextInputEditText>(R.id.tilPath).error = getString(R.string.err_field_invalid)
             } else {
@@ -95,6 +105,8 @@ class FGLSettingsFragment : SetupFragment() {
                         dpi)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_path",
                         path)
+                (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_waitafterpage",
+                    wap)
                 (activity as PrinterSetupActivity).settingsStagingArea.put("hardware_${useCase}printer_cutmode",
                         FGL.CutMode.values().find { getString(it.stringId) == cutmode }!!.id)
                 (activity as PrinterSetupActivity).startFinalPage()
