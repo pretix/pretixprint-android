@@ -10,6 +10,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.ResultReceiver
 import android.util.Log
+import androidx.annotation.Keep
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
@@ -39,6 +40,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     private fun createNotificationChannel() {
+        Log.i("PrintService", "createNotificationChannel()")
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -53,6 +55,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     private fun startForegroundNotification() {
+        Log.i("PrintService", "startForegroundNotification()")
         createNotificationChannel()
         val notificationIntent = Intent(this, SettingsActivity::class.java)
         val pendingIntent = PendingIntentCompat.getActivity(this, 0, notificationIntent, 0, false)
@@ -61,10 +64,12 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.drawable.ic_stat_print)
                     .build()
+        Log.i("PrintService", "startForeground()")
         startForeground(ONGOING_NOTIFICATION_ID, notification)
     }
 
     private fun logException(e: Throwable) {
+        Log.i("PrintService", "logException()")
         try {
             val log = File.createTempFile("error_", ".log", this.cacheDir)
             val fw = FileWriter(log)
@@ -79,6 +84,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
     }
 
     private fun print(intent: Intent, rr: ResultReceiver?) {
+        Log.i("PrintService", "print()")
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
 
@@ -290,7 +296,12 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
     }
 
+    override fun onCreate() {
+        super.onCreate()
+    }
+
     override fun onHandleIntent(intent: Intent?) {
+        Log.i("PrintService", "onHandleIntent()")
         var rr: ResultReceiver? = null
         if (intent!!.hasExtra("resultreceiver")) {
             rr = intent.getParcelableExtra<ResultReceiver>("resultreceiver")!! as ResultReceiver
@@ -299,6 +310,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         startForegroundNotification()
 
         if (intent.action == ACTION_STOP_SERVICE) {
+            Log.i("PrintService", "stopForeground()")
             stopForeground(true)
             stopSelf()
             return
@@ -330,6 +342,11 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
         val connection = prefs.getString("hardware_${type}printer_connection", "network_printer")
+
+        if (prefs.getBoolean("keepalive_service", false)) {
+            KeepaliveService.start(this)
+        }
+
         if (connection == "system") {
             // stop the foreground service, but keep the notification
             if (SDK_INT >= Build.VERSION_CODES.N) {
@@ -338,6 +355,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
                 stopForeground(false)
             }
         } else {
+            Log.i("PrintService", "stopForeground()")
             stopForeground(true)
         }
     }

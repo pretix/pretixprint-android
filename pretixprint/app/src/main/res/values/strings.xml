@@ -19,6 +19,11 @@
     <string name="settings_label_driver">Driver</string>
     <string name="settings_label_security">Security</string>
     <string name="dismiss">Close</string>
+    <string name="notification_channel_keepalive">Service is running</string>
+    <string name="notification_channel_keepalive_description">Shows a notification when the service is running</string>
+    <string name="keepalive_notification">pretixPRINT is running</string>
+    <string name="keepalive_service">Run keepalive service</string>
+    <string name="keepalive_service_description">Workaround to avoid the app being killed on low-powered devices.</string>
     <string name="notification_channel_print">Print jobs</string>
     <string name="notification_channel_print_description">Shows a notification during a print job</string>
     <string name="print_now_notification">Print prepared. Touch to open print dialog</string>
