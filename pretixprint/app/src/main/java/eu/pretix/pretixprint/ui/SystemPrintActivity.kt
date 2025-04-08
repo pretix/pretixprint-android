@@ -36,7 +36,7 @@ class SystemPrintActivity : AppCompatActivity() {
         val pagegroups = intent.extras?.get(INTENT_EXTRA_PAGEGROUPS) as IntArray
         val type = intent.extras?.get(INTENT_EXTRA_TYPE) as String
 
-        SystemConnection().print(tmpfile, pagenum, pagegroups.toList(), this, type, null)
+        SystemConnection().print(tmpfile, pagenum, pagegroups.toList(), this, type, null) {}
         hadLaunchedPrint = true
     }
 

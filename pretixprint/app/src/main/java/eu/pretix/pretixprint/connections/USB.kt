@@ -307,7 +307,15 @@ open class USBConnection : ConnectionType {
         return true
     }
 
-    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(
+        tmpfile: File,
+        numPages: Int,
+        pagegroups: List<Int>,
+        context: Context,
+        type: String,
+        settings: Map<String, String>?,
+        done: () -> Unit
+    ) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
         for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
             if (!conf.containsKey(entry.key)) {
@@ -392,6 +400,7 @@ open class USBConnection : ConnectionType {
                                                 val wap = Integer.valueOf(conf.get("hardware_${type}printer_waitafterpage") ?: "2000").toLong()
                                                 proto.send(futures, pagegroups, istream, ostream, conf, type, wap)
                                                 Log.i("PrintService", "[$type] Finished proto.send()")
+                                                done()
                                             } finally {
                                                 istream.close()
                                                 ostream.close()
@@ -402,6 +411,7 @@ open class USBConnection : ConnectionType {
                                             Log.i("PrintService", "[$type] Start proto.sendUSB()")
                                             proto.sendUSB(manager, device, futures, pagegroups, conf, type, context)
                                             Log.i("PrintService", "[$type] Finished proto.sendUSB()")
+                                            done()
                                         }
                                         
                                         is SunmiByteProtocol -> {
