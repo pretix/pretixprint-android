@@ -23,7 +23,15 @@ class IMinInternalConnection : USBConnection() {
         return Build.BRAND.uppercase() == "IMIN"
     }
 
-    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(
+        tmpfile: File,
+        numPages: Int,
+        pagegroups: List<Int>,
+        context: Context,
+        type: String,
+        settings: Map<String, String>?,
+        done: () -> Unit
+    ) {
         var iNeostraInterfaces: INeostraInterfaces? = null
         val conn = object : ServiceConnection {
             override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
@@ -68,7 +76,7 @@ class IMinInternalConnection : USBConnection() {
             iNeostraInterfaces?.openCashbox()
         }
 
-        super.print(tmpfile, numPages, pagegroups, context, type, settings)
+        super.print(tmpfile, numPages, pagegroups, context, type, settings, done)
     }
 
 }

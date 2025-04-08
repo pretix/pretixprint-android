@@ -78,7 +78,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
     }
 
-    private fun print(intent: Intent, rr: ResultReceiver?) {
+    private fun print(intent: Intent, rr: ResultReceiver?, done: (() -> Unit)) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val type = getType(intent.action!!)
 
@@ -257,7 +257,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
             startForeground(ONGOING_NOTIFICATION_ID, notification)
         } else {
-            conn.print(tmpfile, pagenum, pagegroups, this, type, null)
+            conn.print(tmpfile, pagenum, pagegroups, this, type, null, done)
         }
 
         Log.i("PrintService", "[$type] Cleaning up old files")
@@ -304,11 +304,19 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             return
         }
 
+        var doneCalled = false
         try {
-            print(intent, rr)
-            if (rr != null) {
+            print(intent, rr) {
+                if (rr != null && !doneCalled) {
+                    val b = Bundle()
+                    rr.send(0, b)
+                    doneCalled = true
+                }
+            }
+            if (rr != null && !doneCalled) {
                 val b = Bundle()
                 rr.send(0, b)
+                doneCalled = true
             }
         } catch (e: PrintException) {
             logException(e)

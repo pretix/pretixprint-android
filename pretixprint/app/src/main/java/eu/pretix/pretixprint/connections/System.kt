@@ -33,7 +33,8 @@ class SystemConnection : ConnectionType {
         pagegroups: List<Int>,
         context: Context,
         useCase: String,
-        settings: Map<String, String>?
+        settings: Map<String, String>?,
+        done: () -> Unit
     ) {
         val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
         val jobName = tmpfile.nameWithoutExtension
