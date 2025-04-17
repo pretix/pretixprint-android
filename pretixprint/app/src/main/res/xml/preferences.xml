@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <eu.pretix.pretixprint.ui.WarningPreference
         android:key="notification_permission"
         android:title="@string/notification_permission_required"
@@ -58,6 +58,22 @@
             android:key="pref_pin"
             android:title="@string/pin_protection_pin"
             android:summary="@string/pin_protection_description" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="export_import"
+        android:title="@string/settings_label_export_import"
+        app:isPreferenceVisible="false">
+        <eu.pretix.pretixprint.ui.ProtectedEditTextPreference
+            android:key="export"
+            android:title="@string/settings_label_export"
+            />
+        <Preference
+            android:key="import_scan"
+            android:title="@string/settings_label_import_scan"
+            android:summary="@string/settings_summary_import_scan"
+            android:enabled="false"
+            />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/settings_label_about">
