@@ -19,6 +19,7 @@
 
     <queries>
         <package android:name="woyou.aidlservice.jiuiv5" />  <!-- Sunmi -->
+        <package android:name="com.symbol.datawedge" />
     </queries>
 
     <uses-feature
@@ -88,6 +89,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.SettingsExportActivity"
+            android:exported="true"
+            android:label="@string/title_activity_export"
+            android:parentActivityName=".ui.SettingsActivity" />
         <activity
             android:name=".ui.WelcomeActivity"
             android:label="@string/title_activity_main" />
