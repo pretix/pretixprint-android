@@ -2,14 +2,12 @@ package eu.pretix.pretixprint.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.Intent
 import android.content.RestrictionsManager
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -18,12 +16,14 @@ import android.text.TextUtils
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,9 +40,12 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import splitties.toast.toast
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
+import androidx.core.content.edit
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -50,6 +53,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
     lateinit var defaultSharedPreferences: SharedPreferences
     val types = listOf("ticket", "badge", "receipt")
     var pendingPinAction: ((pin: String) -> Unit)? = null
+    val hardwareScanner = HardwareScanner(object : ScanReceiver {
+        override fun scanResult(result: String) {
+            importSettingsFromJsonString(result)
+        }
+    })
+    var versionClickCount = 0
+    var versionClickToast: Toast? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -113,7 +123,47 @@ class SettingsFragment : PreferenceFragmentCompat() {
             return@setEarlyPreferenceClickListener true
         }
 
-        findPreference<Preference>("version")?.summary = BuildConfig.VERSION_NAME
+        findPreference<Preference>("version")?.apply {
+            setOnPreferenceClickListener {
+                if (defaultSharedPreferences.getBoolean("dev_mode", false)) {
+                    if (versionClickToast != null) {
+                        versionClickToast!!.cancel()
+                    }
+                    versionClickToast = Toast.makeText(context, R.string.show_dev_already, Toast.LENGTH_SHORT).apply { show() }
+                    return@setOnPreferenceClickListener true
+                }
+                if (versionClickCount < 4) {
+                    versionClickCount++
+                    val remaining = 5 - versionClickCount
+                    if (versionClickToast != null) {
+                        versionClickToast!!.cancel()
+                    }
+                    val text = resources.getQuantityString(R.plurals.show_dev_countdown, remaining, remaining)
+                    versionClickToast = Toast.makeText(context, text, Toast.LENGTH_SHORT).apply { show() }
+                } else {
+                    defaultSharedPreferences.edit() { putBoolean("dev_mode", true) }
+                    findPreference<PreferenceCategory>("export_import")?.isVisible = defaultToScanner() and true
+                    if (versionClickToast != null) {
+                        versionClickToast!!.cancel()
+                    }
+                    versionClickToast = Toast.makeText(context, R.string.show_dev_on, Toast.LENGTH_SHORT).apply { show() }
+                }
+                return@setOnPreferenceClickListener true
+            }
+            summary = BuildConfig.VERSION_NAME
+        }
+
+        findPreference<PreferenceCategory>("export_import")?.isVisible = defaultToScanner() and defaultSharedPreferences.getBoolean("dev_mode", false)
+        findPreference<ProtectedEditTextPreference>("export")?.setEarlyPreferenceClickListener { pref ->
+            if (!hasPin()) {
+                startActivity(Intent(requireContext(), SettingsExportActivity::class.java))
+                return@setEarlyPreferenceClickListener true
+            }
+            pinProtect {
+                startActivity(Intent(requireContext(), SettingsExportActivity::class.java))
+            }
+            return@setEarlyPreferenceClickListener true
+        }
 
         childFragmentManager.setFragmentResultListener(PinDialog.RESULT_PIN, this) { _, bundle ->
             val pin = bundle.getString(PinDialog.RESULT_PIN)
@@ -124,8 +174,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStop() {
+        hardwareScanner.stop(requireContext())
+        super.onStop()
+    }
+
+    fun updatePreferenceViews() {
         var anyVisible = false
         var usesSystemPrinter = false
         for (type in types) {
@@ -205,6 +259,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updatePreferenceViews()
+        hardwareScanner.start(requireContext())
     }
 
     private fun printerSummary(type: String): String {
@@ -365,6 +425,39 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .filter { it.startsWith("hardware_${type}") }
             .forEach { edit.remove(it) }
         edit.apply()
+    }
+
+    fun importSettingsFromJsonString(data: String) {
+        if (!data.startsWith("{")) {
+            return
+        }
+        val data = JSONObject(data)
+        if (!data.has("__pretixprintconf")) {
+            return
+        }
+
+        pinProtect {
+            var size = 0
+            defaultSharedPreferences.edit(commit = true) {
+                data.keys().forEach { key ->
+                    if (key == "__pretixprintconf") return@forEach
+                    size += 1
+
+                    val v: Any = data.get(key)
+                    when(v) {
+                        JSONObject.NULL -> remove(key)
+                        is Int -> putInt(key, v)
+                        is Long -> putLong(key, v)
+                        is Float -> putFloat(key, v)
+                        is Double -> putFloat(key, v.toFloat())
+                        is Boolean -> putBoolean(key, v)
+                        else -> putString(key, v.toString())
+                    }
+                }
+            }
+            toast(getString(R.string.import_successful, size))
+            updatePreferenceViews()
+        }
     }
 }
 
