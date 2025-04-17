@@ -46,6 +46,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
 import androidx.core.content.edit
+import eu.pretix.pretixprint.hardware.DataWedgeHelper
+import eu.pretix.pretixprint.hardware.HardwareScanner
+import eu.pretix.pretixprint.hardware.ScanReceiver
+import eu.pretix.pretixprint.hardware.defaultToScanner
 
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -264,6 +268,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         updatePreferenceViews()
+        val dwh = DataWedgeHelper(requireContext(), "pretixprint", R.raw.dwprofile)
+        if (dwh.hasDataWedge) {
+            dwh.install()
+        }
         hardwareScanner.start(requireContext())
     }
 
@@ -440,7 +448,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             var size = 0
             defaultSharedPreferences.edit(commit = true) {
                 data.keys().forEach { key ->
-                    if (key == "__pretixprintconf") return@forEach
+                    if (key.startsWith("__")) return@forEach
                     size += 1
 
                     val v: Any = data.get(key)

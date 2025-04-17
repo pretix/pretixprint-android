@@ -1,4 +1,4 @@
-package eu.pretix.pretixprint.ui
+package eu.pretix.pretixprint.hardware
 
 import android.content.BroadcastReceiver
 import android.content.Context
