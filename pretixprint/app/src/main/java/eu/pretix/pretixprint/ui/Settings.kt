@@ -146,7 +146,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     versionClickToast = Toast.makeText(context, text, Toast.LENGTH_SHORT).apply { show() }
                 } else {
                     defaultSharedPreferences.edit() { putBoolean("dev_mode", true) }
-                    findPreference<PreferenceCategory>("export_import")?.isVisible = defaultToScanner() and true
+                    findPreference<PreferenceCategory>("export_import")?.isVisible = true
+                    findPreference<Preference>("import_scan")?.isVisible = defaultToScanner()
                     if (versionClickToast != null) {
                         versionClickToast!!.cancel()
                     }
@@ -157,12 +158,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
             summary = BuildConfig.VERSION_NAME
         }
 
-        findPreference<PreferenceCategory>("export_import")?.isVisible = defaultToScanner() and defaultSharedPreferences.getBoolean("dev_mode", false)
+        findPreference<PreferenceCategory>("export_import")?.isVisible = defaultSharedPreferences.getBoolean("dev_mode", false)
+        findPreference<Preference>("import_scan")?.isVisible = defaultToScanner()
         findPreference<ProtectedEditTextPreference>("export")?.setEarlyPreferenceClickListener { pref ->
-            if (!hasPin()) {
-                startActivity(Intent(requireContext(), SettingsExportActivity::class.java))
-                return@setEarlyPreferenceClickListener true
-            }
             pinProtect {
                 startActivity(Intent(requireContext(), SettingsExportActivity::class.java))
             }
