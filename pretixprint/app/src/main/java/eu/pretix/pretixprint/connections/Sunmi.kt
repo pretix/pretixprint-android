@@ -29,7 +29,15 @@ class SunmiInternalConnection : ConnectionType {
         return Build.BRAND.uppercase() == "SUNMI"
     }
 
-    override fun print(tmpfile: File, numPages: Int, pagegroups: List<Int>, context: Context, type: String, settings: Map<String, String>?) {
+    override fun print(
+        tmpfile: File,
+        numPages: Int,
+        pagegroups: List<Int>,
+        context: Context,
+        type: String,
+        settings: Map<String, String>?,
+        done: () -> Unit
+    ) {
         val conf = settings?.toMutableMap() ?: mutableMapOf()
         for (entry in PreferenceManager.getDefaultSharedPreferences(context).all.iterator()) {
             if (!conf.containsKey(entry.key)) {
@@ -86,6 +94,7 @@ class SunmiInternalConnection : ConnectionType {
                             Thread.sleep(wap)
                             Log.i("PrintService", "[$type] Sleep done")
                         }
+                        done()
                     }
 
                     is SunmiByteProtocol<*> -> {
@@ -95,6 +104,7 @@ class SunmiInternalConnection : ConnectionType {
                                     try {
                                         proto.sendSunmi(printer, futures, pagegroups, conf, type, wap)
                                         future.complete(null)
+                                        done()
                                     } catch (e: Exception) {
                                         future.completeExceptionally(e)
                                     }
