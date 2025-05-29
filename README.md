@@ -48,3 +48,10 @@ If you want to perform a full build, you need to do get a few libraries first:
 Then, execute:
 
 	./gradlew assembleFullDebug
+
+
+
+Security
+--------
+
+If you discover a security issue, please contact us at security@pretix.eu and see our [Responsible Disclosure Policy](https://docs.pretix.eu/trust/security/disclosure/) further information.
