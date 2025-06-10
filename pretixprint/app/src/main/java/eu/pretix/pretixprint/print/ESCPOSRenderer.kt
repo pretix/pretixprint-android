@@ -293,7 +293,12 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                 }
             }
             "paymentlines" -> {
-                when (receipt.getString("payment_type")) {
+                if (receipt.has("payment_data") &&
+                    receipt.getJSONObject("payment_data").has("source") &&
+                    receipt.getJSONObject("payment_data").getString("source") == "manual") {
+                    text(ctx.getString(R.string.receiptline_paidcard))
+                    newline()
+                } else when (receipt.getString("payment_type")) {
                     "square_pos" -> {
                         emphasize(true)
                         text(ctx.getString(R.string.receiptline_paidcard))
