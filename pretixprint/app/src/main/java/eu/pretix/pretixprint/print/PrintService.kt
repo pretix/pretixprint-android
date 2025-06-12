@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager
 import com.lowagie.text.Document
 import com.lowagie.text.pdf.PdfCopy
 import com.lowagie.text.pdf.PdfReader
+import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.PrintException
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.*
@@ -36,6 +37,8 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         val CHANNEL_ID = "pretixprint_print_channel"
         val ONGOING_NOTIFICATION_ID = 42
         val ACTION_STOP_SERVICE = "action_stop_service"
+        val RESULT_CODE_OKAY = 0
+        val RESULT_CODE_ERROR = 1
     }
 
     private fun createNotificationChannel() {
@@ -305,33 +308,32 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         }
 
         var doneCalled = false
+        val b = Bundle()
+        b.putString("app", BuildConfig.APPLICATION_ID)
+        b.putString("app_version", BuildConfig.VERSION_NAME)
         try {
             print(intent, rr) {
                 if (rr != null && !doneCalled) {
-                    val b = Bundle()
-                    rr.send(0, b)
+                    rr.send(RESULT_CODE_OKAY, b)
                     doneCalled = true
                 }
             }
             if (rr != null && !doneCalled) {
-                val b = Bundle()
-                rr.send(0, b)
+                rr.send(RESULT_CODE_OKAY, b)
                 doneCalled = true
             }
         } catch (e: PrintException) {
             logException(e)
             if (rr != null) {
-                val b = Bundle()
                 b.putString("message", e.message)
-                rr.send(1, b)
+                rr.send(RESULT_CODE_ERROR, b)
             }
         } catch (e: Exception) {
             logException(e)
             e.printStackTrace()
             if (rr != null) {
-                val b = Bundle()
                 b.putString("message", getString(R.string.err_generic, e.message))
-                rr.send(1, b)
+                rr.send(RESULT_CODE_ERROR, b)
             }
         }
 
