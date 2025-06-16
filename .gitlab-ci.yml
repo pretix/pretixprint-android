@@ -28,7 +28,7 @@ release:
     - GRADLE_USER_HOME=/cache ANDROID_HOME=/android-sdk-linux ./gradlew --no-daemon -Dmaven.repo.local=$(pwd)/repo assembleFullRelease --stacktrace
   artifacts:
     paths:
-      - pretixprint/app/build/outputs/apk/full/release/app-full-release.apk
+      - pretixprint/app/build/outputs/apk/full/release/*.apk
     expire_in: '6 weeks'
   only:
     - '/^.*\..*$/'
