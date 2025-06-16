@@ -19,6 +19,8 @@ android {
         versionName "2.19.8"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+
+        setProperty("archivesBaseName", rootProject.name + "-" + versionName)
     }
 
     kotlin {
