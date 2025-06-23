@@ -22,6 +22,7 @@ import eu.pretix.pretixprint.databinding.ActivitySettingsExportBinding
 import org.json.JSONObject
 import kotlin.math.floor
 
+
 class SettingsExportActivity : AppCompatActivity() {
     lateinit var binding: ActivitySettingsExportBinding
 
@@ -38,7 +39,9 @@ class SettingsExportActivity : AppCompatActivity() {
         val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val json = JSONObject()
         json.put("__pretixprintconf", 1) // version tag
-        defaultSharedPreferences.all.forEach { k, v -> json.put(k, v) }
+        for (entry in defaultSharedPreferences.all) {
+            json.put(entry.key.toString(), entry.value)
+        }
         var content = json.toString()
 
         val displayMetrics = DisplayMetrics()
