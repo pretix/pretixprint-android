@@ -255,10 +255,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         val cpl = findPreference<ListPreference>("hardware_receiptprinter_cpl")
         if (cpl != null) {
-            cpl.summary = if (cpl.entry.isNullOrEmpty()) {
+            val entry = defaultSharedPreferences.getString("hardware_receiptprinter_cpl", null)
+            cpl.summary = if (entry.isNullOrEmpty()) {
                 getString(R.string.pref_printer_cpl, cpl.entries[31])
             } else {
-                getString(R.string.pref_printer_cpl, (cpl.entries.indexOf(cpl.entry) + 1).toString())
+                getString(R.string.pref_printer_cpl, entry)
             }
         }
     }
