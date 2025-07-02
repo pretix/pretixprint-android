@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +23,6 @@ import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
 import eu.pretix.pretixprint.connections.*
 import eu.pretix.pretixprint.print.ESCPOSRenderer
-import java.lang.RuntimeException
 
 class PrinterSetupActivity : AppCompatActivity() {
     companion object {
@@ -42,6 +42,35 @@ class PrinterSetupActivity : AppCompatActivity() {
 
     fun proto(): String {
         return settingsStagingArea.get("hardware_${useCase}printer_mode") ?: ""
+    }
+
+    fun warnDiscardedSettings(): Boolean {
+        if (settingsStagingArea.isNotEmpty()) {
+            MaterialAlertDialogBuilder(this)
+                .setMessage(R.string.settings_not_saved)
+                .setPositiveButton(R.string.settings_discard) { di, _ ->
+                    di.dismiss()
+                    finish()
+                }
+                .setNegativeButton(R.string.settings_continue) { di, _ ->
+                    di.dismiss()
+                }
+                .create()
+                .show()
+            return true
+        }
+        return false
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                if (warnDiscardedSettings()) {
+                    return true
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

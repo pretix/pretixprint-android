@@ -49,7 +49,18 @@ class FinishSettingsFragment : SetupFragment() {
                     activity.runOnUiThread {
                         if (this@FinishSettingsFragment.activity == null)
                             return@runOnUiThread
-                        MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.test_success).create().show()
+
+                        val v = layoutInflater.inflate(R.layout.dialog_test_success, null, false)
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setView(v)
+                            .setPositiveButton(R.string.btn_save) { _, _ ->
+                                activity.finalize()
+                            }
+                            .setNegativeButton(R.string.action_cancel) { di, _ ->
+                                di.dismiss()
+                            }
+                            .create()
+                            .show()
                     }
                 } catch (e: PrintException) {
                     Sentry.captureException(e)
