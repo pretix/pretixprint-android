@@ -125,6 +125,8 @@ class ChooseConnectionTypeFragment : SetupFragment() {
     }
 
     override fun back() {
-        activity?.finish()
+        if (!(activity as PrinterSetupActivity).warnDiscardedSettings()) {
+            activity?.finish()
+        }
     }
 }

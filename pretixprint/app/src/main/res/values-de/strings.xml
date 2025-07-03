@@ -52,6 +52,8 @@
     <string name="resolving">Adresse auflösen…</string>
     <string name="testing">Testdruck…</string>
     <string name="test_success">Der Verbindungstest war erfolgreich.</string>
+    <string name="test_success_check">Prüfen Sie bitte die Drucker-Ausgabe.</string>
+    <string name="test_success_save">Die Änderungen wurden noch nicht gespeichert!</string>
     <string name="testing_printer">Drucke Testseite auf %s…</string>
     <string name="err_resolv_failed">Die Adresse des Druckers konnte nicht aufgelöst werden.</string>
     <string name="err_field_required">Dieses Feld ist erforderlich.</string>
@@ -157,4 +159,7 @@
     <string name="warning_bluetooth_disabled_summary">Bluetooth muss aktiv sein, um mit Druckern kommunizieren zu können</string>
     <string name="warning_bluetooth_disabled_turn_on">Einschalten</string>
     <string name="pairing">Koppeln…</string>
+    <string name="settings_not_saved">Die Änderungen wurden noch nicht gespeichert. Wirklich abbrechen?</string>
+    <string name="settings_discard">Ohne Speichern abbrechen</string>
+    <string name="settings_continue">Mit Konfiguration fortfahren</string>
 </resources>

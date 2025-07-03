@@ -66,6 +66,8 @@
     <string name="testing">Testing…</string>
     <string name="testing_printer">Printing test page on %s…</string>
     <string name="test_success">The connection test was successful.</string>
+    <string name="test_success_check">Check the printer output looks correct.</string>
+    <string name="test_success_save">Note that your settings have not yet been saved.</string>
     <string name="err_resolv_failed">Resolving the network printer failed.</string>
     <string name="err_field_required">This field is required.</string>
     <string name="err_field_invalid">This field is invalid.</string>
@@ -165,4 +167,7 @@
     <string name="import_successful">Successfully imported %d settings</string>
     <string name="show_dev_on">You are now a developer!</string>
     <string name="show_dev_already">No need, you are already a developer.</string>
+    <string name="settings_not_saved">Your changes have not yet been saved. Do you really want to abort?</string>
+    <string name="settings_discard">Abort without saving</string>
+    <string name="settings_continue">Continue with configuration</string>
 </resources>
