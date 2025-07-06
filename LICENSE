@@ -1,4 +1,4 @@
-The code in this repository, unless otherwise noticed, is (c) by rami.io GmbH
+The code in this repository, unless otherwise noticed, is (c) by pretix GmbH
 and provided to you under the terms of the Apache License. Note that there is
 the cups4j module which is released under the LGPL license which you might need to
 consider when releasing a work based on this library in binary form.
