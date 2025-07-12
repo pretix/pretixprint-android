@@ -12,6 +12,8 @@ import eu.pretix.pretixprint.R
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.roundToInt
 
 class SystemConnection : ConnectionType {
@@ -25,6 +27,10 @@ class SystemConnection : ConnectionType {
 
     override fun isConfiguredFor(context: Context, type: String): Boolean {
         return true
+    }
+
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCoroutine { cont ->
+        cont.resumeWithException(NotImplementedError("raw connection is not available for System"))
     }
 
     override fun print(

@@ -10,6 +10,8 @@ import org.cups4j.CupsPrinter
 import org.cups4j.PrintJob
 import java.io.File
 import java.io.IOException
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 
 class CUPSConnection : ConnectionType {
@@ -69,5 +71,9 @@ class CUPSConnection : ConnectionType {
                 throw PrintException(context.applicationContext.getString(R.string.err_job_io, e.message))
             }
         }
+    }
+
+    override suspend fun connectAsync(context: Context, type: String): StreamHolder = suspendCoroutine { cont ->
+        cont.resumeWithException(NotImplementedError("raw connection is not available for cups"))
     }
 }

@@ -3,6 +3,8 @@
     <string name="app_name">pretixPRINT</string>
     <string name="title_activity_main">pretixPRINT</string>
     <string name="title_activity_fileviewer">Druckjob-Anzeige</string>
+    <string name="title_activity_maintenance">Wartung</string>
+    <string name="title_activity_maintenance_type">Wartung: %s</string>
     <string name="action_label_settings">Einstellungen</string>
     <string name="settings_label_hardware">Hardware</string>
     <string name="settings_label_ticketprinter">Ticketdrucker</string>
@@ -60,6 +62,7 @@
     <string name="action_cancel">Abbrechen</string>
     <string name="action_save">Speichern</string>
     <string name="action_delete">Entfernen</string>
+    <string name="action_maintain">Wartung</string>
     <string name="pref_printer_current">Aktuell in Verwendung: %s @ %s (%s)</string>
     <string name="pref_printer_current_short">Aktuell in Verwendung: %s</string>
     <string name="pref_delete_printer">%s entfernen?</string>
@@ -162,4 +165,15 @@
     <string name="settings_not_saved">Die Änderungen wurden noch nicht gespeichert. Wirklich abbrechen?</string>
     <string name="settings_discard">Ohne Speichern abbrechen</string>
     <string name="settings_continue">Mit Konfiguration fortfahren</string>
+    <string name="maintain_data_type">Typ</string>
+    <string name="maintain_data_to_send">Daten</string>
+    <string name="maintain_send">Senden</string>
+    <string name="maintain_newline">Zeilenumbruch anfügen</string>
+    <string name="maintain_newline_disabled">Keinen Zeilenumbruch anfügen</string>
+    <string name="maintain_heading_log">Log</string>
+    <string name="maintain_error_hex_only">Nur Hexadezimalzeichen erlaubt</string>
+    <string name="maintain_error_hex_pairs">Hexadezimalzeichen nur als Paare</string>
+    <string name="maintain_error_connection_fail">Verbindung für Wartung nicht möglich</string>
+    <string name="maintain_error_connection_lost">Verbindung verloren</string>
+    <string name="maintain_error_send_fail">Senden fehlgeschlagen</string>
 </resources>
