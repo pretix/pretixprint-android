@@ -82,7 +82,7 @@ class MaintenanceFragment : Fragment(R.layout.fragment_maintenance) {
         binding.tilInput.editText!!.apply {
             addTextChangedListener(afterTextChanged = validateTilInput)
             setOnEditorActionListener { _, actionId, event ->
-                if (event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                if (event?.keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
                     binding.btnSend.performClick()
                     return@setOnEditorActionListener true
                 }
