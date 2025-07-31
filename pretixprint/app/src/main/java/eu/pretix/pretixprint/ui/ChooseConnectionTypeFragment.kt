@@ -78,8 +78,8 @@ internal class ConnectionTypeAdapter(var selectedValue: ConnectionType?) :
         }
     }
 
-    override fun onCheckedChanged(v: CompoundButton?, checked: Boolean) {
-        onClick(v?.parent as View)
+    override fun onCheckedChanged(v: CompoundButton, checked: Boolean) {
+        onClick(v.parent as View)
     }
 
     override fun submitList(list: List<ConnectionType>?) {
