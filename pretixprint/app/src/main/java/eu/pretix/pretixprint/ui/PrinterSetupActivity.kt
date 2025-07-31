@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.PendingIntentCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -76,6 +79,12 @@ class PrinterSetupActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_printer_setup)
+        setSupportActionBar(findViewById(R.id.topAppBar))
+        supportActionBar?.let {
+            it.setHomeButtonEnabled(true)
+            it.setDisplayUseLogoEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
+        }
 
         val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         if (!defaultSharedPreferences.getString("pref_pin", "").isNullOrBlank() &&
@@ -94,6 +103,24 @@ class PrinterSetupActivity : AppCompatActivity() {
             }
 
         useCase = intent.extras?.getString(EXTRA_USECASE) ?: ""
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+            findViewById(R.id.frame)
+        ) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                    or WindowInsetsCompat.Type.displayCutout()
+                    or WindowInsetsCompat.Type.ime()
+            )
+            v.updatePadding(
+                left = insets.left,
+                right = insets.right,
+                top = 0, // handled by AppBar
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
         startConnectionChoice()
     }
 

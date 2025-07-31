@@ -2,6 +2,9 @@ package eu.pretix.pretixprint.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import eu.pretix.pretixprint.databinding.ActivityFileViewerEscposBinding
 import java.io.BufferedReader
 import java.io.File
@@ -18,8 +21,28 @@ class FileViewerEscposActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFileViewerEscposBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+        setSupportActionBar(binding.topAppBar)
+        supportActionBar?.let {
+            it.setDisplayUseLogoEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.content
+        ) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.updatePadding(
+                left = insets.left,
+                right = insets.right,
+                top = 0, // handled by AppBar
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
 
         val file = File(intent.getStringExtra(EXTRA_PATH))
 

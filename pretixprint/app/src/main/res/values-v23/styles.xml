@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Base.AppTheme">
+        <!-- Our StatusBar background is dark, ask the system to render light icons -->
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- If the window belongs to an app targeting VANILLA_ICE_CREAM or above, this attribute is ignored:  -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

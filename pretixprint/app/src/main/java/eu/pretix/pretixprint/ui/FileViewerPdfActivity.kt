@@ -6,7 +6,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.databinding.ActivityFileViewerPdfBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -69,20 +76,54 @@ class FileViewerPdfActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFileViewerPdfBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+        setSupportActionBar(binding.topAppBar)
+        supportActionBar?.let {
+            it.setDisplayUseLogoEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.content
+        ) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.updatePadding(
+                left = insets.left,
+                right = insets.right,
+                top = 0, // handled by AppBar
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
 
         load(0)
+    }
 
-        binding.btnNext.setOnClickListener {
-            pageIndex = (pageIndex + 1) % numPages
-            load(pageIndex)
-        }
-        binding.btnPrev.setOnClickListener {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_file_viewer_pdf, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.action_prev -> {
             if (pageIndex != 0) {
                 pageIndex = (pageIndex - 1) % numPages
                 load(pageIndex)
             }
+            true
         }
+        R.id.action_next -> {
+            pageIndex = (pageIndex + 1) % numPages
+            load(pageIndex)
+            true
+        }
+        android.R.id.home -> {
+            NavUtils.navigateUpFromSameTask(this)
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
     }
 }
