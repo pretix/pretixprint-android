@@ -12,6 +12,9 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 import java.nio.charset.Charset
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class FileViewerLogActivity : AppCompatActivity() {
     companion object {
@@ -47,6 +50,10 @@ class FileViewerLogActivity : AppCompatActivity() {
         }
 
         val file = File(intent.getStringExtra(EXTRA_PATH))
+
+        val f = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val name = "${f.format(Date(file.lastModified()))} (${file.name.split(".")[1]})"
+        supportActionBar?.title = name
 
         val reader = BufferedReader(InputStreamReader(file.inputStream(), Charset.forName("cp1252")))
         val sb = StringBuilder()
