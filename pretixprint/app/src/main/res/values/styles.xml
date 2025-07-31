@@ -1,16 +1,19 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.Material3.Light">
+    <style name="Base.AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
-        <item name="logo">@drawable/ic_logo</item>
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.App.ActionBar</item>
+        <item name="logo">@drawable/ic_logo</item> <!-- FIMXE: update? -->
+        <item name="appBarLayoutStyle">@style/Widget.App.AppBarLayout</item>
+        <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="preferenceTheme">@style/ThemeOverlay.App.Preference</item>
         <!-- natively available on api level 21+ -->
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Body1</item>
     </style>
+
+    <!-- this enables overrides in values-v23/styles.xml -->
+    <style name="AppTheme" parent="Base.AppTheme" />
 
     <style name="ThemeOverlay.App.Preference" parent="PreferenceThemeOverlay">
         <item name="preferenceStyle">@style/ThemeOverlay.Preference.Material</item>
@@ -43,10 +46,21 @@
         <item name="iconSpaceReserved">false</item>
     </style>
 
-    <style name="ThemeOverlay.App.ActionBar" parent="">
+    <style name="Widget.App.AppBarLayout" parent="Widget.Material3.AppBarLayout">
+        <item name="android:background">@color/pretix_brand_dark</item>
+        <item name="liftOnScroll">false</item>
+    </style>
+
+    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar.Surface">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Toolbar.Surface</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="ThemeOverlay.App.Toolbar.Surface" parent="ThemeOverlay.Material3.Toolbar.Surface">
         <item name="colorSurface">@color/pretix_brand_light</item>
         <item name="colorOnSurface">@color/white</item>
-        <item name="colorControlNormal">@color/white</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
     </style>
 
     <style name="AppTheme.Dialog" parent="Theme.Material3.Light.Dialog">
@@ -56,11 +70,5 @@
         <item name="logo">@drawable/ic_logo</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/pretix_brand_light</item>
-        <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
-        <item name="colorAccent">@color/pretix_brand_green</item>
     </style>
 </resources>

@@ -53,13 +53,19 @@
             android:excludeFromRecents="true" />
         <activity
             android:name=".ui.FileViewerEscposActivity"
-            android:label="@string/title_activity_fileviewer" />
+            android:label="@string/title_activity_fileviewer"
+            android:parentActivityName=".ui.SettingsActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.FileViewerLogActivity"
-            android:label="@string/title_activity_fileviewer" />
+            android:label="@string/title_activity_fileviewer"
+            android:parentActivityName=".ui.SettingsActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.FileViewerPdfActivity"
-            android:label="@string/title_activity_fileviewer" />
+            android:label="@string/title_activity_fileviewer"
+            android:parentActivityName=".ui.SettingsActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.USBAttachedActivity"
             android:exported="true"

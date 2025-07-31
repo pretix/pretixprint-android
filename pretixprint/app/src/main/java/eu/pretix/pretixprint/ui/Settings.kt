@@ -46,6 +46,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.min
 import androidx.core.content.edit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import eu.pretix.pretixprint.hardware.DataWedgeHelper
 import eu.pretix.pretixprint.hardware.HardwareScanner
 import eu.pretix.pretixprint.hardware.ScanReceiver
@@ -487,6 +490,23 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_settings)
+        setSupportActionBar(findViewById(R.id.topAppBar))
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+            findViewById(R.id.content)
+        ) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            v.updatePadding(
+                left = insets.left,
+                right = insets.right,
+                top = 0, // handled by AppBar
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
 
         // Display the fragment as the main content.
         supportFragmentManager

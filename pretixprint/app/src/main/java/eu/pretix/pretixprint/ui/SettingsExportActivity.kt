@@ -5,19 +5,19 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.MenuItem
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.preference.PreferenceManager
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
-import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.databinding.ActivitySettingsExportBinding
 import org.json.JSONObject
 import kotlin.math.floor
@@ -31,10 +31,29 @@ class SettingsExportActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivitySettingsExportBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+        setSupportActionBar(binding.topAppBar)
+        supportActionBar?.let {
+            it.setDisplayUseLogoEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
+        }
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.content
+        ) { v, windowInsets ->
+            val insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+                        or WindowInsetsCompat.Type.ime()
+            )
+            v.updatePadding(
+                left = insets.left,
+                right = insets.right,
+                top = 0, // handled by AppBar
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
 
         val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val json = JSONObject()
@@ -75,8 +94,8 @@ class SettingsExportActivity : AppCompatActivity() {
             }
         }
 
-        view.findViewById<ImageView>(R.id.ivQrcode).setImageBitmap(newBitmap)
-        view.findViewById<TextView>(R.id.tvQrcode).text = content
+        binding.ivQrcode.setImageBitmap(newBitmap)
+        binding.tvQrcode.text = content
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
