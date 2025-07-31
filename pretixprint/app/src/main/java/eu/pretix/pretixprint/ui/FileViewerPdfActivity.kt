@@ -19,6 +19,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -44,10 +47,15 @@ class FileViewerPdfActivity : AppCompatActivity() {
         binding.tvPdfInfo.text = "Loading…"
         pageIndex = page
         val file = File(intent.getStringExtra(EXTRA_PATH))
+
+        val f = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val name = "${f.format(Date(file.lastModified()))} (${file.name.split(".")[1]})"
+        supportActionBar?.title = name
+
         bgScope.launch {
                 val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
                 val renderer = android.graphics.pdf.PdfRenderer(fd)
-                val page = renderer.openPage(page)
+                val page = renderer.openPage(pageIndex)
                 val img = Bitmap.createBitmap((page.width / 72.0 * renderDpi).toInt(), (page.height / 72.0 * renderDpi).toInt(), Bitmap.Config.ARGB_8888)
                 img.eraseColor(Color.WHITE)
                 page.render(img, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
@@ -55,7 +63,7 @@ class FileViewerPdfActivity : AppCompatActivity() {
 
                 val pageCount = renderer.pageCount
                 runOnUiThread {
-                    binding.tvPdfInfo.text = "page ${page.index + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
+                    binding.tvPdfInfo.text = "page ${pageIndex + 1} of ${pageCount}, ${(page.width / 72.0 * 25.4).roundTo(4)} x ${(page.height / 72.0 * 25.4).roundTo(4)} cm"
                 }
                 numPages = renderer.pageCount
 
