@@ -4,7 +4,7 @@
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
-        <item name="logo">@drawable/ic_logo</item> <!-- FIMXE: update? -->
+        <item name="logo">@drawable/ic_logo_print</item>
         <item name="appBarLayoutStyle">@style/Widget.App.AppBarLayout</item>
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="preferenceTheme">@style/ThemeOverlay.App.Preference</item>
@@ -67,7 +67,7 @@
         <item name="colorPrimary">@color/pretix_brand_light</item>
         <item name="colorPrimaryDark">@color/pretix_brand_dark</item>
         <item name="colorAccent">@color/pretix_brand_green</item>
-        <item name="logo">@drawable/ic_logo</item>
+        <item name="logo">@drawable/ic_logo_print</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="windowNoTitle">true</item>
     </style>
