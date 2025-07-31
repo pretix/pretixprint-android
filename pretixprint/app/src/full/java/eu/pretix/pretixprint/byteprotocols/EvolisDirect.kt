@@ -4,14 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Matrix
-import android.hardware.usb.UsbConfiguration
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.evolis.libevolis.androidsdk.EvolisPrinter
 import com.evolis.libevolis.androidsdk.model.*
@@ -20,9 +17,7 @@ import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
-import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.imaging.BmpImageParser
-import eu.pretix.pretixprint.print.ESCPOSRenderer
 import eu.pretix.pretixprint.ui.EvolisDirectSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -32,6 +27,7 @@ import java.io.File
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
+import androidx.core.graphics.createBitmap
 
 
 class EvolisDirect : CustomByteProtocol<Bitmap> {
@@ -61,7 +57,7 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
     ): ByteArray {
         // Evolis does not cope well with transparency - it's just black.
         // So we're actively drawing the original picture on a white background.
-        val backgroundedImage = Bitmap.createBitmap(img.width, img.height, img.config)
+        val backgroundedImage = createBitmap(img.width, img.height, img.config!!)
         val canvas = Canvas(backgroundedImage)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(img, 0f, 0f, null)

@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import androidx.core.graphics.createBitmap
 
 
 class LinkOS : CustomByteProtocol<Bitmap> {
@@ -44,7 +45,7 @@ class LinkOS : CustomByteProtocol<Bitmap> {
     override fun convertPageToBytes(img: Bitmap, isLastPage: Boolean, previousPage: Bitmap?, conf: Map<String, String>, type: String): ByteArray {
         // ZebraImageFactory does not cope well with transparency - it's just black.
         // So we're actively drawing the original picture on a white background.
-        val backgroundedImage = Bitmap.createBitmap(img.width, img.height, img.config)
+        val backgroundedImage = createBitmap(img.width, img.height, img.config!!)
         val canvas = Canvas(backgroundedImage)
         canvas.drawColor(Color.WHITE)
         canvas.drawBitmap(img, 0f, 0f, null)
