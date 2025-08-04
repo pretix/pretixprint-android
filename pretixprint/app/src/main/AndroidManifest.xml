@@ -144,12 +144,17 @@
         </service>
 
         <meta-data android:name="io.sentry.dsn" android:value="${SENTRY_DSN}" />
+        <meta-data android:name="io.sentry.attach-screenshot" android:value="false" />
+        <meta-data android:name="io.sentry.attach-view-hierarchy" android:value="false" />
         <meta-data android:name="io.sentry.auto-session-tracking.enable" android:value="false" />
         <meta-data android:name="io.sentry.breadcrumbs.activity-lifecycle" android:value="false" />
         <meta-data android:name="io.sentry.breadcrumbs.app-lifecycle" android:value="false" />
         <meta-data android:name="io.sentry.breadcrumbs.system-events" android:value="false" />
         <meta-data android:name="io.sentry.breadcrumbs.app-components" android:value="false" />
         <meta-data android:name="io.sentry.breadcrumbs.user-interaction" android:value="false" />
+        <meta-data android:name="io.sentry.logs.enabled" android:value="false" />
+        <meta-data android:name="io.sentry.send-default-pii" android:value="false" />
+        <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="false" />
     </application>
 
 </manifest>
