@@ -2,9 +2,6 @@ package eu.pretix.pretixprint
 
 import androidx.multidex.MultiDexApplication
 import androidx.preference.PreferenceManager
-import com.facebook.flipper.android.AndroidFlipperClient
-import com.facebook.flipper.core.FlipperClient
-import com.facebook.soloader.SoLoader
 import eu.pretix.pretixprint.print.WYSIWYGRenderer
 
 class PretixPrint : MultiDexApplication() {
@@ -12,12 +9,6 @@ class PretixPrint : MultiDexApplication() {
         super.onCreate()
 
         WYSIWYGRenderer.registerFonts(this)
-
-        SoLoader.init(this, false)
-        if (BuildConfig.DEBUG && FlipperInitializer.active(this)) {
-            val client: FlipperClient = AndroidFlipperClient.getInstance(this)
-            FlipperInitializer.initFlipperPlugins(this, client)
-        }
 
         migrateSettings()
     }
