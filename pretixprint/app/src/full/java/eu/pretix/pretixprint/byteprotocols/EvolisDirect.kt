@@ -10,9 +10,6 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import androidx.preference.PreferenceManager
-import com.evolis.libevolis.androidsdk.EvolisPrinter
-import com.evolis.libevolis.androidsdk.model.*
-import com.evolis.libevolis.androidsdk.model.info.ASDK_EvolisPrinterInfos
 import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
@@ -28,6 +25,13 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 import androidx.core.graphics.createBitmap
+import com.evolis.sdk.android.compat.EvolisPrinter
+import com.evolis.sdk.android.compat.model.ASDK_INTRAY
+import com.evolis.sdk.android.compat.model.ASDK_OUTTRAY
+import com.evolis.sdk.android.compat.model.ASDK_PRINTER_FACE
+import com.evolis.sdk.android.compat.model.ASDK_PRINTER_STATUS
+import com.evolis.sdk.android.compat.model.ASDK_RETURN_CODE
+import com.evolis.sdk.android.compat.model.info.ASDK_EvolisPrinterInfo
 
 
 class EvolisDirect : CustomByteProtocol<Bitmap> {
@@ -127,8 +131,8 @@ class EvolisDirect : CustomByteProtocol<Bitmap> {
             val cardSource = getSetting("hardware_${type}printer_cardsource", "EVOLIS_IT_BOTH")
             val cardDestination =
                 getSetting("hardware_${type}printer_carddestination", "EVOLIS_OT_STANDARD")
-            val info = ASDK_EvolisPrinterInfos()
-            val inforet = printer.ASDK_Infos_GetPrinterInfo(info)
+            val info = ASDK_EvolisPrinterInfo()
+            val inforet = printer.ASDK_Info_GetPrinterInfo(info)
             if (inforet != ASDK_RETURN_CODE.ASDK_NO_ERROR) {
                 throw PrintError(inforet.toString())
             }
