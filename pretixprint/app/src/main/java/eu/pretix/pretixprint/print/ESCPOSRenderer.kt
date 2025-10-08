@@ -9,6 +9,7 @@ import java.nio.charset.Charset
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObject, private val charsPerLine: Int, private val ctx: Context) {
     private val out = mutableListOf<Byte>()
@@ -208,10 +209,12 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                             sale_text = position.getString("sale_text"),
                             subevent_text = position.optString("subevent_text", ""),
                             price = position.getDouble("price"),
+                            line_price_gross = position.optDouble("line_price_gross", position.getDouble("price")),
                             tax_rate = position.getString("tax_rate"),
                             canceled = position.getBoolean("canceled"),
                             item = position.optLong("item", 0),
                             variation = position.optLong("variation", 0),
+                            discount = position.optLong("discount", 0),
                             tax_rule = position.optLong("tax_rule", 0),
                             subevent = position.optLong("subevent", 0),
                             voucher_code = position.optString("voucher_code", ""),
@@ -247,6 +250,14 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                                 "$cnt x ${receipt.getString("currency")} $singlePrice",
                                 "        ",
                                 indentation=if(line.is_addon) 4 else 2
+                        )
+                        newline()
+                    }
+                    if (line.discount != null && line.discount != 0L && line.discountPercentage() != 0) {
+                        splitline(
+                            "  - ${line.discountPercentage()} %",
+                            "        ",
+                            indentation=if(line.is_addon) 4 else 2
                         )
                         newline()
                     }
@@ -900,7 +911,16 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             val subevent: Long?,
             val is_addon: Boolean,
             val addon_group: Long?,
-    )
+            val line_price_gross: Double,
+            val discount: Long?
+    ) {
+        fun discountPercentage(): Int {
+            if (line_price_gross == 0.0) {
+                return 0
+            }
+            return ((line_price_gross - price) / line_price_gross * 100.0).roundToInt()
+        }
+    }
 
     private fun <E> List<E>.mergeConsecutive(): List<Pair<E, Int>>
             = fold(listOf()) { acc, e ->
