@@ -12,6 +12,7 @@ import io.sentry.Sentry
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.TimeoutException
 
@@ -67,7 +68,9 @@ class NetworkConnection : ConnectionType {
                 when (proto) {
                     is StreamByteProtocol<*> -> {
                         Log.i("PrintService", "[$type] Start connection to ${serverAddr.hostAddress}:$port")
-                        val socket = Socket(serverAddr, port)
+                        val socket = Socket()
+                        socket.connect(InetSocketAddress(serverAddr, port), 15_000)
+                        socket.soTimeout = 30_000
                         val ostream = socket.getOutputStream()
                         val istream = socket.getInputStream()
 
