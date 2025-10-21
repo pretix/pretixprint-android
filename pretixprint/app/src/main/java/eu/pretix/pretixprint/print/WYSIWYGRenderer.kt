@@ -77,7 +77,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
             "secret" -> op.getString("secret")  // the one in textcontent might be shortened
             "" -> op.getString("secret")  // required for backwards compatibility
             "pseudonymization_id" -> op.getString("pseudonymization_id")  // required for backwards compatibility
-            else -> getTextContent(content, text, textI18n)
+            else -> getTextContent(content, text, textI18n).trim()
         }
     }
 
