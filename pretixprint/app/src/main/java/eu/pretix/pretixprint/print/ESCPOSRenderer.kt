@@ -562,7 +562,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             }
 
             if (layoutLine.has("uppercase")) {
-                text = text.toUpperCase()
+                text = text.uppercase()
             }
 
             if (layoutLine.has("prefix") && !text.isEmpty()) {
