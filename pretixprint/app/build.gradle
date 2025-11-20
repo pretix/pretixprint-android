@@ -7,20 +7,20 @@ plugins {
 }
 
 android {
-    namespace 'eu.pretix.pretixprint'
+    namespace = 'eu.pretix.pretixprint'
 
-    compileSdk 36
+    compileSdk = 36
 
     defaultConfig {
         applicationId "eu.pretix.pretixprint"
-        minSdkVersion 21
-        targetSdkVersion 35
-        versionCode 81
-        versionName "2.21.0"
+        minSdk = 21
+        targetSdk = 35
+        versionCode = 81
+        versionName = "2.21.0"
         vectorDrawables.useSupportLibrary = true
-        multiDexEnabled true
+        multiDexEnabled = true
 
-        setProperty("archivesBaseName", rootProject.name + "-" + versionName)
+        base.archivesName = rootProject.name + "-" + versionName
     }
 
     kotlin {
@@ -63,16 +63,16 @@ android {
         }
 
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            multiDexKeepProguard file('multidex-config.pro')
-            signingConfig signingConfigs.release
+            multiDexKeepProguard = file('multidex-config.pro')
+            signingConfig = signingConfigs.release
             manifestPlaceholders["SENTRY_DSN"] = sentry_dsn
         }
         debug {
-            debuggable true
-            applicationIdSuffix ".debug"
-            versionNameSuffix "-debug"
+            debuggable = true
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
             manifestPlaceholders["SENTRY_DSN"] = ""
         }
     }
@@ -120,7 +120,7 @@ android {
     }
 
     lint {
-        abortOnError false
+        abortOnError = false
         disable 'InvalidPackage', 'MissingTranslation'
     }
 }
@@ -192,5 +192,5 @@ repositories {
     google()
     mavenCentral()
     jcenter()
-    maven { url "https://jitpack.io" }
+    maven { url = "https://jitpack.io" }
 }
