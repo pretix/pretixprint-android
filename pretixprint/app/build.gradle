@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId "eu.pretix.pretixprint"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 81
         versionName = "2.21.0"
         vectorDrawables.useSupportLibrary = true
