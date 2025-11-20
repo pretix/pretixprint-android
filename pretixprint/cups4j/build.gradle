@@ -1,16 +1,16 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdk = 30
     lint {
-        abortOnError false
+        abortOnError = false
     }
-    namespace 'org.cups4j'
-
+    namespace = 'org.cups4j'
 }
 repositories {
     mavenCentral()
 }
+
 dependencies {
     implementation 'com.android.support:support-annotations:28.0.0'
     implementation 'javax.jmdns:jmdns:3.4.1'
