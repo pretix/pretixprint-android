@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk = 30
+    compileSdk = 36
     lint {
         abortOnError = false
     }
