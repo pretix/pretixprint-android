@@ -162,4 +162,11 @@
     <string name="settings_not_saved">Die Änderungen wurden noch nicht gespeichert. Wirklich abbrechen?</string>
     <string name="settings_discard">Ohne Speichern abbrechen</string>
     <string name="settings_continue">Mit Konfiguration fortfahren</string>
+    <string name="title_activity_export">Export Konfiguration</string>
+    <string name="settings_label_export_import">Export/Import</string>
+    <string name="settings_label_export">Konfiguration exportieren</string>
+    <string name="settings_label_import_scan">Konfiguration per Scan importieren</string>
+    <string name="settings_summary_import_scan">Drücken Sie die Hardware Scan tasten, um zu importieren</string>
+    <string name="show_dev_on">Sie sind nun ein Entwickler!</string>
+    <string name="show_dev_already">Keine Notwendigkeit, sie sind bereits Entwickler.</string>
 </resources>
