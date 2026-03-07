@@ -169,4 +169,6 @@
     <string name="settings_summary_import_scan">Drücken Sie die Hardware Scan tasten, um zu importieren</string>
     <string name="show_dev_on">Sie sind nun ein Entwickler!</string>
     <string name="show_dev_already">Keine Notwendigkeit, sie sind bereits Entwickler.</string>
+    <string name="sunmi">Sunmi</string>
+    <string name="imin">iMin</string>
 </resources>
