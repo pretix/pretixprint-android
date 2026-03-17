@@ -171,4 +171,5 @@
     <string name="show_dev_already">Keine Notwendigkeit, sie sind bereits Entwickler.</string>
     <string name="sunmi">Sunmi</string>
     <string name="imin">iMin</string>
+    <string name="import_successful">Erfolgreich %d Einstellungen importiert</string>
 </resources>
