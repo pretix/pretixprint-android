@@ -1,3 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">pretixPRINT</string>
+    <string name="title_activity_main">pretixPRINT</string>
+    <string name="title_activity_fileviewer">ジョブ・ビューワーを印刷</string>
+    <string name="title_activity_export">設定をエクスポートする</string>
+    <string name="action_label_settings">設定</string>
+    <string name="settings_label_hardware">ハードウエア</string>
+    <string name="settings_label_ticketprinter">チケット・プリンター</string>
+    <string name="settings_label_badgeprinter">バッジプリンター</string>
+    <string name="settings_label_receiptprinter">レシート・プリンター</string>
+    <string name="settings_label_about">このアプリについて</string>
+    <string name="settings_label_debugging">デバッグ</string>
+    <string name="settings_label_last_prints">直前のプリント・ジョブ</string>
+    <string name="settings_label_version">バージョン</string>
+    <string name="settings_label_licenses">著者とライセンス</string>
+    <string name="settings_label_find">プリンターを設定する</string>
+    <string name="settings_label_ipaddress">IPアドレス</string>
+    <string name="settings_label_port">ポート</string>
+    <string name="settings_label_printername">プリンター名</string>
+    <string name="settings_label_driver">ドライバ</string>
+    <string name="settings_label_security">セキュリティ</string>
+    <string name="settings_label_export_import">エクスポート/インポート</string>
+    <string name="settings_label_export">設定をエクスポートする</string>
+    <string name="settings_label_import_scan">設定をスキャンしてインポートする</string>
+    <string name="settings_summary_import_scan">ハードウェアスキャンボタンを押してインポートする</string>
+    <string name="dismiss">閉じる</string>
+    <string name="notification_channel_print">プリント・ジョブ</string>
+    <string name="notification_channel_print_description">印刷ジョブ中に通知を表示する</string>
 </resources>
