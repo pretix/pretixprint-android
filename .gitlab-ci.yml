@@ -20,7 +20,7 @@ release:
     - cp .secure_files/ZSDK_ANDROID_API.jar pretixprint/ZSDK/
     - cp .secure_files/ZSDK_CARD_ANDROID_API.jar pretixprint/ZSDK/
     - cp .secure_files/snmp6_1z.jar pretixprint/ZSDK/
-    - cp .secure_files/libevolis-release.aar pretixprint/EvolisSDK/
+    - cp .secure_files/evolis-sdk-android.aar pretixprint/EvolisSDK/
     - cd pretixprint
     - cat $LOCALPROP > local.properties
     - git submodule init
