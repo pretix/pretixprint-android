@@ -42,7 +42,7 @@ class OrderPositionContentProvider(private val order: JSONObject, private val op
     }
 
     private fun interpolate(str: String): String {
-        return str.replace(Regex("\\{([a-zA-Z0-9:_]+)\\}")) { match ->
+        return str.replace(Regex("\\{([-a-zA-Z0-9:_]+)\\}")) { match ->
             val key = match.groups[1]!!.value
             // Do not use shortened version
             if (key == "secret") {
