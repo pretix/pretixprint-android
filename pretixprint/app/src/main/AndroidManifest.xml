@@ -31,7 +31,7 @@
         android:name="android.hardware.bluetooth"
         android:required="false" />
 
-    <uses-sdk tools:overrideLibrary="com.evolis.libevolis" />
+    <uses-sdk tools:overrideLibrary="com.evolis.sdk.android" />
 
     <application
         android:name=".PretixPrint"

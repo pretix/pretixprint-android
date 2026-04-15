@@ -9,8 +9,8 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import androidx.preference.PreferenceManager
-import com.evolis.libevolis.androidsdk.model.ASDK_INTRAY
-import com.evolis.libevolis.androidsdk.model.ASDK_OUTTRAY
+import com.evolis.sdk.android.compat.model.ASDK_INTRAY
+import com.evolis.sdk.android.compat.model.ASDK_OUTTRAY
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
