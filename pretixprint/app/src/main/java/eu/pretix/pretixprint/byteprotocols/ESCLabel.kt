@@ -5,6 +5,7 @@ import android.util.Log
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.connections.NetworkConnection
+import eu.pretix.pretixprint.connections.USBConnection
 import eu.pretix.pretixprint.ui.ESCLabelSettingsFragment
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture
@@ -26,7 +27,7 @@ class ESCLabel : StreamByteProtocol<Bitmap> {
     }
 
     override fun allowedForConnection(type: ConnectionType): Boolean {
-        return type is NetworkConnection
+        return type is USBConnection || type is NetworkConnection
     }
 
     override fun createSettingsFragment(): SetupFragment? {
