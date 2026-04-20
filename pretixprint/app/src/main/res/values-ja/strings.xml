@@ -164,4 +164,10 @@
     <string name="err_generic">印刷中に不明なエラーが発生しました: %s</string>
     <string name="welcome_headline">pretixPRINT へようこそ！</string>
     <string name="welcome_tutorial1">pretixPRINT を使用すると、チケット販売アプリの pretixPOS などの他の pretix アプリが、ネットワーク上の対応プリンターを使ってチケット、バッジ、レシートを印刷できるようになります。</string>
+    <string name="welcome_tutorial2">現在、pretixPRINT は IPP 対応または CUPS で共有されたプリンター、つまり macOS や Linux コンピュータで共有されたすべてのプリンターとネットワークインターフェースを備えた最新のプリンターのほとんどと通信できます。</string>
+    <string name="action_configure">プリンターの検索を開始</string>
+    <string name="notification_permission_denied">通知の許可が拒否されました。アプリがバックグラウンドにあるとき、安定して印刷できなくなります。</string>
+    <string name="notification_permission_denied_understood">了解しました</string>
+    <string name="notification_permission_required">アプリに通知の送信が許可されていません。これにより、安定した印刷ができなくなります。</string>
+    <string name="notification_permission_required_summary">ここをクリックして許可を付与してください。許可ダイアログが表示されない場合は、システム設定のアプリ → pretixPRINT → 権限で手動で許可を付与する必要があります。</string>
 </resources>
