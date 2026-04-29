@@ -296,8 +296,11 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                 processTaxes()
 
                 for (i in 0..(taxrates.count() - 1)) {
+                    // Only show significant digits after the decimal point
+                    val decimalFormat = DecimalFormat("0.0000")
+                    val taxrate = decimalFormat.format(taxrates[i].toDouble()).trimEnd('0').trimEnd(decimalFormat.decimalFormatSymbols.decimalSeparator)
                     splitline(
-                            (i + 65).toChar() + " " + DecimalFormat("0.00").format(taxrates[i].toDouble()) + "%:",
+                            (i + 65).toChar() + ": " + taxrate + " %",
                             DecimalFormat("0.00").format(taxvalues[i])
                     )
                     newline()
