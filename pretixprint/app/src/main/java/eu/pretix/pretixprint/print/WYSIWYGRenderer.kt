@@ -110,6 +110,7 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Noto Sans Japanese", "fonts/noto-sans-jp-v52-cyrillic_japanese_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
             registerFontFamily(ctx, "Noto Sans Traditional Chinese", "fonts/noto-sans-tc-v35-chinese-traditional_cyrillic_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
             registerFontFamily(ctx, "Noto Sans Simplified Chinese", "fonts/noto-sans-sc-v36-chinese-simplified_cyrillic_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
+            registerFontFamily(ctx, "Noto Sans Thai", "fonts/noto-sans-thai-v29-latin_latin-ext_thai-%s.ttf", "regular", "700", "700", "regular")
             registerFontFamily(ctx, "Roboto", "fonts/Roboto-%s.ttf")
             registerFontFamily(ctx, "Droid Serif", "fonts/DroidSerif-%s-webfont.ttf")
             registerFontFamily(ctx, "Fira Sans", "fonts/firasans-%s-webfont.ttf")
