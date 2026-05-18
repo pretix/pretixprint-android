@@ -163,7 +163,7 @@ dependencies {
     fullImplementation(project(':EvolisSDK')) {
         transitive = true
     }
-    fullImplementation 'net.java.dev.jna:jna:5.11.0@aar'
+    fullImplementation 'net.java.dev.jna:jna:5.18.1@aar'
 
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
