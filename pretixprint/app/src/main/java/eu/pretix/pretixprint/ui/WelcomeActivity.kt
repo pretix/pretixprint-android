@@ -36,6 +36,7 @@ class WelcomeActivity : AppCompatActivity() {
         binding.button.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 }
