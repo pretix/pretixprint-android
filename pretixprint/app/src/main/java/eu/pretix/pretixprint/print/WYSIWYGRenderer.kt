@@ -103,30 +103,24 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
 
     companion object {
         fun registerFonts(ctx: Context) {
-            registerFontFamily(ctx, "Almarai", "fonts/almarai-v5-arabic-%s.ttf", "regular", "800", "800", "regular")
             registerFontFamily(ctx, "Baloo Bhaijaan", "fonts/baloo-bhaijaan-v6-latin-ext_vietnamese_latin_arabic-%s.ttf", "regular", "regular", "regular", "regular")
             registerFontFamily(ctx, "Open Sans", "fonts/OpenSans-%s.ttf")
-            registerFontFamily(ctx, "Noto Sans", "fonts/NotoSans-%s-webfont.ttf")
-            registerFontFamily(ctx, "Noto Sans Japanese", "fonts/noto-sans-jp-v52-cyrillic_japanese_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Noto Sans Traditional Chinese", "fonts/noto-sans-tc-v35-chinese-traditional_cyrillic_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Noto Sans Simplified Chinese", "fonts/noto-sans-sc-v36-chinese-simplified_cyrillic_latin_latin-ext_vietnamese-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Noto Sans Thai", "fonts/noto-sans-thai-v29-latin_latin-ext_thai-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Roboto", "fonts/Roboto-%s.ttf")
             registerFontFamily(ctx, "Droid Serif", "fonts/DroidSerif-%s-webfont.ttf")
-            registerFontFamily(ctx, "Fira Sans", "fonts/firasans-%s-webfont.ttf")
-            registerFontFamily(ctx, "Lato", "fonts/Lato-%s.ttf")
-            registerFontFamily(ctx, "Vollkorn", "fonts/Vollkorn-%s.ttf")
-            registerFontFamily(ctx, "Montserrat", "fonts/montserrat-%s-webfont.ttf")
-            registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
-            registerFontFamily(ctx, "Tajawal", "fonts/tajawal-v3-latin_arabic-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
-            registerFontFamily(ctx, "Titillium Upright", "fonts/titillium-%s-webfont.ttf", "RegularUpright", "BoldUpright", "BoldUpright", "RegularUpright")
-            registerFontFamily(ctx, "Titillium Semibold Upright", "fonts/titillium-%s-webfont.ttf", "SemiboldUpright", "BoldUpright", "BoldUpright", "SemiboldUpright")
-            registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
-            registerFontFamily(ctx, "DejaVu Sans", "fonts/DejaVuSans-%s-webfont.ttf")
-            registerFontFamily(ctx, "Poppins", "fonts/poppins-v12-latin-%s.ttf", "500", "700", "700italic", "500italic")
-            registerFontFamily(ctx, "Space Mono", "fonts/space-mono-v10-latin-ext_latin-%s.ttf", "regular", "700", "700italic", "italic")
-            registerFontFamily(ctx, "Ubuntu", "fonts/ubuntu-v15-latin-ext_latin-%s.ttf", "regular", "700", "700italic", "italic")
+            registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf", "regular", "bold", "bolditalic", "regularitalic")
+            registerFontFamily(ctx, "Titillium Upright", "fonts/titillium-%s-webfont.ttf", "regularupright", "boldupright", "boldupright", "regularupright")
+            registerFontFamily(ctx, "Titillium Semibold Upright", "fonts/titillium-%s-webfont.ttf", "semiboldupright", "boldupright", "boldupright", "semiboldupright")
+            registerFontFamily(ctx, "DejaVu Sans", "fonts/DejaVuSans%s-webfont.ttf", "", "-Bold", "-Oblique", "-BoldOblique")
+
+            val cat_json = ctx.assets.open("fonts/catalog.json").bufferedReader().use { it.readText() }
+            val cat = JSONObject(cat_json)
+            for (family in cat.keys()) {
+                val familyConfig = cat.getJSONObject(family);
+                val regularName = familyConfig.getJSONObject("regular").getString("truetype")
+                val boldName = if (familyConfig.has("bold")) familyConfig.getJSONObject("bold").getString("truetype") else regularName
+                val italicName = if (familyConfig.has("italic")) familyConfig.getJSONObject("italic").getString("truetype") else regularName
+                val boldItalicName = if (familyConfig.has("bolditalic")) familyConfig.getJSONObject("bolditalic").getString("truetype") else regularName
+                registerFontFamily(ctx, family, "fonts/%s", regularName, boldName, boldItalicName, italicName)
+            }
         }
 
         fun storeFont(ctx: Context, path: String): String {
