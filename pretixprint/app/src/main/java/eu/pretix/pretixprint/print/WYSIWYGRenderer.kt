@@ -119,7 +119,7 @@ class WYSIWYGRenderer(private val layout: JSONArray, private val order: JSONObje
             registerFontFamily(ctx, "Montserrat", "fonts/montserrat-%s-webfont.ttf")
             registerFontFamily(ctx, "Oswald", "fonts/oswald-%s-webfont.ttf")
             registerFontFamily(ctx, "Tajawal", "fonts/tajawal-v3-latin_arabic-%s.ttf", "regular", "700", "700", "regular")
-            registerFontFamily(ctx, "Titillium", "fonts/titillium-%s-webfont.ttf")
+            registerFontFamily(ctx, "Titillium", "fonts/titillium-web-v19-latin_latin-ext-%s.ttf", "regular", "700", "700italic", "italic")
             registerFontFamily(ctx, "Titillium Upright", "fonts/titillium-%s-webfont.ttf", "RegularUpright", "BoldUpright", "BoldUpright", "RegularUpright")
             registerFontFamily(ctx, "Titillium Semibold Upright", "fonts/titillium-%s-webfont.ttf", "SemiboldUpright", "BoldUpright", "BoldUpright", "SemiboldUpright")
             registerFontFamily(ctx, "Roboto Condensed", "fonts/RobotoCondensed-%s-webfont.ttf")
