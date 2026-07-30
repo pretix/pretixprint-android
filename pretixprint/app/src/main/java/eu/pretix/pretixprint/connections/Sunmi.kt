@@ -98,14 +98,17 @@ class SunmiInternalConnection : ConnectionType {
                     }
 
                     is SunmiByteProtocol<*> -> {
+                        Log.i("PrintService", "[$type] Calling sunmi sdk")
                         PrinterSdk.getInstance().getPrinter(context, object : PrinterListen {
                             override fun onDefPrinter(printer: PrinterSdk.Printer?) {
                                 if (printer != null) {
                                     try {
+                                        Log.i("PrintService", "[$type] Got printer from sunmi sdk")
                                         proto.sendSunmi(printer, futures, pagegroups, conf, type, wap)
                                         future.complete(null)
                                         done()
                                     } catch (e: Exception) {
+                                        Log.e("PrintService", "[$type] Failed to print $e")
                                         future.completeExceptionally(e)
                                     }
                                 }

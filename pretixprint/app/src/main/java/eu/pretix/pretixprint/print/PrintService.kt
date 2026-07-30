@@ -234,7 +234,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
             }
         }
 
-        Log.i("PrintService", "[$type] Starting connection adapter")
+        Log.i("PrintService", "[$type] Starting connection adapter $connection")
         if (connection == "system") {
             // printManager.print is only allowed to be called by activities
             // so lets move the call into it's own activity and try to get the user
