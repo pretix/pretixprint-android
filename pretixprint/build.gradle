@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.android' version "2.2.21" apply false
     id "com.jaredsburrows.license" version "0.9.7" apply false
     id "io.sentry.android.gradle" version "5.8.0" apply false
+    id 'org.cyclonedx.bom' version '3.2.4'
 }
 
 allprojects {
