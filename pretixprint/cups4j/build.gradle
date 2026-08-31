@@ -21,6 +21,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.9.1'
-    implementation 'javax.jmdns:jmdns:3.4.1'
+    implementation libs.androidx.annotation
+    implementation libs.jmdns
 }
