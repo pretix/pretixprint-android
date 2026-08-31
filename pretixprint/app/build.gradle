@@ -1,9 +1,9 @@
 plugins {
-    id "com.android.application"
-    id "org.jetbrains.kotlin.android"
-    id "org.jetbrains.kotlin.kapt"
-    id "com.jaredsburrows.license"
-    id "io.sentry.android.gradle"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.license)
+    alias(libs.plugins.sentry.android)
 }
 
 android {
@@ -127,26 +127,26 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
-    implementation 'androidx.multidex:multidex:2.0.1'
-    implementation "androidx.viewpager2:viewpager2:1.0.0"
-    implementation "androidx.fragment:fragment-ktx:1.5.5"
-    implementation "androidx.preference:preference-ktx:1.2.1"
-    implementation 'com.louiscad.splitties:splitties-toast:3.0.0'
-    implementation 'com.github.razir.progressbutton:progressbutton:2.1.0'
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.legacy.support.v4
+    implementation libs.androidx.vectordrawable
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.multidex
+    implementation libs.androidx.viewpager2
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.preference.ktx
+    implementation libs.splitties.toast
+    implementation libs.progressbutton
 
     // libpretixprint
-    implementation 'com.github.librepdf:openpdf:1.3.24'
-    implementation 'com.github.pretix:android-awt:1.0.4-2'
-    implementation 'com.google.zxing:core:3.3.3'
+    implementation printLibs.openpdf
+    implementation printLibs.zxing.core
+    implementation libs.android.awt
 
-    implementation 'joda-time:joda-time:2.10.10'
-    implementation 'io.sentry:sentry-android:8.18.0'
-    implementation 'org.slf4j:slf4j-nop:1.7.30'
+    implementation libs.joda.time
+    implementation libs.sentry.android
+    implementation libs.slf4j.nop
 
     implementation(project(':cups4j')) {
         transitive = false
@@ -155,40 +155,40 @@ dependencies {
         transitive = false
     }
 
-    implementation 'com.github.anastaciocintra:escpos-coffee:4.0.2'
-    implementation 'com.sunmi:printerlibrary:1.0.13'
-    implementation 'com.sunmi:printerx:1.0.13'
+    implementation libs.escpos.coffee
+    implementation libs.sunmi.printerlibrary
+    implementation libs.sunmi.printerx
 
     // Evolis SDK
     fullImplementation(project(':EvolisSDK')) {
         transitive = true
     }
-    fullImplementation 'net.java.dev.jna:jna:5.18.1@aar'
+    fullImplementation libs.jna
 
     // Zebra LinkOS SDK
     // Comment == Version shipped by Zebra
     fullImplementation(project(':ZSDK')) {
         transitive = false
     }
-    fullImplementation 'org.bouncycastle:bcprov-jdk15on:1.65.01' // 1.48
-    fullImplementation 'commons-codec:commons-codec:1.15' // 1.15; already included for libpretixprint
-    fullImplementation 'commons-io:commons-io:2.7' // 2.2
-    fullImplementation 'org.apache.commons:commons-lang3:3.4' // 3.4
-    // fullImplementation 'com.google.zxing:core:3.3.1' // 3.3.1; already included for libpretixprint
-    fullImplementation 'dom4j:dom4j:1.6.1' // 1.6.1
-    fullImplementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.4' // 2.2.3
-    fullImplementation 'com.fasterxml.jackson.core:jackson-core:2.12.4' // 2.2.3
-    fullImplementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4' // 2.2.3
-    fullImplementation 'jaxen:jaxen:1.2.0' // 1.1-beta-6
-    // fullImplementation 'org.simpleframework:simple-xml:2.7.1' // 2.7.1; depends on xpp3, fails with DuplicatePlatformClasses
-    fullImplementation 'org.snmp4j:snmp4j:3.4.4' // 2.3.0
+    fullImplementation libs.bcprov.jdk15on
+    fullImplementation libs.commons.codec // 1.15; already included for libpretixprint
+    fullImplementation libs.commons.io // 2.2
+    fullImplementation libs.commons.lang3 // 3.4
+    // fullImplementation printLibs.zxing.core // 3.3.1; already included for libpretixprint
+    fullImplementation libs.dom4j // 1.6.1
+    fullImplementation libs.jackson.annotations // 2.2.3
+    fullImplementation libs.jackson.core // 2.2.3
+    fullImplementation libs.jackson.databind // 2.2.3
+    fullImplementation libs.jaxen // 1.1-beta-6
+    // fullImplementation libs.simple.xml // 2.7.1; depends on xpp3, fails with DuplicatePlatformClasses
+    fullImplementation libs.snmp4j // 2.3.0
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4"
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlin.reflect
+    implementation libs.eventbus
+    implementation libs.jackson.moduleKotlin
 
-    implementation 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.3'
+    implementation libs.streamsupport.cfuture
 }
 repositories {
     google()

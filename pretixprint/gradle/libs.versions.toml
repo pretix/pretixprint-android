@@ -1,0 +1,87 @@
+[versions]
+agp = "8.13.0"
+android-awt = "1.0.4-2"
+annotation = "1.9.1"
+appcompat = "1.7.1"
+bcprov-jdk15on = "1.65.01"
+commons-codec = "1.15"
+commons-io = "2.7"
+commons-lang3 = "3.4"
+constraintlayout = "2.1.0"
+cyclonedx-bom = "3.2.4"
+dom4j = "1.6.1"
+escpos-coffee = "4.0.2"
+eventbus = "3.1.1"
+fragment-ktx = "1.5.5"
+jackson = "2.12.4"
+jaredsburrows-license = "0.9.7"
+jaxen = "1.2.0"
+jmdns = "3.4.1"
+jna = "5.18.1"
+joda-time = "2.10.10"
+kotlin = "2.2.21"
+legacy-support-v4 = "1.0.0"
+material = "1.12.0"
+multidex = "2.0.1"
+preference-ktx = "1.2.1"
+progressbutton = "2.1.0"
+sentry-android = "8.18.0"
+sentry-plugin = "5.8.0"
+simple-xml = "2.7.1"
+slf4j-nop = "1.7.30"
+snmp4j = "3.4.4"
+splitties-toast = "3.0.0"
+streamsupport-cfuture = "1.7.3"
+sunmi-printerlibrary = "1.0.13"
+sunmi-printerx = "1.0.13"
+vectordrawable = "1.1.0"
+viewpager2 = "1.0.0"
+
+[libraries]
+android-awt = { module = "com.github.pretix:android-awt", version.ref = "android-awt" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment-ktx" }
+androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacy-support-v4" }
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
+androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preference-ktx" }
+androidx-vectordrawable = { module = "androidx.vectordrawable:vectordrawable", version.ref = "vectordrawable" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprov-jdk15on" }
+commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+dom4j = { module = "dom4j:dom4j", version.ref = "dom4j" }
+escpos-coffee = { module = "com.github.anastaciocintra:escpos-coffee", version.ref = "escpos-coffee" }
+eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-moduleKotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jaxen = { module = "jaxen:jaxen", version.ref = "jaxen" }
+jmdns = { module = "javax.jmdns:jmdns", version.ref = "jmdns" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+joda-time = { module = "joda-time:joda-time", version.ref = "joda-time" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+progressbutton = { module = "com.github.razir.progressbutton:progressbutton", version.ref = "progressbutton" }
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry-android" }
+simple-xml = { module = "org.simpleframework:simple-xml", version.ref = "simple-xml" }
+slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j-nop" }
+snmp4j = { module = "org.snmp4j:snmp4j", version.ref = "snmp4j" }
+splitties-toast = { module = "com.louiscad.splitties:splitties-toast", version.ref = "splitties-toast" }
+streamsupport-cfuture = { module = "net.sourceforge.streamsupport:streamsupport-cfuture", version.ref = "streamsupport-cfuture" }
+sunmi-printerlibrary = { module = "com.sunmi:printerlibrary", version.ref = "sunmi-printerlibrary" }
+sunmi-printerx = { module = "com.sunmi:printerx", version.ref = "sunmi-printerx" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+bom = { id = "org.cyclonedx.bom", version.ref = "cyclonedx-bom" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+license = { id = "com.jaredsburrows.license", version.ref = "jaredsburrows-license" }
+sentry-android = { id = "io.sentry.android.gradle", version.ref = "sentry-plugin" }
