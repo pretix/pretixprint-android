@@ -2,6 +2,7 @@ package eu.pretix.pretixprint.print
 
 import android.content.Context
 import eu.pretix.pretixprint.R
+import fr.arnaudguyon.xmltojsonlib.XmlToJson
 import org.joda.time.format.ISODateTimeFormat
 import org.json.JSONException
 import org.json.JSONObject
@@ -445,6 +446,34 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                             )
                             newline()
                         }
+                    }
+                    "spos" -> {
+                        val paymentData = receipt.getJSONObject("payment_data")
+                        val customerReceipt = XmlToJson
+                            .Builder(
+                                paymentData.getString(
+                                    "de.spayment.akzeptanz.CustomerReceipt"
+                                )
+                            )
+                            .build().toJson()?.getJSONObject("Receipt")
+                        val receiptLines = customerReceipt?.getJSONArray("ReceiptLine")
+                        var padding = 0
+                        customerReceipt?.getInt("numCols")?.let {
+                            if (charsPerLine < it) {
+                                padding = (charsPerLine - it) / 2
+                            }
+                        }
+
+                        for (i in 0 until (receiptLines?.length() ?: 0)) {
+                            val receiptLine = receiptLines?.getJSONObject(i)
+                            // Ignoring
+                            // receiptLine[type]
+                            // receiptLine[Formats][Format][0][(from|to|Format)]
+                            text(" ".repeat(padding))
+                            text(receiptLine?.getString("Text") ?: "")
+                            newline()
+                        }
+                        newline()
                     }
                     "external" -> {
                         text(ctx.getString(R.string.receiptline_paidcard))

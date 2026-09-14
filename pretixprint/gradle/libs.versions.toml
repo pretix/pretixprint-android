@@ -36,6 +36,7 @@ sunmi-printerlibrary = "1.0.13"
 sunmi-printerx = "1.0.13"
 vectordrawable = "1.1.0"
 viewpager2 = "1.0.0"
+xmltojson = "1.5.3"
 
 [libraries]
 android-awt = { module = "com.github.pretix:android-awt", version.ref = "android-awt" }
@@ -75,6 +76,7 @@ splitties-toast = { module = "com.louiscad.splitties:splitties-toast", version.r
 streamsupport-cfuture = { module = "net.sourceforge.streamsupport:streamsupport-cfuture", version.ref = "streamsupport-cfuture" }
 sunmi-printerlibrary = { module = "com.sunmi:printerlibrary", version.ref = "sunmi-printerlibrary" }
 sunmi-printerx = { module = "com.sunmi:printerx", version.ref = "sunmi-printerx" }
+xmltojson = { module = "com.github.smart-fun:XmlToJson", version.ref = "xmltojson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
