@@ -189,6 +189,7 @@ dependencies {
     implementation libs.jackson.moduleKotlin
 
     implementation libs.streamsupport.cfuture
+    implementation libs.xmltojson
 }
 repositories {
     google()
