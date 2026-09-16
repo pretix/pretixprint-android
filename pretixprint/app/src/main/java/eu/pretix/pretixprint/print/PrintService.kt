@@ -298,6 +298,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
         if (intent!!.hasExtra("resultreceiver")) {
             rr = intent.getParcelableExtra<ResultReceiver>("resultreceiver")!! as ResultReceiver
         }
+        val printJobId = intent.getIntExtra("print_job_id", -1)
 
         startForegroundNotification()
 
@@ -309,6 +310,7 @@ abstract class AbstractPrintService(name: String) : IntentService(name) {
 
         var doneCalled = false
         val b = Bundle()
+        b.putInt("print_job_id", printJobId)
         b.putString("app", BuildConfig.APPLICATION_ID)
         b.putString("app_version", BuildConfig.VERSION_NAME)
         try {
