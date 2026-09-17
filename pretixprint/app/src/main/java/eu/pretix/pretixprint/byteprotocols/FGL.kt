@@ -120,7 +120,8 @@ class FGL : StreamByteProtocol<Bitmap> {
     ) {
         while (istream.available() > 0) {
             // Flush buffer of error codes from previous prints
-            istream.read()
+            val b = istream.read()
+            Log.d("PrintService", "[$type] had something in buffer=${b}")
         }
         for (f in pages) {
             Log.i("PrintService", "[$type] Waiting for page to be converted")
@@ -129,51 +130,68 @@ class FGL : StreamByteProtocol<Bitmap> {
             ostream.write(page)
             ostream.flush()
             Log.i("PrintService", "[$type] Page sent, waiting for printer to complete")
-            val loopStarted = System.currentTimeMillis()
-            wait@ while (true) {
-                val r = istream.read()
-                when (r) {
-                    -1 -> Thread.sleep(10)
-                    0 -> Thread.sleep(10)
-                    1 -> break@wait  // reject bin warning
-                    2 -> throw PrintError("Reject bin error")
-                    3 -> throw PrintError("Paper jam (path 1)")
-                    4 -> throw PrintError("Paper jam (path 2)")
-                    5 -> break@wait // test button ticket ack
-                    6 -> break@wait // ticket ack
-                    7 -> throw PrintError("Wrong file identifier during update")
-                    8 -> throw PrintError("Invalid checksum")
-                    9 -> break@wait // valid checksum
-                    10 -> throw PrintError("Out of paper (path 1)")
-                    11 -> throw PrintError("Out of paper (path 2)")
-                    12 -> break@wait // paper loaded path 1
-                    13 -> break@wait // paper loaded path 2
-                    14 -> throw PrintError("Escrow jam")
-                    15 -> break@wait // low paper
-                    16 -> throw PrintError("Out of paper")
-                    17 -> Thread.sleep(10) // x-on
-                    18 -> break@wait // power on
-                    19 -> Thread.sleep(10) // x-off = busy
-                    20 -> throw PrintError("Bad flash memory")
-                    21 -> throw PrintError("Illegal print command")
-                    22 -> break@wait // ribbon low
-                    23 -> throw PrintError("Ribbon out")
-                    24 -> throw PrintError("Paper jam")
-                    25 -> throw PrintError("Illegal data")
-                    26 -> throw PrintError("Powerup problem")
-                    28 -> throw PrintError("Downloading error")
-                    29 -> throw PrintError("Cutter jam")
-                    30 -> throw PrintError("Stuck ticket")
-                    31 -> throw PrintError("Cutter jam (path 2)")
-                    else -> throw PrintError("Invalid status response: $r")
-                }
-                if (System.currentTimeMillis() - loopStarted > 15000) {
-                    throw PrintError("Response timeout")
-                }
-            }
+            checkPrinterStatus(istream, ostream)
         }
         Log.i("PrintService", "[$type] Job done, sleep")
         Thread.sleep(waitAfterPage)
+    }
+
+    fun checkPrinterStatus(istream: InputStream, ostream: OutputStream) {
+        val loopStarted = System.currentTimeMillis()
+        wait@ while (true) {
+            val r = try {
+                istream.read()
+            } catch (_: Exception) {
+                Log.w("FGL", "checkPrinterStatus: reading didn't work")
+                -1
+            }
+            Log.d("FGL", "checkPrinterStatus: got status ${r}")
+            when (r) {
+                -1 -> Thread.sleep(10)
+                0 -> Thread.sleep(10)
+                1 -> break@wait  // reject bin warning
+                2 -> throw PrintError("Reject bin error")
+                3 -> throw PrintError("Paper jam (path 1)")
+                4 -> throw PrintError("Paper jam (path 2)")
+                5 -> break@wait // test button ticket ack
+                6 -> { // ticket ack
+                    Log.i("FGL", "checkPrinterStatus: got ack, lets try again")
+                    ostream.write("<S1>\n".toByteArray())
+                    Thread.sleep(10)
+                }
+                7 -> throw PrintError("Wrong file identifier during update")
+                8 -> throw PrintError("Invalid checksum")
+                9 -> break@wait // valid checksum
+                10 -> throw PrintError("Out of paper (path 1)")
+                11 -> throw PrintError("Out of paper (path 2)")
+                12 -> break@wait // paper loaded path 1
+                13 -> break@wait // paper loaded path 2
+                14 -> throw PrintError("Escrow jam")
+                15 -> break@wait // low paper
+                16 -> break@wait // out of paper - this means the NEXT print job will fail.
+                // ^- sadly this is not reliable enough to send it up, because the printer sometimes also returns it when it has paper.
+                17 -> break@wait // x-on
+                18 -> break@wait // power on
+                19 -> Thread.sleep(10) // x-off = busy
+                20 -> throw PrintError("Bad flash memory")
+                21 -> throw PrintError("Illegal print command")
+                22 -> break@wait // ticket taken
+                23 -> throw PrintError("Ribbon out / Ticket waiting")
+                24 -> throw PrintError("Paper jam")
+                25 -> throw PrintError("Illegal data")
+                26 -> throw PrintError("Powerup problem")
+                28 -> throw PrintError("Downloading error")
+                29 -> throw PrintError("Cutter jam")
+                30 -> throw PrintError("Stuck ticket / Cutter jam (path 1)")
+                31 -> throw PrintError("Cutter jam (path 2)")
+                else -> throw PrintError("Invalid status response: $r")
+            }
+            if (System.currentTimeMillis() - loopStarted > 15000) {
+                Log.w("FGL", "checkPrinterStatus: timeout")
+                throw PrintError("Response timeout")
+            }
+        }
+        Log.d("FGL", "checkPrinterStatus: finished")
     }
 
     override fun createSettingsFragment(): SetupFragment {
