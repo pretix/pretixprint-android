@@ -1,6 +1,5 @@
 package eu.pretix.pretixprint.ui
 
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -12,11 +11,12 @@ import android.widget.Button
 import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import eu.pretix.pretixprint.BuildConfig
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.print.ESCPOSRenderer
 
-class ESCPOSSettingsFragment : SetupFragment() {
+class ESCPOSSettingsFragment : ProtoSetupFragment() {
+    override val proto = ESCPOS()
 
     override fun onCreateView(
             inflater: LayoutInflater,

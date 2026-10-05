@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import eu.pretix.pretixprint.byteprotocols.ESCPOS
 import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 import eu.pretix.pretixprint.byteprotocols.protocols
@@ -349,4 +350,8 @@ abstract class SetupFragment : Fragment() {
     var useCase: String = "unknown"
 
     abstract fun back()
+}
+
+abstract class ProtoSetupFragment: SetupFragment() {
+    abstract val proto : ByteProtocolInterface<Any>
 }

@@ -9,8 +9,10 @@ import android.widget.Button
 import androidx.preference.PreferenceManager
 import com.google.android.material.textfield.TextInputEditText
 import eu.pretix.pretixprint.R
+import eu.pretix.pretixprint.byteprotocols.ePOSPrintXML
 
-class ePOSPrintXMLSettingsFragment : SetupFragment() {
+class ePOSPrintXMLSettingsFragment : ProtoSetupFragment() {
+    override val proto = ePOSPrintXML()
 
     override fun onCreateView(
             inflater: LayoutInflater,

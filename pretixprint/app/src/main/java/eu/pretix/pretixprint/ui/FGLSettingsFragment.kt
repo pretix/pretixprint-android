@@ -13,9 +13,14 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
+import eu.pretix.pretixprint.byteprotocols.ByteProtocolInterface
 import eu.pretix.pretixprint.byteprotocols.FGL
 
-class FGLSettingsFragment : SetupFragment() {
+open class FGLSettingsFragment : ProtoSetupFragment() {
+    override val proto: ByteProtocolInterface<Any> = FGL()
+    // Do not forget to adjust for SetupFragments that are inheriting from this class
+    open val hasCutMode = true
+    open val hasPath = true
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -24,7 +29,6 @@ class FGLSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_fgl_settings, container, false)
-        val proto = FGL()
 
         val currentWaitAfterPage = (activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_waitafterpage"
@@ -36,24 +40,32 @@ class FGLSettingsFragment : SetupFragment() {
         })
         (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setAdapter(pathAdapter)
 
-        val chosenPathId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+        if (hasPath) {
+            val chosenPathId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_path"
-        )) ?: prefs.getString("hardware_${useCase}printer_path", "1")
-        if (chosenPathId?.isNotEmpty() == true) {
-            val chosenPath = FGL.Ticketpath.values().find { it.id.toString() == chosenPathId }!!.id.toString()
-            (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setText(chosenPath, false)
+            )) ?: prefs.getString("hardware_${useCase}printer_path", "1")
+            if (chosenPathId?.isNotEmpty() == true) {
+                val chosenPath = FGL.Ticketpath.values().find { it.id.toString() == chosenPathId }!!.id.toString()
+                (view.findViewById<TextInputLayout>(R.id.tilPath).editText as? AutoCompleteTextView)?.setText(chosenPath, false)
+            }
+        } else {
+            view.findViewById<TextInputLayout>(R.id.tilPath).visibility = View.GONE
         }
 
-        val cutModeAdapter = ArrayAdapter(requireContext(), R.layout.list_item, FGL.CutMode.values().map {
-            getString(it.stringId)
-        })
-        (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setAdapter(cutModeAdapter)
-        val chosenCutModeId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
-            "hardware_${useCase}printer_cutmode"
-        )) ?: prefs.getString("hardware_${useCase}printer_cutmode", "job")
-        if (chosenCutModeId?.isNotEmpty() == true) {
-            val chosenCutMode = getString(FGL.CutMode.values().find { it.id == chosenCutModeId }!!.stringId)
-            (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setText(chosenCutMode, false)
+        if (hasCutMode) {
+            val cutModeAdapter = ArrayAdapter(requireContext(), R.layout.list_item, FGL.CutMode.values().map {
+                getString(it.stringId)
+            })
+            (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setAdapter(cutModeAdapter)
+            val chosenCutModeId = ((activity as PrinterSetupActivity).settingsStagingArea.get(
+                "hardware_${useCase}printer_cutmode"
+            )) ?: prefs.getString("hardware_${useCase}printer_cutmode", "job")
+            if (chosenCutModeId?.isNotEmpty() == true) {
+                val chosenCutMode = getString(FGL.CutMode.values().find { it.id == chosenCutModeId }!!.stringId)
+                (view.findViewById<TextInputLayout>(R.id.tilCutMode).editText as? AutoCompleteTextView)?.setText(chosenCutMode, false)
+            }
+        } else {
+            view.findViewById<TextInputLayout>(R.id.tilCutMode).visibility = View.GONE
         }
 
         val rotationAdapter = ArrayAdapter(requireContext(), R.layout.list_item, Rotation.values().map {

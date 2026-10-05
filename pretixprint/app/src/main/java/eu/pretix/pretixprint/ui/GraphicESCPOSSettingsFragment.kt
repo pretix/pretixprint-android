@@ -16,7 +16,8 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.GraphicESCPOS
 
-class GraphicESCPOSSettingsFragment : SetupFragment() {
+class GraphicESCPOSSettingsFragment : ProtoSetupFragment() {
+    override val proto = GraphicESCPOS()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -25,7 +26,7 @@ class GraphicESCPOSSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_graphicescpos_settings, container, false)
-        val proto = GraphicESCPOS()
+
         val currentDPI = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_dpi"
         ) as String?)

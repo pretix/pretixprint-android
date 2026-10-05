@@ -19,7 +19,8 @@ import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.EvolisDirect
 
 
-class EvolisDirectSettingsFragment : SetupFragment() {
+class EvolisDirectSettingsFragment : ProtoSetupFragment() {
+    override val proto = EvolisDirect()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -28,7 +29,6 @@ class EvolisDirectSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_linkoscard_settings, container, false)
-        val proto = EvolisDirect()
 
         val currentDoubleSided = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_doublesided"

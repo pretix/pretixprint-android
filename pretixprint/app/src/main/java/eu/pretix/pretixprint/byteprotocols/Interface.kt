@@ -3,9 +3,7 @@ package eu.pretix.pretixprint.byteprotocols
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import com.sunmi.peripheral.printer.SunmiPrinterService
 import com.sunmi.printerx.PrinterSdk
-import com.sunmi.printerx.PrinterSdk.Printer
 import eu.pretix.pretixprint.connections.ConnectionType
 import eu.pretix.pretixprint.ui.SetupFragment
 import java8.util.concurrent.CompletableFuture

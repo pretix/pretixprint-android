@@ -1,7 +1,6 @@
 package eu.pretix.pretixprint.ui
 
 import android.os.Bundle
-import android.os.Looper
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +19,8 @@ import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.LinkOSCard
 
 
-class LinkOSCardSettingsFragment : SetupFragment() {
+class LinkOSCardSettingsFragment : ProtoSetupFragment() {
+    override val proto = LinkOSCard()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -29,7 +29,6 @@ class LinkOSCardSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_linkoscard_settings, container, false)
-        val proto = LinkOSCard()
 
         val currentDoubleSided = ((activity as PrinterSetupActivity).settingsStagingArea.get(
                 "hardware_${useCase}printer_doublesided"

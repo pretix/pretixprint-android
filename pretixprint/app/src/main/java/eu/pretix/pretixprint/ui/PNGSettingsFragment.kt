@@ -15,7 +15,8 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.PNG
 
-class PNGSettingsFragment : SetupFragment() {
+class PNGSettingsFragment : ProtoSetupFragment() {
+    override val proto = PNG()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -24,7 +25,6 @@ class PNGSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_png_settings, container, false)
-        val proto = PNG()
 
         val currentWaitAfterPage = (activity as PrinterSetupActivity).settingsStagingArea.get(
             "hardware_${useCase}printer_waitafterpage"

@@ -15,7 +15,8 @@ import eu.pretix.pretixprint.R
 import eu.pretix.pretixprint.Rotation
 import eu.pretix.pretixprint.byteprotocols.BrotherRaster
 
-class BrotherRasterSettingsFragment : SetupFragment() {
+class BrotherRasterSettingsFragment : ProtoSetupFragment() {
+    override val proto = BrotherRaster()
 
     private fun translatedLabelName(label: BrotherRaster.Label): String {
         var suffix = ""
@@ -39,7 +40,6 @@ class BrotherRasterSettingsFragment : SetupFragment() {
     ): View {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         val view = inflater.inflate(R.layout.fragment_brotherraster_settings, container, false)
-        val proto = BrotherRaster()
 
         val labelAdapter = ArrayAdapter(requireContext(), R.layout.list_item, BrotherRaster.Label.values().map {
             translatedLabelName(it)
