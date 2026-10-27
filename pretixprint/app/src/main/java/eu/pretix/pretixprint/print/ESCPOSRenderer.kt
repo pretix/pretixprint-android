@@ -448,31 +448,7 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
                         }
                     }
                     "spos" -> {
-                        val paymentData = receipt.getJSONObject("payment_data")
-                        val customerReceipt = XmlToJson
-                            .Builder(
-                                paymentData.getString(
-                                    "de.spayment.akzeptanz.CustomerReceipt"
-                                )
-                            )
-                            .build().toJson()?.getJSONObject("Receipt")
-                        val receiptLines = customerReceipt?.getJSONArray("ReceiptLine")
-                        var padding = 0
-                        customerReceipt?.getInt("numCols")?.let {
-                            if (charsPerLine < it) {
-                                padding = (charsPerLine - it) / 2
-                            }
-                        }
-
-                        for (i in 0 until (receiptLines?.length() ?: 0)) {
-                            val receiptLine = receiptLines?.getJSONObject(i)
-                            // Ignoring
-                            // receiptLine[type]
-                            // receiptLine[Formats][Format][0][(from|to|Format)]
-                            text(" ".repeat(padding))
-                            text(receiptLine?.getString("Text") ?: "")
-                            newline()
-                        }
+                        sposReceiptRenderer(receipt.getJSONObject("payment_data"), "CustomerReceipt")
                         newline()
                     }
                     "external" -> {
@@ -516,6 +492,18 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
             }
             "emphasize" -> {
                 emphasize(layoutLine.getBoolean("on"))
+            }
+            "eftclosingdata" -> {
+                when (receipt.getString("eft_terminal")) {
+                    "spos" -> {
+                        try {
+                            sposReceiptRenderer(receipt.getJSONObject("eft_closing_data"), "MerchantReceipt")
+                            newline()
+                        } catch (e: Exception) {
+                            // We might not even have gotten any closing data here...
+                        }
+                    }
+                }
             }
         }
     }
@@ -927,6 +915,33 @@ class ESCPOSRenderer(private val dialect: Dialect, private val receipt: JSONObje
         opencashdrawer(Cashdrawer.Drawer1.number, 50, 500)
         opencashdrawer(Cashdrawer.Drawer2.number, 50, 500)
         return out.toByteArray()
+    }
+
+    private fun sposReceiptRenderer(xmlsource: JSONObject, receiptType: String = "CustomerReceipt") {
+        val customerReceipt = XmlToJson
+            .Builder(
+                xmlsource.getString(
+                    "de.spayment.akzeptanz.$receiptType"
+                )
+            )
+            .build().toJson()?.getJSONObject("Receipt")
+        val receiptLines = customerReceipt?.getJSONArray("ReceiptLine")
+        var padding = 0
+        customerReceipt?.getInt("numCols")?.let {
+            if (charsPerLine < it) {
+                padding = (charsPerLine - it) / 2
+            }
+        }
+
+        for (i in 0 until (receiptLines?.length() ?: 0)) {
+            val receiptLine = receiptLines?.getJSONObject(i)
+            // Ignoring
+            // receiptLine[type]
+            // receiptLine[Formats][Format][0][(from|to|Format)]
+            text(" ".repeat(padding))
+            text(receiptLine?.getString("Text") ?: "")
+            newline()
+        }
     }
 
     data class ReceiptLine(
