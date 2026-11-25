@@ -12,13 +12,13 @@ Printer Compatibility
 | -- | -- | -- | -- | -- | -- |
 | FGL ticket printers (Boca, Practical Automation) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing | ✔️ Boca printers |
 | SLCS label printers (Bixolon, Metapace) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing | ✔️ Bixolon printers |
-| ESC/Label color label printers (Epson Colorworks CW-C4000, CW-C6000, CW-C6500) | ✔️ | ✔️ | | Ticket printing, badge printing | ✔️ Epson printers |
+| ESC/Label color label printers (Epson Colorworks CW-C4000, CW-C6000, CW-C6500) | ✔️ | ✔️ | | Ticket printing, badge printing | ❌ no support |
 | ESC/POS receipt printers (Epson, Bixolon, SNBC, Metapace, …) | ✔️ | ✔️ | ✔️ (some) | Ticket printing, badge printing, receipt printing | ✔️ Epson printers |
 | StarPRNT receipt printers | ✔️ | ✔️ | ✔️ (some) | Receipt printing | ❌ no support |
 | Sunmi built-in printers |  | ✔️ (internal) | | Ticket printing, badge printing, receipt printing | ✔️ current devices |
 | Brother label printers (QL series) | ✔️ | ✔️ |  | Ticket printing, badge printing | ❌ no support |
 | Zebra label printers | ✔️ | ✔️ | ❓ | Ticket printing, badge printing | ❌ no support |
-| Zebra card printers (ZC, ZXP series) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing | ✔️ |
+| Zebra card printers (ZC, ZXP series) | ✔️ | ✔️ | ❓ | Ticket printing, badge printing | ✔️ ZC series |
 | Evolis card printers (Zenius, Primacy series) | ✔️ | ❓ |  | Ticket printing, badge printing | ❌ no support |
 | Printers connected to a Linux CUPS service, some IPP printers | ✔️ |  |  | Ticket printing, badge printing | ❌ no support |
 
